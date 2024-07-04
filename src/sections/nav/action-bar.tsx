@@ -15,9 +15,9 @@ export function ActionBar() {
             <Button variant={"plain"}>Projects</Button>
             <Button variant={"plain"}>Experience</Button>
             <Button variant={"plain"}>Contact</Button>
-            <IconButton>
+            {/* <IconButton>
                 <Icon icon={"material-symbols:dark-mode-outline"}/>
-            </IconButton>
+            </IconButton> */}
         </Box>
     );
 }
