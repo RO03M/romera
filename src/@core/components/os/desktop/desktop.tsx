@@ -1,14 +1,21 @@
 import { styled } from "@mui/material";
-// import { useGridSize } from "../../../hooks/use-grid-size";
+import { useDesktopItems } from "../../../stores/desktop";
 import { ApplicationItem } from "./application-item";
 
 export function Desktop() {
-	// const { width, height } = useGridSize();
+
+	const { items } = useDesktopItems();
 
 	return (
 		<Wrapper id={"desktop-area"}>
-			<ApplicationItem gridPosition={[0, 0]}/>
-			<ApplicationItem gridPosition={[0, 1]}/>
+			{items.map((desktopItem) => (
+				<ApplicationItem
+					key={desktopItem.id}
+					id={desktopItem.id}
+					gridPosition={desktopItem.gridPosition}
+					name={desktopItem.name}
+				/>
+			))}
 		</Wrapper>
 	);
 }
