@@ -1,8 +1,14 @@
 import { desktop } from "../../../constants";
+import { clamp } from "lodash";
 
 export function positionToGridPosition(position: [number, number]) {
-	return {
-		x: Math.floor(position[0] / desktop.grid.width),
-		y: Math.floor(position[1] / desktop.grid.height)
+	const clampedPosition = {
+		x: clamp(position[0], 0, window.innerWidth),
+		y: clamp(position[1], 0, window.innerHeight)
 	};
+	const x = Math.floor(clampedPosition.x / desktop.grid.width);
+
+	const y = Math.floor(clampedPosition.y / desktop.grid.height);
+
+	return { x, y };
 }
