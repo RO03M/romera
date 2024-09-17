@@ -1,5 +1,5 @@
 export function normalize(path: string) {
-	let formattedPath = path.replace(/\/$/, "");
+	let formattedPath = path.replace(/\/$/, "").replace(/\/+/g, "/");
 
 	let splittedPath = formattedPath.split("/");
 

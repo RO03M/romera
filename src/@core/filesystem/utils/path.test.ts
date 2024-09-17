@@ -27,4 +27,8 @@ describe("absolute path testing", () => {
 		expect(normalize("/a/b/../../c")).toBe("/c");
 		expect(normalize("/a/b/../c/../d/./e")).toBe("/a/d/e");
 	});
+
+    test("support for slash redundancy", () => {
+        expect(normalize("//home/////projects")).toBe("/home/projects");
+    });
 });
