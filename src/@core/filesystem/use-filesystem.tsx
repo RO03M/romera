@@ -24,8 +24,6 @@ export function useFilesystem() {
 	const findDirectory = useCallback((path: string) => {
 		const node = findNode(path);
 
-		console.log(node);
-
 		if (node === null || node.type !== "directory") {
 			return null;
 		}

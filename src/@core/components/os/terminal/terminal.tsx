@@ -3,22 +3,23 @@ import { TerminalInput } from "./input";
 import { useCallback, useState } from "preact/hooks";
 import { useFilesystem } from "../../../filesystem/use-filesystem";
 import { formatInput } from "./utils/format-input";
+import { normalize } from "../../../filesystem/utils/path";
 
 export function Terminal() {
 	const [currentNodePath, setCurrentNodePath] = useState("/");
 	const [outputs, setOutputs] = useState<string[]>([]);
 	const [input, setInput] = useState("");
 
-	const { cmd, findNode, findDirectory } = useFilesystem();
+	const { cmd, findDirectory } = useFilesystem();
 
 	const cd = useCallback(
 		(path: string) => {
             let absolutePath = "";
             // find from root of filesystem
             if (path.startsWith("/")) {
-                absolutePath = path;
+                absolutePath = normalize(path);
             } else {
-                absolutePath = `${currentNodePath}/${path}`.replace("//", "/");
+                absolutePath = normalize(`${currentNodePath}/${path}`);
             }
 
 			const node = findDirectory(absolutePath);
