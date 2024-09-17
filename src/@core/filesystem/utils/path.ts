@@ -5,7 +5,8 @@ export function normalize(path: string) {
 
 	while (splittedPath.includes("..") || splittedPath.includes(".")) {
 		const tempFormattedPath: (string | null)[] = splittedPath;
-		for (let i = 0; i < tempFormattedPath.length; i++) {
+
+		for (let i = 0; i < tempFormattedPath.length; i++) {			
 			if (tempFormattedPath[i] === "..") {
 				tempFormattedPath[i] = null;
 				if (i - 1 >= 0) {
@@ -13,9 +14,10 @@ export function normalize(path: string) {
 				}
 				break;
 			}
-			
+
 			if (tempFormattedPath[i] === ".") {
 				tempFormattedPath[i] = null;
+				break;
 			}
 		}
 
