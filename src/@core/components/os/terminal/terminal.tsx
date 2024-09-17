@@ -4,10 +4,11 @@ import { useCallback, useState } from "preact/hooks";
 import { useFilesystem } from "../../../filesystem/use-filesystem";
 import { formatInput } from "./utils/format-input";
 import { normalize } from "../../../filesystem/utils/path";
+import { type TerminalOutput, TerminalOutputList } from "./output-list";
 
 export function Terminal() {
 	const [currentNodePath, setCurrentNodePath] = useState("/");
-	const [outputs, setOutputs] = useState<string[]>([]);
+	const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
 	const [input, setInput] = useState("");
 
 	const { cmd, findDirectory } = useFilesystem();
@@ -39,11 +40,11 @@ export function Terminal() {
 		(event: SubmitEvent) => {
 			event.preventDefault();
 			const { program, args } = formatInput(input);
-			let output = "";
+			let outputMessage = "";
 
 			switch (program) {
 				case "cd": {
-					output = cd(args.join());
+					outputMessage = cd(args.join());
 					break;
 				}
 				default: {
@@ -53,14 +54,21 @@ export function Terminal() {
 					});
 
 					if (found) {
-						output = cmdOutput;
+						outputMessage = cmdOutput;
 					} else {
-						output = `Command ${program} not found`;
+						outputMessage = `Command ${program} not found`;
 					}
 
 					break;
 				}
 			}
+
+			const output: TerminalOutput = {
+				command: input,
+				message: outputMessage,
+				path: currentNodePath,
+				username: "romera"
+			};
 
 			setOutputs((prevOutputs) => [...prevOutputs, output]);
 			setInput("");
@@ -70,11 +78,10 @@ export function Terminal() {
 
 	return (
 		<Wrapper onSubmit={onSubmit}>
-			{outputs.map((input, key) => (
-				<div style={{ whiteSpace: "pre-wrap" }} key={`${key}-${input}`}>{input}</div>
-			))}
+			<TerminalOutputList outputs={outputs} />
 			<div>
 				<TerminalInput
+					username={"romera"}
 					nodePath={currentNodePath}
 					input={{
 						onInput: (event) => setInput(event.currentTarget.value),
@@ -91,5 +98,6 @@ const Wrapper = styled<"form">("form")({
 	fontWeight: 700,
 	color: "#fff",
 	width: "100vw", // remover width e height
-	height: "100vh"
+	height: "100vh",
+	overflowY: "scroll"
 });
