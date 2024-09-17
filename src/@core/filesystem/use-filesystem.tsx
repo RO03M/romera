@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "preact/hooks";
 import { useFilesystemStore } from "./use-filesystem-store";
 import { findNodeFromTree } from "./utils/find-node-from-tree";
+import { normalize } from "./utils/path";
 
 interface BashContext {
 	path: string;
@@ -34,7 +35,10 @@ export function useFilesystem() {
 	const std = useMemo(
 		() => ({
 			fs: {
-				findNode
+				findNode,
+				path: {
+					normalize
+				}
 			}
 		}),
 		[findNode]
@@ -42,10 +46,8 @@ export function useFilesystem() {
 
 	const cmd = useCallback(
 		(program: string, options: CommandOptions = { args: [] }) => {
-			const { args } = options;
+			const { args, bashContext } = options;
 			const functionFile = findNode(`/bin/${program}`);
-
-			console.log(functionFile);
 
 			if (!functionFile) {
 				return { found: false, output: null };
@@ -59,7 +61,8 @@ export function useFilesystem() {
 			);
 
 			const output = invoke(std, {
-				args
+				args,
+				bashContext
 			});
 
 			return { found: true, output };

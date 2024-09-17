@@ -1,17 +1,19 @@
 import type { Node } from "../node";
+import { normalize } from "./path";
 
 export function findNodeFromTree(path: string, root: Node) {
-	const splittedPath = path
-		.split(/(?=[\/])|(?<=[\/])/g)
-		.map((nodePath) => `/${nodePath}`.replace("//", "/"));
+	const normalizedPath = normalize(path);
+	let splittedPath: string[] = [];
+	if (normalizedPath === "/") {
+		splittedPath = ["/"];
+	} else {
+		splittedPath = normalizedPath.split("/").map((nodePath) => `/${nodePath}`);
+	}
 
 	let currentNode: Node | undefined = root;
 
-	console.log(path, splittedPath);
-
 	for (let i = 0; i < splittedPath.length; i++) {
 		if (i + 1 === splittedPath.length) {
-			console.log(i);
 			continue;
 		}
 
@@ -25,8 +27,6 @@ export function findNodeFromTree(path: string, root: Node) {
 
 		currentNode = match;
 	}
-
-	console.log(currentNode);
 
 	if (currentNode === undefined) {
 		return null;

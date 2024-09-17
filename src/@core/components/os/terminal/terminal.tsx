@@ -14,13 +14,13 @@ export function Terminal() {
 
 	const cd = useCallback(
 		(path: string) => {
-            let absolutePath = "";
-            // find from root of filesystem
-            if (path.startsWith("/")) {
-                absolutePath = normalize(path);
-            } else {
-                absolutePath = normalize(`${currentNodePath}/${path}`);
-            }
+			let absolutePath = "";
+			// find from root of filesystem
+			if (path.startsWith("/")) {
+				absolutePath = normalize(path);
+			} else {
+				absolutePath = normalize(`${currentNodePath}/${path}`);
+			}
 
 			const node = findDirectory(absolutePath);
 
@@ -47,7 +47,10 @@ export function Terminal() {
 					break;
 				}
 				default: {
-					const { found, output: cmdOutput } = cmd(program, { args });
+					const { found, output: cmdOutput } = cmd(program, {
+						args,
+						bashContext: { path: currentNodePath }
+					});
 
 					if (found) {
 						output = cmdOutput;
@@ -62,23 +65,23 @@ export function Terminal() {
 			setOutputs((prevOutputs) => [...prevOutputs, output]);
 			setInput("");
 		},
-		[input, cd, cmd]
+		[input, currentNodePath, cd, cmd]
 	);
 
 	return (
 		<Wrapper onSubmit={onSubmit}>
 			{outputs.map((input, key) => (
-				<div key={`${key}-${input}`}>{input}</div>
+				<div style={{ whiteSpace: "pre-wrap" }} key={`${key}-${input}`}>{input}</div>
 			))}
-            <div>
-                <TerminalInput
-                    nodePath={currentNodePath}
-                    input={{
-                        onInput: (event) => setInput(event.currentTarget.value),
-                        value: input
-                    }}
-                />
-            </div>
+			<div>
+				<TerminalInput
+					nodePath={currentNodePath}
+					input={{
+						onInput: (event) => setInput(event.currentTarget.value),
+						value: input
+					}}
+				/>
+			</div>
 		</Wrapper>
 	);
 }

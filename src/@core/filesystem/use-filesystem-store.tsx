@@ -5,7 +5,7 @@ interface FileSystemState {
 	node: Node;
 }
 
-export const useFilesystemStore = create<FileSystemState>()((set) => ({
+export const useFilesystemStore = create<FileSystemState>()(() => ({
 	node: {
 		id: 1,
 		name: "/",
@@ -21,8 +21,9 @@ export const useFilesystemStore = create<FileSystemState>()((set) => ({
 						type: "file",
 						name: "/ls",
 						content: `
-							const foda = 10 + 10;
-							console.log(foda, system);
+const node = std.fs.findNode(context.bashContext.path) ?? [];
+
+return node.nodes.map((node) => "        " + node.name);
 						`
 					},
 					{
@@ -30,13 +31,18 @@ export const useFilesystemStore = create<FileSystemState>()((set) => ({
 						type: "file",
 						name: "/cat",
 						content: `
-							const file = std.fs.findNode("/home/hello");
+const [path] = context.args;
 
-							if (file !== null) {
-								return file.content;
-							}
-							
-							return "";
+const filePath = std.fs.path.normalize(context.bashContext.path + "/" + path);
+
+const file = std.fs.findNode(filePath);
+
+if (file !== null) {
+	return file.content;
+}
+
+
+return "";
 						`
 					}
 				]
