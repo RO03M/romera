@@ -1,5 +1,5 @@
 import { desktop } from "../../../constants";
-import { clamp } from "lodash";
+import { clamp } from "../math";
 
 export function positionToGridPosition(position: [number, number]) {
 	const clampedPosition = {
