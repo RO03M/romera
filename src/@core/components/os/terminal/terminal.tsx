@@ -97,7 +97,7 @@ const Wrapper = styled<"form">("form")({
 	backgroundColor: "#000",
 	fontWeight: 700,
 	color: "#fff",
-	width: "100vw", // remover width e height
-	height: "100vh",
+	width: "100%",
+	height: "100%",
 	overflowY: "scroll"
 });
