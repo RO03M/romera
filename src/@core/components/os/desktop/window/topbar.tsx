@@ -1,12 +1,8 @@
-import {
-	Box,
-	type BoxProps,
-	ButtonBase,
-	styled,
-	Typography
-} from "@mui/material";
+import { ButtonBase, IconButton, styled, Typography } from "@mui/material";
 import { type HTMLMotionProps, motion } from "framer-motion";
 import { Row } from "../../../ui/row";
+import { Icon } from "@iconify/react";
+import { icons } from "../../../icons";
 
 interface TopbarProp {
 	onMaximizeClick?: () => void;
@@ -18,14 +14,27 @@ interface TopbarProp {
 export const Topbar = (props: TopbarProp) => {
 	const { title, containerProps, onMaximizeClick, onClose } = props;
 	return (
-		<Wrapper {...containerProps}>
-			<Title>
-				{title}
-			</Title>
+		<Wrapper
+			{...containerProps}
+			animate={{
+				backgroundColor: [`#${Math.floor(Math.random() * 255 ** 3).toString(16)}`, `#${Math.floor(Math.random() * 255 ** 3).toString(16)}`, `#${Math.floor(Math.random() * 255 ** 3).toString(16)}`]
+			}}
+			transition={{
+				repeat: Number.POSITIVE_INFINITY,
+				duration: 1
+			}}
+		>
+			<Title>{title}</Title>
 			<Row>
-				<ButtonBase>-</ButtonBase>
-				<ButtonBase onClick={onMaximizeClick}>□</ButtonBase>
-				<ButtonBase onClick={onClose}>x</ButtonBase>
+				<Button>
+					<Icon icon={icons.horizontalLine} />
+				</Button>
+				<Button onClick={onMaximizeClick}>
+					<Icon icon={icons.square} />
+				</Button>
+				<Button onClick={onClose}>
+					<Icon icon={icons.close} />
+				</Button>
 			</Row>
 		</Wrapper>
 	);
@@ -36,12 +45,22 @@ const Wrapper = styled(motion.div)({
 	height: 25,
 	display: "flex",
 	justifyContent: "flex-end",
-	borderRadius: "4px 4px 0 0",
-    backgroundColor: `#${Math.floor(Math.random() * 255 ** 3).toString(16)}`
+	borderRadius: "4px 4px 0 0"
+	// backgroundColor: `#${Math.floor(Math.random() * 255 ** 3).toString(16)}`
 });
 
 const Title = styled(Typography)({
 	flex: 1,
 	marginLeft: 1,
 	userSelect: "none"
+});
+
+const Button = styled<"div">("div")({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	paddingInline: 10,
+	"&:hover": {
+		backgroundColor: "black"
+	}
 });
