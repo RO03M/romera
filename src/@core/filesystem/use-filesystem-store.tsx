@@ -57,6 +57,18 @@ return "";
 						name: "/hello",
 						type: "file",
 						content: "Hello world!"
+					},
+					{
+						id: 7,
+						name: "/romera",
+						type: "directory",
+						nodes: [
+							{
+								id: 8,
+								name: "/desktop",
+								type: "directory"
+							}
+						]
 					}
 				]
 			}

@@ -4,9 +4,15 @@ import { Topbar } from "./topbar";
 import { ResizeBar } from "./resize-bar";
 import { useWindow } from "./use-window";
 import { useCallback } from "preact/hooks";
-import { Terminal } from "../../terminal/terminal";
+import type { ReactNode } from "preact/compat";
 
-export function Window() {
+interface WindowProps {
+	content?: ReactNode;
+}
+
+export function Window(props: WindowProps) {
+	const { content } = props;
+
 	const windowProps = useWindow();
 
 	const dragControls = useDragControls();
@@ -93,9 +99,7 @@ export function Window() {
 					onPanStart: startDrag
 				}}
 			/>
-			<ContentWrapper>
-				<Terminal />
-			</ContentWrapper>
+			<ContentWrapper>{content}</ContentWrapper>
 		</Wrapper>
 	);
 }
@@ -104,9 +108,9 @@ const Wrapper = styled(motion.div)({
 	position: "absolute",
 	top: 150,
 	left: 150,
-	backgroundColor: "ButtonShadow",
 	display: "flex",
-	flexDirection: "column"
+	flexDirection: "column",
+	backgroundColor: "#0f0f0f",
 });
 
 const ContentWrapper = styled<"div">("div")({

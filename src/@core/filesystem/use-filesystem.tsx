@@ -2,6 +2,8 @@ import { useCallback, useMemo } from "preact/hooks";
 import { useFilesystemStore } from "./use-filesystem-store";
 import { findNodeFromTree } from "./utils/find-node-from-tree";
 import { normalize } from "./utils/path";
+import { getPathFromNode } from "./utils/get-path-from-node";
+import type { Node } from "./node";
 
 interface BashContext {
 	path: string;
@@ -22,15 +24,38 @@ export function useFilesystem() {
 		[store.node]
 	);
 
-	const findDirectory = useCallback((path: string) => {
-		const node = findNode(path);
+	const pathFromNode = useCallback(
+		(node: Node) => {
+			return getPathFromNode(node, store.node);
+		},
+		[store.node]
+	);
 
-		if (node === null || node.type !== "directory") {
-			return null;
-		}
+	const findDirectory = useCallback(
+		(path: string) => {
+			const node = findNode(path);
 
-		return node;
-	}, [findNode]);
+			if (node === null || node.type !== "directory") {
+				return null;
+			}
+
+			return node;
+		},
+		[findNode]
+	);
+
+	const findFile = useCallback(
+		(path: string) => {
+			const node = findNode(path);
+
+			if (node === null || node.type !== "file") {
+				return null;
+			}
+
+			return node;
+		},
+		[findNode]
+	);
 
 	const std = useMemo(
 		() => ({
@@ -54,11 +79,7 @@ export function useFilesystem() {
 			}
 
 			// Isso seria o exemplo de um processo
-			const invoke = new Function(
-				"std",
-				"context",
-				functionFile.content ?? ""
-			);
+			const invoke = new Function("std", "context", functionFile.content ?? "");
 
 			const output = invoke(std, {
 				args,
@@ -74,6 +95,8 @@ export function useFilesystem() {
 		store,
 		cmd,
 		findNode,
-		findDirectory
+		pathFromNode,
+		findDirectory,
+		findFile
 	};
 }

@@ -18,7 +18,7 @@ export function TerminalInput(props: TerminalInputProps) {
 				username={username}
 				path={nodePath}
 			/> 
-			<UnstyledInput {...input} as={"input"} autoFocus onBlur={(event) => event.currentTarget.focus()} />
+			<UnstyledInput {...input} as={"input"} />
 		</Wrapper>
 	);
 }

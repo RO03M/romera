@@ -16,13 +16,6 @@ export const Topbar = (props: TopbarProp) => {
 	return (
 		<Wrapper
 			{...containerProps}
-			animate={{
-				backgroundColor: [`#${Math.floor(Math.random() * 255 ** 3).toString(16)}`, `#${Math.floor(Math.random() * 255 ** 3).toString(16)}`, `#${Math.floor(Math.random() * 255 ** 3).toString(16)}`]
-			}}
-			transition={{
-				repeat: Number.POSITIVE_INFINITY,
-				duration: 1
-			}}
 		>
 			<Title>{title}</Title>
 			<Row>
@@ -45,7 +38,8 @@ const Wrapper = styled(motion.div)({
 	height: 25,
 	display: "flex",
 	justifyContent: "flex-end",
-	borderRadius: "4px 4px 0 0"
+	borderRadius: "4px 4px 0 0",
+	backgroundColor: "black"
 	// backgroundColor: `#${Math.floor(Math.random() * 255 ** 3).toString(16)}`
 });
 
