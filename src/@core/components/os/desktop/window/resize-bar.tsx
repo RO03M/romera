@@ -99,7 +99,6 @@ export function ResizeBar(props: ResizeBarProps) {
 				right,
 				cursor,
 				position: "absolute",
-				backgroundColor: "#4499ff90",
 				touchAction: "none"
 			}}
 		/>
