@@ -3,9 +3,13 @@ import type { Node } from "./node";
 
 interface FileSystemState {
 	node: Node;
+	setNode: (node: Node) => void;
 }
 
-export const useFilesystemStore = create<FileSystemState>()(() => ({
+export const useFilesystemStore = create<FileSystemState>()((set) => ({
+	setNode(node) {
+		set({ node });
+	},
 	node: {
 		id: 1,
 		name: "/",
@@ -66,7 +70,15 @@ return "";
 							{
 								id: 8,
 								name: "/desktop",
-								type: "directory"
+								type: "directory",
+								nodes: [
+									{
+										id: 9,
+										name: "/hello",
+										type: "file",
+										content: "Hello world!"
+									}
+								]
 							}
 						]
 					}

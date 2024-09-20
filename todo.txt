@@ -1,0 +1,7 @@
+processos como web workers!!
+
+    var blobURL = URL.createObjectURL( new Blob([ "(", function() {
+        console.log("Works!");
+    }.toString(), ")()" ], { type: 'application/javascript' } ))
+
+    var worker = new Worker(blobURL);

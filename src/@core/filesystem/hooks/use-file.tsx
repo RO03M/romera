@@ -1,18 +1,40 @@
-import { useMemo } from "preact/hooks";
+import { useCallback, useMemo } from "preact/hooks";
 import { useFilesystem } from "../use-filesystem";
 
 export function useFile(path?: string) {
-	const { findFile } = useFilesystem();
+	const { findFile, putFile, pathFromNode } = useFilesystem();
 
 	if (!path) {
 		return null;
 	}
 
-	return useMemo(() => {
+	const file = useMemo(() => {
 		if (!path) {
 			return null;
 		}
 
 		return findFile(path);
 	}, [path, findFile]);
+
+	const writeFile = useCallback(
+		(value: string) => {
+			if (file === null) {
+				return;
+			}
+
+			const path = pathFromNode(file);
+
+			if (!path) {
+				return;
+			}
+
+			putFile(path, value);
+		},
+		[file, pathFromNode, putFile]
+	);
+
+	return {
+		file,
+		writeFile
+	};
 }

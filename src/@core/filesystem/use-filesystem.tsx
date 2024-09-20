@@ -4,6 +4,7 @@ import { findNodeFromTree } from "./utils/find-node-from-tree";
 import { normalize } from "./utils/path";
 import { getPathFromNode } from "./utils/get-path-from-node";
 import type { Node } from "./node";
+import { updateNodeFromTree } from "./utils/node-operations/update-node-from-tree";
 
 interface BashContext {
 	path: string;
@@ -57,6 +58,10 @@ export function useFilesystem() {
 		[findNode]
 	);
 
+	const putFile = useCallback((path: string, value: string) => {
+		store.setNode(updateNodeFromTree(path, store.node, value));
+	}, [store.node, store.setNode]);
+
 	const std = useMemo(
 		() => ({
 			fs: {
@@ -97,6 +102,7 @@ export function useFilesystem() {
 		findNode,
 		pathFromNode,
 		findDirectory,
-		findFile
+		findFile,
+		putFile
 	};
 }
