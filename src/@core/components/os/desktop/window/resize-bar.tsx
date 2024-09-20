@@ -1,7 +1,7 @@
 import { motion, type PanInfo } from "framer-motion";
 import { useMemo } from "preact/hooks";
 
-const THICKNESS = 15;
+const THICKNESS = 5;
 
 interface ResizeBarProps {
 	orientation: "vertical" | "horizontal" | "corner";
@@ -28,15 +28,16 @@ export function ResizeBar(props: ResizeBarProps) {
 	}, [orientation]);
 
 	const dragFlag = useMemo(() => {
-		switch (orientation) {
-			case "vertical":
-				return "y";
-			case "horizontal":
-				return "x";
-			case "corner":
-				return true;
-		}
-	}, [orientation]);
+		return true;
+		// switch (orientation) {
+		// 	case "vertical":
+		// 		return "y";
+		// 	case "horizontal":
+		// 		return "x";
+		// 	case "corner":
+		// 		return true;
+		// }
+	}, []);
 
 	const [top, bottom] = useMemo(() => {
 		switch (verticalAlignment) {
@@ -97,7 +98,9 @@ export function ResizeBar(props: ResizeBarProps) {
 				left,
 				right,
 				cursor,
-				position: "absolute"
+				position: "absolute",
+				backgroundColor: "#4499ff90",
+				touchAction: "none"
 			}}
 		/>
 	);

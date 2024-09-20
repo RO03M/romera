@@ -95,9 +95,7 @@ export function Window(props: WindowProps) {
 			/>
 			<Topbar
 				title={"debug"}
-				containerProps={{
-					onPanStart: startDrag
-				}}
+				onPointerDown={startDrag}
 			/>
 			<ContentWrapper>{content}</ContentWrapper>
 		</Wrapper>
@@ -110,7 +108,7 @@ const Wrapper = styled(motion.div)({
 	left: 150,
 	display: "flex",
 	flexDirection: "column",
-	backgroundColor: "#0f0f0f",
+	backgroundColor: "#0f0f0f"
 });
 
 const ContentWrapper = styled<"div">("div")({

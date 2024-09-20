@@ -3,18 +3,20 @@ import { Typography, styled } from "@mui/material";
 import { type HTMLMotionProps, motion } from "framer-motion";
 import { icons } from "../../../icons";
 import { Row } from "../../../ui/row";
+import type { HTMLAttributes } from "preact/compat";
 
 interface TopbarProp {
 	onMaximizeClick?: () => void;
 	onClose?: () => void;
-	containerProps?: HTMLMotionProps<"div">;
+	onPointerDown: (event: PointerEvent) => void;
+	containerProps?: HTMLAttributes<HTMLDivElement>;
 	title: string;
 }
 
 export const Topbar = (props: TopbarProp) => {
-	const { title, containerProps, onMaximizeClick, onClose } = props;
+	const { title, onPointerDown, onMaximizeClick, onClose } = props;
 	return (
-		<Wrapper {...containerProps}>
+		<Wrapper onPointerDown={onPointerDown} as={"div"}>
 			<Title>{title}</Title>
 			<Row>
 				<Button>
@@ -31,13 +33,15 @@ export const Topbar = (props: TopbarProp) => {
 	);
 };
 
-const Wrapper = styled(motion.div)({
+const Wrapper = styled<"div">("div", { label: "topbar" })({
 	width: "100%",
-	height: 25,
+	height: 40,
 	display: "flex",
 	justifyContent: "flex-end",
+	alignItems: "center",
 	borderRadius: "4px 4px 0 0",
-	backgroundColor: "black"
+	backgroundColor: "black",
+	touchAction: "none"
 	// backgroundColor: `#${Math.floor(Math.random() * 255 ** 3).toString(16)}`
 });
 
