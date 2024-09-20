@@ -1,6 +1,5 @@
 import { Icon } from "@iconify/react";
 import { Typography, styled } from "@mui/material";
-import { type HTMLMotionProps, motion } from "framer-motion";
 import { icons } from "../../../icons";
 import { Row } from "../../../ui/row";
 import type { HTMLAttributes } from "preact/compat";
