@@ -4,10 +4,6 @@ import { useFilesystem } from "../use-filesystem";
 export function useFile(path?: string) {
 	const { findFile, putFile, pathFromNode } = useFilesystem();
 
-	if (!path) {
-		return null;
-	}
-
 	const file = useMemo(() => {
 		if (!path) {
 			return null;
@@ -17,7 +13,7 @@ export function useFile(path?: string) {
 	}, [path, findFile]);
 
 	const writeFile = useCallback(
-		(value: string) => {
+		(value = "") => {
 			if (file === null) {
 				return;
 			}
