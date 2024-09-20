@@ -1,8 +1,8 @@
-import { ButtonBase, IconButton, styled, Typography } from "@mui/material";
-import { type HTMLMotionProps, motion } from "framer-motion";
-import { Row } from "../../../ui/row";
 import { Icon } from "@iconify/react";
+import { Typography, styled } from "@mui/material";
+import { type HTMLMotionProps, motion } from "framer-motion";
 import { icons } from "../../../icons";
+import { Row } from "../../../ui/row";
 
 interface TopbarProp {
 	onMaximizeClick?: () => void;
@@ -14,9 +14,7 @@ interface TopbarProp {
 export const Topbar = (props: TopbarProp) => {
 	const { title, containerProps, onMaximizeClick, onClose } = props;
 	return (
-		<Wrapper
-			{...containerProps}
-		>
+		<Wrapper {...containerProps}>
 			<Title>{title}</Title>
 			<Row>
 				<Button>

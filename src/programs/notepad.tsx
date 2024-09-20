@@ -9,7 +9,7 @@ interface NotepadProps {
 export function Notepad(props: NotepadProps) {
 	const { filePath } = props;
 
-	const file = useFile(filePath);
+	const { file } = useFile(filePath);
 
 	useHotkeys("ctrl+s", () => console.log("asdasd"), {
 		preventDefault: true,
