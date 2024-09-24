@@ -102,6 +102,12 @@ if (!status) {
 										name: "/hello",
 										type: "file",
 										content: "Hello world!"
+									},
+									{
+										id: incrementalId(),
+										name: "/file2",
+										type: "file",
+										content: "Hello world!"
 									}
 								]
 							}

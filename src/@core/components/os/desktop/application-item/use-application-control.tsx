@@ -3,8 +3,11 @@ import { useFile } from "../../../../filesystem/hooks/use-file";
 import { useGridSize } from "../../../../hooks/use-grid-size";
 import { type HTMLMotionProps, useMotionValue } from "framer-motion";
 import { positionToGridPosition } from "../../../../utils/grid";
+import { useApplicationsConfigFileManager } from "./use-applications-config-file-manager";
 
 export function useApplicationControl(applicationName: string) {
+	const { isPositionFree } = useApplicationsConfigFileManager();
+
 	const { file, writeFile } = useFile(`/usr/applications/${applicationName}`, {
 		forceCreation: true
 	});
@@ -29,11 +32,6 @@ export function useApplicationControl(applicationName: string) {
 	const yBlur = useMotionValue(gridPosition[1] * gridSize.height);
 
 	const resetPosition = useCallback(() => {
-		// const oldItem = getItemById(itemId);
-
-		// const gridPosition = oldItem?.gridPosition ?? [0, 0]
-
-		// updateDesktopItemPosition(itemId, gridPosition);
 		xBlur.set(gridPosition[0] * gridSize.width);
 		yBlur.set(gridPosition[1] * gridSize.height);
 		setIsFree(true);
@@ -42,10 +40,10 @@ export function useApplicationControl(applicationName: string) {
 	const onDrag = useCallback(() => {
 		const { x: newX, y: newY } = positionToGridPosition([x.get(), y.get()]);
 
-		// setIsFree(isPositionFree([newX, newY], [itemId]));
+		setIsFree(isPositionFree(newX, newY, applicationName));
 		xBlur.set(newX * gridSize.width);
 		yBlur.set(newY * gridSize.height);
-	}, [gridSize, x, y, xBlur, yBlur]);
+	}, [applicationName, gridSize, x, y, xBlur, yBlur, isPositionFree]);
 
 	const onDragStart = useCallback(() => {
 		setIsDragging(true);
@@ -55,16 +53,14 @@ export function useApplicationControl(applicationName: string) {
 		setIsDragging(false);
 		const { x: newX, y: newY } = positionToGridPosition([x.get(), y.get()]);
 
-		// const isFree = isPositionFree([newX, newY], [itemId]);
-		const isFree = true;
+		const isFree = isPositionFree(newX, newY, applicationName);
 
 		if (isFree) {
-			// updateDesktopItemPosition(itemId, [newX, newY]);
 			writeFile(`${newX},${newY}`);
 		} else {
 			resetPosition();
 		}
-	}, [x, y, resetPosition, writeFile]);
+	}, [applicationName, x, y, resetPosition, writeFile, isPositionFree]);
 
 	const onHoverStart = useCallback(() => {
 		setIsHover(true);
@@ -83,7 +79,6 @@ export function useApplicationControl(applicationName: string) {
 		if (file !== null && file.content === undefined) {
 			writeFile("0,0");
 		}
-		console.log(file);
 	}, [file, writeFile]);
 
 	return {

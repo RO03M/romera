@@ -8,6 +8,7 @@ interface INode {
 	createdAt?: Date;
 	updatedAt?: Date;
 	nodes?: Node[];
+	content?: unknown;
 }
 
 export interface File extends INode {
