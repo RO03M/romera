@@ -1,12 +1,13 @@
 import type { Node } from "../../node";
 import { normalize } from "../path";
+import { cloneDeep } from "lodash";
 
 export function doActionOnNode<T = unknown>(
 	path: string,
 	root: Node,
 	action: (node: Node) => T
 ): [Node, T | null] {
-	const clonedRoot = structuredClone(root);
+	const clonedRoot = cloneDeep(root);
 
 	const normalizedPath = normalize(path);
 	let splittedPath: string[] = [];

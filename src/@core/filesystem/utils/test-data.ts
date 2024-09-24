@@ -1,23 +1,24 @@
+import { incrementalId } from "../../utils/incremental-id";
 import type { Node } from "../node";
 
 export const mockFilesystem: Node = {
-	id: 1,
+	id: incrementalId(),
 	name: "/",
 	type: "directory",
 	nodes: [
 		{
-			id: 2,
+			id: incrementalId(),
 			name: "/bin",
 			type: "directory",
 			nodes: [
 				{
-					id: 3,
+					id: incrementalId(),
 					type: "file",
 					name: "/ls",
 					content: "ls file"
 				},
 				{
-					id: 4,
+					id: incrementalId(),
 					type: "file",
 					name: "/cat",
 					content: "cat file"
@@ -25,29 +26,53 @@ export const mockFilesystem: Node = {
 			]
 		},
 		{
-			id: 5,
+			id: incrementalId(),
 			name: "/home",
 			type: "directory",
 			nodes: [
 				{
-					id: 6,
+					id: incrementalId(),
 					name: "/hello",
 					type: "file",
 					content: "Hello world!"
 				},
 				{
-					id: 7,
+					id: incrementalId(),
 					name: "/romera",
 					type: "directory",
 					nodes: [
 						{
-							id: 8,
+							id: incrementalId(),
 							name: "/desktop",
 							type: "directory"
 						}
 					]
 				}
 			]
-		}
+		},
+		{
+			id: incrementalId(),
+			name: "/dev",
+			type: "directory",
+			nodes: [
+				{
+					id: incrementalId(),
+					name: "/gips",
+					type: "directory",
+					description:
+						"Graphical Interfaces Processes (dir to store the actives windows)",
+					nodes: [
+						{
+							id: incrementalId(),
+							name: "/foo",
+							type: "gip",
+							content: {
+								component: () => {}
+							}
+						}
+					]
+				}
+			]
+		},
 	]
 };

@@ -97,7 +97,7 @@ export function useFilesystem() {
 			const { args, bashContext } = options;
 			const functionFile = findNode(`/bin/${program}`);
 
-			if (!functionFile) {
+			if (!functionFile || functionFile.type !== "file") {
 				return { found: false, output: null };
 			}
 

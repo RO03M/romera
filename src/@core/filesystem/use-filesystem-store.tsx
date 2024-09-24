@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Node } from "./node";
 import { incrementalId } from "../utils/incremental-id";
+import { Terminal } from "../components/os/terminal/terminal";
 
 interface FileSystemState {
 	node: Node;
@@ -107,6 +108,36 @@ if (!status) {
 						]
 					}
 				]
+			},
+			{
+				id: incrementalId(),
+				name: "/dev",
+				type: "directory",
+				nodes: [
+					{
+						id: incrementalId(),
+						name: "/gips",
+						type: "directory",
+						description:
+							"Graphical Interfaces Processes (dir to store the actives windows)",
+						nodes: [
+							{
+								id: incrementalId(),
+								name: "/foo",
+								type: "gip",
+								content: {
+									component: <Terminal />
+								}
+							}
+						]
+					}
+				]
+			},
+			{
+				id: incrementalId(),
+				name: "/proc",
+				type: "directory",
+				nodes: []
 			}
 		]
 	}
