@@ -1,5 +1,6 @@
 import { styled } from "@mui/material";
 import type { Node } from "../../../@core/filesystem/node";
+import { useMemo } from "preact/hooks";
 
 interface ExplorerListItemProps {
     node: Node;
@@ -9,6 +10,14 @@ interface ExplorerListItemProps {
 export function ExplorerListItem(props: ExplorerListItemProps) {
     const { node, onClick } = props;
 
+    const children = useMemo(() => {
+        if (node.type !== "directory") {
+            return [];
+        }
+
+        return node.nodes ?? [];
+    }, [node]);
+
 	return (
 		<Wrapper
             id={`explorer-list-item-node-${node.id}`}
@@ -16,7 +25,7 @@ export function ExplorerListItem(props: ExplorerListItemProps) {
         >
 			<div>{node.name.replace(/^\//, "")}</div>
 			<div>{node.type}</div>
-			<div>{node.nodes?.length ?? 0}</div>
+			<div>{children}</div>
 		</Wrapper>
 	);
 }

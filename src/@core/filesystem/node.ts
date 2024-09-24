@@ -7,6 +7,7 @@ interface INode {
 	description?: string;
 	createdAt?: Date;
 	updatedAt?: Date;
+	nodes?: Node[];
 }
 
 export interface File extends INode {
@@ -16,12 +17,11 @@ export interface File extends INode {
 
 export interface Directory extends INode {
 	type: "directory";
-	nodes?: Node[];
 }
 
 export interface Gip extends INode {
 	type: "gip";
-	content: {
+	content?: {
 		component: ReactNode;
 	};
 }

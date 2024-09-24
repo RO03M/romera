@@ -41,6 +41,10 @@ export function createNodeOnTree(
 	}
 
 	const [rootWithNode] = doActionOnNode(parentPath, root, (node) => {
+		if (node.type !== "directory") {
+			return;
+		}
+
 		if (!node.nodes) {
 			node.nodes = [];
 		}
