@@ -1,3 +1,7 @@
+export interface File extends Omit<Node, "nodes"> {
+    type: "file";
+}
+
 export interface Node {
     id: number;
     name: string;
