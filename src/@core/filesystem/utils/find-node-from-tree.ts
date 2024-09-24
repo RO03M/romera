@@ -2,11 +2,9 @@ import type { Node } from "../node";
 import { doActionOnNode } from "./node-operations/do-action-on-node";
 
 export function findNodeFromTree(path: string, root: Node) {
-	let result: Node | undefined;
-
-	doActionOnNode(path, root, (node) => {
-		result = node;
+	const [_, node] = doActionOnNode(path, root, (node) => {
+		return node;
 	});
 
-	return result;
+	return node;
 }

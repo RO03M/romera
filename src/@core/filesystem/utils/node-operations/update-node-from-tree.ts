@@ -6,7 +6,7 @@ export function updateNodeFromTree(
 	root: Node,
 	content: Node["content"]
 ) {
-	const updatedRoot = doActionOnNode(path, root, (node) => {
+	const [updatedRoot] = doActionOnNode(path, root, (node) => {
 		if (node !== undefined && node.type === "file") {
 			node.content = content;
 		}

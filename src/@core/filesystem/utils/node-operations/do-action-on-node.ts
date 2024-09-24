@@ -1,11 +1,11 @@
 import type { Node } from "../../node";
 import { normalize } from "../path";
 
-export function doActionOnNode(
+export function doActionOnNode<T = unknown>(
 	path: string,
 	root: Node,
-	action: (node: Node) => void
-) {
+	action: (node: Node) => T
+): [Node, T | null] {
 	const clonedRoot = structuredClone(root);
 
 	const normalizedPath = normalize(path);
@@ -17,6 +17,7 @@ export function doActionOnNode(
 	}
 
 	let currentNode: Node | undefined = clonedRoot;
+	let actionResult: T | null = null;
 
 	for (let i = 0; i < splittedPath.length; i++) {
 		const isLastPath = splittedPath.length - 1 === i;
@@ -42,9 +43,9 @@ export function doActionOnNode(
 
 			currentNode = currentNode.nodes[nextNodeIndex];
 		} else {
-			action(currentNode);
+			actionResult = action(currentNode);
 		}
 	}
 
-	return clonedRoot;
+	return [clonedRoot, actionResult];
 }

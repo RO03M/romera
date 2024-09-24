@@ -8,9 +8,8 @@ import { findNodeFromTree } from "../find-node-from-tree";
 describe("Filesystem general node operations", () => {
 	describe("Do action on node", () => {
         it("Should be able to find a directory node", () => {
-            let dir: Node | undefined;
-            doActionOnNode("/bin", mockFilesystem, (node) => {
-                dir = node;
+            const [_, dir] = doActionOnNode("/bin", mockFilesystem, (node) => {
+                return node;
             });
 
             expect(dir).toBeDefined();
@@ -20,9 +19,8 @@ describe("Filesystem general node operations", () => {
         });
         
         it("Should be able to find a file node", () => {
-            let file: Node | undefined;
-            doActionOnNode("/bin/ls", mockFilesystem, (node) => {
-                file = node;
+            const [_, file] = doActionOnNode("/bin/ls", mockFilesystem, (node) => {
+                return node;
             });
 
             expect(file).toBeDefined();
@@ -31,12 +29,12 @@ describe("Filesystem general node operations", () => {
         });
 
 		it("Should be able to find the node and do something with it", () => {
-			let foundNode: Node | undefined;
-            
-			const result = doActionOnNode("/bin/ls", mockFilesystem, (node) => {
+			const [result, foundNode] = doActionOnNode("/bin/ls", mockFilesystem, (node) => {
                 node.content = "changed";
-                foundNode = { ...node };
+                const foundNode = { ...node };
                 foundNode.content = "can't change me";
+
+                return foundNode;
 			});
             
             expect(result).toBeDefined();
