@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { Node } from "./node";
+import { incrementalId } from "../utils/incremental-id";
 
 interface FileSystemState {
 	node: Node;
@@ -11,17 +12,17 @@ export const useFilesystemStore = create<FileSystemState>()((set) => ({
 		set({ node });
 	},
 	node: {
-		id: 1,
+		id: incrementalId(),
 		name: "/",
 		type: "directory",
 		nodes: [
 			{
-				id: 2,
+				id: incrementalId(),
 				name: "/bin",
 				type: "directory",
 				nodes: [
 					{
-						id: 3,
+						id: incrementalId(),
 						type: "file",
 						name: "/ls",
 						content: `
@@ -31,7 +32,7 @@ return node.nodes.map((node) => "        " + node.name);
 						`
 					},
 					{
-						id: 4,
+						id: incrementalId(),
 						type: "file",
 						name: "/cat",
 						content: `
@@ -52,28 +53,28 @@ return "";
 				]
 			},
 			{
-				id: 5,
+				id: incrementalId(),
 				name: "/home",
 				type: "directory",
 				nodes: [
 					{
-						id: 6,
+						id: incrementalId(),
 						name: "/hello",
 						type: "file",
 						content: "Hello world!"
 					},
 					{
-						id: 7,
+						id: incrementalId(),
 						name: "/romera",
 						type: "directory",
 						nodes: [
 							{
-								id: 8,
+								id: incrementalId(),
 								name: "/desktop",
 								type: "directory",
 								nodes: [
 									{
-										id: 9,
+										id: incrementalId(),
 										name: "/hello",
 										type: "file",
 										content: "Hello world!"
