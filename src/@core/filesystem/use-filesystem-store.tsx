@@ -111,6 +111,19 @@ if (!status) {
 			},
 			{
 				id: incrementalId(),
+				name: "/usr",
+				type: "directory",
+				nodes: [
+					{
+						id: incrementalId(),
+						name: "/applications",
+						type: "directory",
+						nodes: []
+					}
+				]
+			},
+			{
+				id: incrementalId(),
 				name: "/dev",
 				type: "directory",
 				nodes: [
@@ -127,6 +140,14 @@ if (!status) {
 								type: "gip",
 								content: {
 									component: <Terminal />
+								}
+							},
+							{
+								id: incrementalId(),
+								name: "/teste",
+								type: "gip",
+								content: {
+									component: (() => <div>teste</div>)()
 								}
 							}
 						]

@@ -1,8 +1,12 @@
-import { useCallback, useMemo } from "preact/hooks";
+import { useCallback, useEffect, useMemo } from "preact/hooks";
 import { useFilesystem } from "../use-filesystem";
 
-export function useFile(path?: string) {
-	const { findFile, putFile, pathFromNode } = useFilesystem();
+interface UseFileOptions {
+	forceCreation?: boolean;
+}
+
+export function useFile(path?: string, options?: UseFileOptions) {
+	const { findFile, putFile, createFile, pathFromNode } = useFilesystem();
 
 	const file = useMemo(() => {
 		if (!path) {
@@ -11,6 +15,18 @@ export function useFile(path?: string) {
 
 		return findFile(path);
 	}, [path, findFile]);
+
+	useEffect(() => {
+		if (options?.forceCreation && path !== undefined && file === null) {
+			const splittedPath = path.split("/");
+			const fileName = splittedPath.pop();
+			const parentPath = splittedPath.join("/");
+			console.log(splittedPath.join("/"), fileName);
+			if (fileName !== undefined && parentPath !== undefined) {
+				createFile(parentPath, fileName);
+			}
+		}
+	}, [path, file, options?.forceCreation, createFile]);
 
 	const writeFile = useCallback(
 		(value = "") => {

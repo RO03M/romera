@@ -27,7 +27,7 @@ export function useFilesystem() {
 	);
 
 	const createNode = useCallback(
-		(parentPath: string, node: Node) => {
+		(parentPath: string, node: Omit<Node, "id">) => {
 			const response = createNodeOnTree(parentPath, store.node, node);
 
 			if (response.status === true && response.nodeTree !== undefined) {
@@ -38,6 +38,13 @@ export function useFilesystem() {
 		},
 		[store.node, store.setNode]
 	);
+
+	const createFile = useCallback((path: string, fileName: string) => {
+		return createNode(path, {
+			name: fileName,
+			type: "file"
+		});
+	}, [createNode]);
 
 	const pathFromNode = useCallback(
 		(node: Node) => {
@@ -121,6 +128,8 @@ export function useFilesystem() {
 		pathFromNode,
 		findDirectory,
 		findFile,
-		putFile
+		putFile,
+		createNode,
+		createFile
 	};
 }

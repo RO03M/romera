@@ -2,21 +2,17 @@ import { styled } from "@mui/material";
 import { motion } from "framer-motion";
 import { useGridSize } from "../../../../hooks/use-grid-size";
 import { DragBackground } from "./drag-background";
-import { useApplicationItemActions } from "./use-application-item-actions";
+import { useApplicationControl } from "./use-application-control";
 
 interface ApplicationItemProps {
-	id: number;
-	gridPosition: [number, number];
 	name: string;
 }
 
 export function ApplicationItem(props: ApplicationItemProps) {
-	const { id, name, gridPosition } = props;
+	const { name } = props;
 
-	const { item, blur, itemComponentProps } = useApplicationItemActions({
-		gridPosition,
-		itemId: id
-	});
+	const { item, blur, itemComponentProps } = useApplicationControl(name);
+
 	const gridSize = useGridSize();
 
 	return (

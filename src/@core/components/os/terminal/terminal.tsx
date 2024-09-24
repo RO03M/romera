@@ -65,7 +65,7 @@ export function Terminal() {
 
 			const output: TerminalOutput = {
 				command: input,
-				message: outputMessage,
+				message: String(outputMessage),
 				path: currentNodePath,
 				username: "romera"
 			};
