@@ -49,6 +49,29 @@ if (file !== null) {
 
 return "";
 						`
+					},
+					{
+						id: incrementalId(),
+						type: "file",
+						name: "/mkdir",
+						content: `
+const [dirName] = context.args;
+
+if (!dirName) {
+	return "Missing directory name"
+}
+
+const newDirectory = {
+	name: dirName,
+	type: "directory"
+};
+
+const { status } = std.fs.createNode(context.bashContext.path, newDirectory);
+
+if (!status) {
+	return "Cannot create directory " + dirName;
+}
+						`
 					}
 				]
 			},

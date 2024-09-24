@@ -5,6 +5,7 @@ import { normalize } from "./utils/path";
 import { getPathFromNode } from "./utils/get-path-from-node";
 import type { Node } from "./node";
 import { updateNodeFromTree } from "./utils/node-operations/update-node-from-tree";
+import { createNodeOnTree } from "./utils/node-operations/create-node-on-tree";
 
 interface BashContext {
 	path: string;
@@ -23,6 +24,19 @@ export function useFilesystem() {
 			return findNodeFromTree(path, store.node);
 		},
 		[store.node]
+	);
+
+	const createNode = useCallback(
+		(parentPath: string, node: Node) => {
+			const response = createNodeOnTree(parentPath, store.node, node);
+
+			if (response.status === true && response.nodeTree !== undefined) {
+				store.setNode(response.nodeTree);
+			}
+
+			return response;
+		},
+		[store.node, store.setNode]
 	);
 
 	const pathFromNode = useCallback(
@@ -58,20 +72,24 @@ export function useFilesystem() {
 		[findNode]
 	);
 
-	const putFile = useCallback((path: string, value: string) => {
-		store.setNode(updateNodeFromTree(path, store.node, value));
-	}, [store.node, store.setNode]);
+	const putFile = useCallback(
+		(path: string, value: string) => {
+			store.setNode(updateNodeFromTree(path, store.node, value));
+		},
+		[store.node, store.setNode]
+	);
 
 	const std = useMemo(
 		() => ({
 			fs: {
 				findNode,
+				createNode,
 				path: {
 					normalize
 				}
 			}
 		}),
-		[findNode]
+		[findNode, createNode]
 	);
 
 	const cmd = useCallback(
