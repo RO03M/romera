@@ -13,7 +13,7 @@ export function Explorer(props: ExplorerProps) {
 
 	const [path, setPath] = useState(initialPath);
 
-	const dir = useDir(path);
+	const { dir } = useDir(path);
 
 	const nodes = useMemo(() => {
 		const parentNode: Node = {

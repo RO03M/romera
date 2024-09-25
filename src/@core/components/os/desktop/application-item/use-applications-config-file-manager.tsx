@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "preact/hooks";
 import { useDir } from "../../../../filesystem/hooks/use-directory";
 
 export function useApplicationsConfigFileManager() {
-	const applicationsDir = useDir("/usr/applications");
+	const { dir: applicationsDir  }= useDir("/usr/applications");
 
 	const parsedApplications = useMemo(() => {
 		if (applicationsDir === null || applicationsDir.nodes === undefined) {
