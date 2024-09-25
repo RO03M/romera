@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "preact/hooks";
 import { useDir } from "../filesystem/hooks/use-directory";
 
 export function useGip() {
-	const { dir } = useDir("/dev/gips");
+	const { dir, createFileInDirectory } = useDir("/dev/gips");
 
 	const graphicalProcesses = useMemo(() => {
 		if (dir !== null && dir.nodes !== undefined) {
