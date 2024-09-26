@@ -100,7 +100,7 @@ export function Window(props: WindowProps) {
 				verticalAlignment={"end"}
 				onDrag={windowProps.handleBottomLeftDrag}
 			/>
-			<Topbar title={"debug"} onClose={() => killProcesses([pid])} onPointerDown={startDrag} />
+			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => killProcesses([pid])} onPointerDown={startDrag} />
 			<ContentWrapper>
 				<Suspense fallback={"..."}>
 					{Content !== undefined && <Content {...contentArgs} />}
@@ -112,8 +112,8 @@ export function Window(props: WindowProps) {
 
 const Wrapper = styled(motion.div)({
 	position: "absolute",
-	top: 150,
-	left: 150,
+	top: 0,
+	left: 0,
 	display: "flex",
 	flexDirection: "column",
 	backgroundColor: "#0f0f0f"

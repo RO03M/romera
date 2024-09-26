@@ -13,10 +13,9 @@ interface TopbarProp {
 }
 
 export const Topbar = (props: TopbarProp) => {
-	const { title, onPointerDown, onMaximizeClick, onClose } = props;
+	const { onPointerDown, onMaximizeClick, onClose } = props;
 	return (
 		<Wrapper onPointerDown={onPointerDown} as={"div"}>
-			<Title>{title}</Title>
 			<Row>
 				<TopbarButton>
 					<Icon icon={icons.horizontalLine} />
@@ -50,14 +49,6 @@ const Wrapper = styled.div(
 		name: "window-topbar"
 	}
 );
-
-const Title = styled.span({
-	flex: 1,
-	marginLeft: 1,
-	userSelect: "none",
-	display: "flex",
-	alignItems: "center"
-});
 
 const TopbarButton = styled.div<{ closeButton?: boolean }>((props) => ({
 	display: "flex",
