@@ -31,7 +31,7 @@ export function Terminal() {
 		setIsPending(true);
 	}, []);
 
-	const restingMode = useCallback(() => {
+	const free = useCallback(() => {
 		setIsPending(false);
 	}, []);
 
@@ -76,10 +76,18 @@ export function Terminal() {
 						workingDirectory: currentNodePath,
 						echo,
 						pendingMode,
-						restingMode
+						free
 					});
 				}
 			}
+
+			const output: TerminalOutput = {
+				command: input,
+				path: currentNodePath,
+				username: "romera"
+			};
+
+			setOutputs((prevOutputs) => [...prevOutputs, output]);
 
 			setInput("");
 		},
@@ -88,7 +96,7 @@ export function Terminal() {
 			input,
 			currentNodePath,
 			pendingMode,
-			restingMode,
+			free,
 			echo,
 			cd,
 			createProcess

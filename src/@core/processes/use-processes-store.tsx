@@ -6,6 +6,7 @@ interface ProcessesStore {
 	processes: Process[];
 	createProcess: (cmd: string, ttyContext: TTYContext) => Process;
 	setPidsToRunning: (pids: Process["pid"][]) => void;
+	killProcesses: (pids: Process["pid"][]) => void;
 }
 
 export const useProcessesStore = create<ProcessesStore>()((set, get) => ({
@@ -32,6 +33,13 @@ export const useProcessesStore = create<ProcessesStore>()((set, get) => ({
 			processes[index].status = "running";
 		}
 		
+		set({ processes });
+	},
+	killProcesses(pids) {
+		const processes = get().processes.filter((process) => {
+			return !pids.includes(process.pid);
+		});
+
 		set({ processes });
 	},
 	processes: []

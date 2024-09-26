@@ -4,7 +4,7 @@ export interface TerminalOutput {
 	username?: string;
 	path?: string;
 	command?: string;
-	message: string;
+	message?: string;
 }
 
 interface TerminalOutputListProps {
@@ -21,13 +21,12 @@ export function TerminalOutputList(props: TerminalOutputListProps) {
 					style={{ whiteSpace: "pre-wrap" }}
 					key={`output-${key}-${output.username}`}
 				>
-					
 					<LineStart
 						username={output.username}
 						command={output.command}
 						path={output.path}
 					/>
-					<div>{output.message}</div>
+					{output.message !== undefined && <div>{output.message}</div>}
 				</div>
 			))}
 		</div>

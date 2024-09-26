@@ -9,7 +9,7 @@ export interface TTYContext {
 	workingDirectory: string;
 	echo: (message: string) => void;
     pendingMode: () => void;
-    restingMode: () => void;
+    free: () => void;
 }
 
 type ProcessStatus = "created" | "running" | "stopped" | "zombie" | "sleeping";
