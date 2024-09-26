@@ -2,11 +2,15 @@ import { create } from "zustand";
 import type { Process, ProcessComponentProps, TTYContext } from "./types";
 import { incrementalId } from "../utils/incremental-id";
 import { Explorer } from "../../programs/explorer/explorer";
+import type { ComponentType } from "preact";
 
 interface ProcessesStore {
 	processes: Process[];
 	createProcess: (cmd: string, ttyContext: TTYContext) => Process;
-	createWindowProcess: (args: ProcessComponentProps) => Process;
+	createWindowProcess: (
+		Component: ComponentType<ProcessComponentProps>,
+		args: ProcessComponentProps
+	) => Process;
 	setPidsToRunning: (pids: Process["pid"][]) => void;
 	killProcesses: (pids: Process["pid"][]) => void;
 }
@@ -27,11 +31,11 @@ export const useProcessesStore = create<ProcessesStore>()((set, get) => ({
 
 		return process;
 	},
-	createWindowProcess(args: ProcessComponentProps) {
+	createWindowProcess(Component, args) {
 		const process: Process = {
 			pid: incrementalId("process"),
 			status: "created",
-			Component: Explorer,
+			Component,
 			componentArgs: args
 		};
 

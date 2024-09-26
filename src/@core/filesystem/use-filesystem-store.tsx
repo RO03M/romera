@@ -127,13 +127,18 @@ const interval = setInterval(() => {
 										id: incrementalId(),
 										name: "/hello",
 										type: "file",
-										content: "Hello world!"
+										content: "Hello file content"
 									},
 									{
 										id: incrementalId(),
 										name: "/file2",
 										type: "file",
 										content: "Hello world!"
+									},
+									{
+										id: incrementalId(),
+										name: "/folder",
+										type: "directory"
 									}
 								]
 							}

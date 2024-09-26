@@ -11,6 +11,7 @@ export function Desktop() {
 			{items.map((desktopItem) => (
 				<ApplicationItem
 					key={desktopItem.id}
+					type={desktopItem.type}
 					name={desktopItem.name}
 				/>
 			))}

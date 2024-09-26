@@ -10,6 +10,8 @@ export function Explorer(props: ProcessComponentProps) {
 
 	const [path, setPath] = useState(workingDirectory);
 
+	console.log(path);
+
 	const { dir } = useDir(path);
 
 	const nodes = useMemo(() => {
