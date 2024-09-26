@@ -4,20 +4,22 @@ import type { InputHTMLAttributes } from "preact/compat";
 import { LineStart } from "./line-start";
 
 interface TerminalInputProps {
+	isPending?: boolean;
 	input: InputHTMLAttributes<HTMLInputElement>;
 	nodePath: string;
 	username: string;
 }
 
 export function TerminalInput(props: TerminalInputProps) {
-	const { nodePath, username, input } = props;
+	const { nodePath, username, input, isPending = false } = props;
+
+	if (isPending) {
+		return <span />;
+	}
 
 	return (
 		<Wrapper>
-			<LineStart
-				username={username}
-				path={nodePath}
-			/> 
+			<LineStart username={username} path={nodePath} />
 			<UnstyledInput {...input} as={"input"} />
 		</Wrapper>
 	);
@@ -26,15 +28,15 @@ export function TerminalInput(props: TerminalInputProps) {
 const Wrapper = styled<"div">("div")({
 	position: "relative",
 	display: "flex",
-    flexDirection: "row"
+	flexDirection: "row"
 });
 
 export const NodePathTypography = styled<"span">("span")({
-    color: "darkblue",
-    "&::after": {
-        content: "'$'",
-        color: "white"
-    }
+	color: "darkblue",
+	"&::after": {
+		content: "'$'",
+		color: "white"
+	}
 });
 
 // const Caret = styled<"div">("div")({

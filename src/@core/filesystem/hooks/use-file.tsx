@@ -21,7 +21,7 @@ export function useFile(path?: string, options?: UseFileOptions) {
 			const splittedPath = path.split("/");
 			const fileName = splittedPath.pop();
 			const parentPath = splittedPath.join("/");
-			console.log(splittedPath.join("/"), fileName);
+
 			if (fileName !== undefined && parentPath !== undefined) {
 				createFile(parentPath, fileName);
 			}

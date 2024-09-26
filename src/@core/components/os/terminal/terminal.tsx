@@ -5,13 +5,35 @@ import { useFilesystem } from "../../../filesystem/use-filesystem";
 import { formatInput } from "./utils/format-input";
 import { normalize } from "../../../filesystem/utils/path";
 import { type TerminalOutput, TerminalOutputList } from "./output-list";
+import { useProcessesStore } from "../../../processes/use-processes-store";
+import { incrementalId } from "../../../utils/incremental-id";
 
 export function Terminal() {
+	const [id] = useState(incrementalId("tty"));
+	// Rename to currentWorkingDirectory
 	const [currentNodePath, setCurrentNodePath] = useState("/");
+	const [isPending, setIsPending] = useState(false);
 	const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
 	const [input, setInput] = useState("");
 
 	const { cmd, findDirectory } = useFilesystem();
+	const { processes, createProcess } = useProcessesStore();
+
+	const echo = useCallback((message: string) => {
+		const output: TerminalOutput = {
+			message
+		};
+
+		setOutputs((prevOutputs) => [...prevOutputs, output]);
+	}, []);
+
+	const pendingMode = useCallback(() => {
+		setIsPending(true);
+	}, []);
+
+	const restingMode = useCallback(() => {
+		setIsPending(false);
+	}, []);
 
 	const cd = useCallback(
 		(path: string) => {
@@ -48,39 +70,38 @@ export function Terminal() {
 					break;
 				}
 				default: {
-					const { found, output: cmdOutput } = cmd(program, {
-						args,
-						bashContext: { path: currentNodePath }
+					pendingMode();
+					createProcess(input, {
+						id,
+						workingDirectory: currentNodePath,
+						echo,
+						pendingMode,
+						restingMode
 					});
-
-					if (found) {
-						outputMessage = cmdOutput;
-					} else {
-						outputMessage = `Command ${program} not found`;
-					}
-
-					break;
 				}
 			}
 
-			const output: TerminalOutput = {
-				command: input,
-				message: String(outputMessage),
-				path: currentNodePath,
-				username: "romera"
-			};
-
-			setOutputs((prevOutputs) => [...prevOutputs, output]);
 			setInput("");
 		},
-		[input, currentNodePath, cd, cmd]
+		[
+			id,
+			input,
+			currentNodePath,
+			pendingMode,
+			restingMode,
+			echo,
+			cd,
+			createProcess
+		]
 	);
 
 	return (
 		<Wrapper onSubmit={onSubmit}>
+			<span>{id}</span>
 			<TerminalOutputList outputs={outputs} />
 			<div>
 				<TerminalInput
+					isPending={isPending}
 					username={"romera"}
 					nodePath={currentNodePath}
 					input={{

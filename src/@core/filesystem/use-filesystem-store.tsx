@@ -73,6 +73,25 @@ if (!status) {
 	return "Cannot create directory " + dirName;
 }
 						`
+					},
+					{
+						id: incrementalId(),
+						type: "file",
+						name: "/sleep",
+						content: `
+const [sleepTime = 1] = context.args;
+return new Promise((resolve, reject) => {
+	let i = 0;
+	const interval = setInterval(() => {
+		i++;
+		context.tty.echo(i + "seconds elapsed");
+		if (i >= sleepTime) {
+			resolve();
+			clearInterval(interval);
+		}
+	}, 1000);
+});
+						`
 					}
 				]
 			},

@@ -86,6 +86,14 @@ export function useFilesystem() {
 		[store.node, store.setNode]
 	);
 
+	const fsMethods = useMemo(() => ({
+		findNode,
+		createNode,
+		path: {
+			normalize
+		}
+	}), [findNode, createNode]);
+
 	const std = useMemo(
 		() => ({
 			fs: {
@@ -123,6 +131,7 @@ export function useFilesystem() {
 
 	return {
 		store,
+		fsMethods,
 		cmd,
 		findNode,
 		pathFromNode,

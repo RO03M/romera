@@ -1,9 +1,9 @@
 import { LineStart } from "./line-start";
 
 export interface TerminalOutput {
-	username: string;
-	path: string;
-	command: string;
+	username?: string;
+	path?: string;
+	command?: string;
 	message: string;
 }
 
@@ -21,6 +21,7 @@ export function TerminalOutputList(props: TerminalOutputListProps) {
 					style={{ whiteSpace: "pre-wrap" }}
 					key={`output-${key}-${output.username}`}
 				>
+					
 					<LineStart
 						username={output.username}
 						command={output.command}
