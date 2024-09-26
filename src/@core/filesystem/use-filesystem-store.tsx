@@ -127,44 +127,6 @@ if (!status) {
 						nodes: []
 					}
 				]
-			},
-			{
-				id: incrementalId(),
-				name: "/dev",
-				type: "directory",
-				nodes: [
-					{
-						id: incrementalId(),
-						name: "/gips",
-						type: "directory",
-						description:
-							"Graphical Interfaces Processes (dir to store the actives windows)",
-						nodes: [
-							{
-								id: incrementalId(),
-								name: "/foo",
-								type: "gip",
-								content: {
-									component: <Terminal />
-								}
-							},
-							{
-								id: incrementalId(),
-								name: "/teste",
-								type: "gip",
-								content: {
-									component: (() => <div>teste</div>)()
-								}
-							}
-						]
-					}
-				]
-			},
-			{
-				id: incrementalId(),
-				name: "/proc",
-				type: "directory",
-				nodes: []
 			}
 		]
 	}
