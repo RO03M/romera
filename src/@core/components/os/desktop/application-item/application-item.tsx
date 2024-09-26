@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useGridSize } from "../../../../hooks/use-grid-size";
 import { DragBackground } from "./drag-background";
 import { useApplicationControl } from "./use-application-control";
+import { useProcessesStore } from "../../../../processes/use-processes-store";
 
 interface ApplicationItemProps {
 	name: string;
@@ -12,6 +13,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 	const { name } = props;
 
 	const { item, blur, itemComponentProps } = useApplicationControl(name);
+	const { createWindowProcess } = useProcessesStore();
 
 	const gridSize = useGridSize();
 
@@ -34,23 +36,30 @@ export function ApplicationItem(props: ApplicationItemProps) {
 					position: "absolute",
 					width: gridSize.width,
 					height: gridSize.height,
-					display: "flex",
-					flexDirection: "column",
-					alignItems: "center",
-					justifyContent: "center",
 					zIndex: blur.show ? 9999 : 0,
 					x: item.position.x,
 					y: item.position.y
 				}}
 			>
-				<Wrapper />
-				<span>{name}</span>
+				<ContentContainer onDblClickCapture={() => createWindowProcess({ workingDirectory: "/bin" })}>
+					<Icon />
+					<span>{name}</span>
+				</ContentContainer>
 			</motion.div>
 		</>
 	);
 }
 
-const Wrapper = styled<"div">("div")({
+const ContentContainer = styled<"div">("div")({
+	width: "100%",
+	height: "100%",
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "center",
+	justifyContent: "center"
+});
+
+const Icon = styled<"div">("div")({
 	width: "50%",
 	height: "50%",
 	backgroundImage: `url("./application-icons/blank-icon.png")`,

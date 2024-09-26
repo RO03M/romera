@@ -1,7 +1,8 @@
 import type { ComponentType } from "preact";
 
-interface ProcessComponentProps {
+export interface ProcessComponentProps {
 	title?: string;
+	workingDirectory?: string;
 }
 
 export interface TTYContext {
@@ -17,11 +18,14 @@ type ProcessStatus = "created" | "running" | "stopped" | "zombie" | "sleeping";
 export interface Process {
 	pid: number;
 	status: ProcessStatus;
-	ttyContext: TTYContext;
+	args?: string[];
+	program?: string;
+	ttyContext?: TTYContext;
 	// Reference to the terminal that the command was generated (Should be used to show the output to the correct terminal)
 	tty?: unknown;
 	// If the process is a command generated in the shell
-	cmd: string;
+	cmd?: string;
 	// If the process is generated after the user opens a new window
 	Component?: ComponentType<ProcessComponentProps>;
+	componentArgs?: ProcessComponentProps;
 }

@@ -1,18 +1,20 @@
-import { useGip } from "../../../gip/use-gip";
+import { useMemo } from "preact/hooks";
 import { Window } from "../desktop/window/window";
-import { Terminal } from "../terminal/terminal";
+import { useProcessesStore } from "../../../processes/use-processes-store";
 
 export function WindowManager() {
-	const { graphicalProcesses } = useGip();
+	const { processes } = useProcessesStore();
+
+	const windowProcesses = useMemo(() => {
+		console.log("teste");
+		return processes.filter((process) => process.Component !== undefined);
+	}, [processes]);
 
 	return (
 		<div id={"window-manager"}>
-			<Window content={<Terminal />} />
-			<Window content={<Terminal />} />
-			{/* {graphicalProcesses.map(
-				(gip) =>
-					gip.content && <Window key={gip.id} content={gip.content.component} />
-			)} */}
+			{windowProcesses.map((process) => (
+				<Window key={process.pid} Content={process.Component} contentArgs={process.componentArgs} />
+			))}
 		</div>
 	);
 }

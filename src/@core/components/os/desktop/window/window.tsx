@@ -4,14 +4,16 @@ import { Topbar } from "./topbar";
 import { ResizeBar } from "./resize-bar";
 import { useWindow } from "./use-window";
 import { useCallback } from "preact/hooks";
-import type { ReactNode } from "preact/compat";
+import type { ComponentType, ReactNode } from "preact/compat";
+import type { ProcessComponentProps } from "../../../../processes/types";
 
 interface WindowProps {
-	content?: ReactNode;
+	contentArgs?: ProcessComponentProps;
+	Content?: ComponentType<ProcessComponentProps>;
 }
 
 export function Window(props: WindowProps) {
-	const { content } = props;
+	const { contentArgs, Content } = props;
 
 	const windowProps = useWindow();
 
@@ -93,11 +95,8 @@ export function Window(props: WindowProps) {
 				verticalAlignment={"end"}
 				onDrag={windowProps.handleBottomLeftDrag}
 			/>
-			<Topbar
-				title={"debug"}
-				onPointerDown={startDrag}
-			/>
-			<ContentWrapper>{content}</ContentWrapper>
+			<Topbar title={"debug"} onPointerDown={startDrag} />
+			<ContentWrapper>{Content !== undefined && <Content {...contentArgs} />}</ContentWrapper>
 		</Wrapper>
 	);
 }

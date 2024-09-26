@@ -28,12 +28,12 @@ export function ProcessesHeart() {
 		);
 
 		for (const process of runningProcesses) {
-			const { program, args } = formatInput(process.cmd);
+			const { program, args } = formatInput(process?.cmd ?? "");
 			const functionFile = findNode(`/bin/${program}`);
 
 			if (!functionFile) {
                 pidsToKill.push(process.pid);
-                process.ttyContext.free();
+                process?.ttyContext?.free();
 				continue;
 			}
             
@@ -51,7 +51,7 @@ export function ProcessesHeart() {
 
 			startedPids.push(process.pid);
             Promise.resolve(output).then(() => {
-                process.ttyContext.free();
+                process?.ttyContext?.free();
                 killProcesses([process.pid]);
             });
 		}

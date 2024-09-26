@@ -105,7 +105,6 @@ export function Terminal() {
 
 	return (
 		<Wrapper onSubmit={onSubmit}>
-			<span>{id}</span>
 			<TerminalOutputList outputs={outputs} />
 			<div>
 				<TerminalInput

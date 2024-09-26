@@ -3,15 +3,12 @@ import { useDir } from "../../@core/filesystem/hooks/use-directory";
 import type { Node } from "../../@core/filesystem/node";
 import { normalize } from "../../@core/filesystem/utils/path";
 import { ExplorerList } from "./explorer-list/list";
+import type { ProcessComponentProps } from "../../@core/processes/types";
 
-interface ExplorerProps {
-	initialPath: string;
-}
+export function Explorer(props: ProcessComponentProps) {
+	const { workingDirectory } = props;
 
-export function Explorer(props: ExplorerProps) {
-	const { initialPath } = props;
-
-	const [path, setPath] = useState(initialPath);
+	const [path, setPath] = useState(workingDirectory);
 
 	const { dir } = useDir(path);
 
