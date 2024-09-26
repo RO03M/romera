@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import type { Process, ProcessComponentProps, TTYContext } from "./types";
 import { incrementalId } from "../utils/incremental-id";
-import { Explorer } from "../../programs/explorer/explorer";
 import type { ComponentType } from "preact";
+import { programTable } from "../../programs/program-table";
 
 interface ProcessesStore {
 	processes: Process[];
@@ -11,6 +11,10 @@ interface ProcessesStore {
 		Component: ComponentType<ProcessComponentProps>,
 		args: ProcessComponentProps
 	) => Process;
+	createWindowProcessFromProgramTable: (
+		componentName: string,
+		args: ProcessComponentProps
+	) => Process | null;
 	setPidsToRunning: (pids: Process["pid"][]) => void;
 	killProcesses: (pids: Process["pid"][]) => void;
 }
@@ -32,6 +36,27 @@ export const useProcessesStore = create<ProcessesStore>()((set, get) => ({
 		return process;
 	},
 	createWindowProcess(Component, args) {
+		const process: Process = {
+			pid: incrementalId("process"),
+			status: "created",
+			Component,
+			componentArgs: args
+		};
+
+		const processes = get().processes;
+		processes.push(process);
+
+		set({ processes: [...processes] });
+
+		return process;
+	},
+	createWindowProcessFromProgramTable(componentName, args) {
+		const Component = programTable[componentName];
+
+		if (Component === undefined) {
+			return null;
+		}
+
 		const process: Process = {
 			pid: incrementalId("process"),
 			status: "created",

@@ -99,6 +99,18 @@ const interval = setInterval(() => {
 	std.processes.createProcess(command, context.tty);
 }, 1000);
 						`
+					},
+					{
+						id: incrementalId(),
+						type: "file",
+						name: "/code",
+						content: `
+const [path] = context.args;
+
+const filePath = std.fs.path.normalize(context.tty.workingDirectory + "/" + path);
+
+std.processes.createWindowProcessFromProgramTable("monaco", { workingDirectory: filePath });
+						`
 					}
 				]
 			},

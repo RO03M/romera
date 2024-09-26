@@ -6,11 +6,22 @@ import type { Process } from "./types";
 
 export function ProcessesHeart() {
 	const { fsMethods, findNode } = useFilesystem();
-	const { processes, setPidsToRunning, createProcess, killProcesses } = useProcessesStore();
+	const {
+		processes,
+		setPidsToRunning,
+		createProcess,
+		createWindowProcessFromProgramTable,
+		killProcesses
+	} = useProcessesStore();
 
-	const processesMethods = useMemo(() => ({
-		createProcess
-	}), [createProcess]);
+	const processesMethods = useMemo(
+		() => ({
+			createProcess,
+			killProcesses,
+			createWindowProcessFromProgramTable
+		}),
+		[createProcess, killProcesses, createWindowProcessFromProgramTable]
+	);
 
 	const std = useMemo(
 		() => ({
@@ -22,7 +33,7 @@ export function ProcessesHeart() {
 
 	const heartbeat = useCallback(() => {
 		const startedPids: Process["pid"][] = [];
-        const pidsToKill: Process["pid"][] = [];
+		const pidsToKill: Process["pid"][] = [];
 		const runningProcesses = processes.filter(
 			(process) => process.status === "created"
 		);
@@ -32,15 +43,15 @@ export function ProcessesHeart() {
 			const functionFile = findNode(`/bin/${program}`);
 
 			if (!functionFile) {
-                pidsToKill.push(process.pid);
-                process?.ttyContext?.free();
+				pidsToKill.push(process.pid);
+				process?.ttyContext?.free();
 				continue;
 			}
-            
-            // remover a verificação da string
-            if (typeof functionFile.content !== "string") {
-                continue;
-            }
+
+			// remover a verificação da string
+			if (typeof functionFile.content !== "string") {
+				continue;
+			}
 
 			const invoke = new Function("std", "context", functionFile.content ?? "");
 
@@ -50,19 +61,19 @@ export function ProcessesHeart() {
 			});
 
 			startedPids.push(process.pid);
-            Promise.resolve(output).then(() => {
-                process?.ttyContext?.free();
-                killProcesses([process.pid]);
-            });
+			Promise.resolve(output).then(() => {
+				process?.ttyContext?.free();
+				killProcesses([process.pid]);
+			});
 		}
 
-        if (startedPids.length > 0) {
-            setPidsToRunning(startedPids);
-        }
+		if (startedPids.length > 0) {
+			setPidsToRunning(startedPids);
+		}
 
-        if (pidsToKill.length > 0) {
-            killProcesses(pidsToKill);
-        }
+		if (pidsToKill.length > 0) {
+			killProcesses(pidsToKill);
+		}
 	}, [processes, std, killProcesses, findNode, setPidsToRunning]);
 
 	useEffect(() => {
