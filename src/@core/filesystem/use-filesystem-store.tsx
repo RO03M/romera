@@ -155,7 +155,26 @@ const interval = setInterval(() => {
 						id: incrementalId(),
 						name: "/applications",
 						type: "directory",
-						nodes: []
+						nodes: [
+							{
+								id: incrementalId(),
+								name: "/hello",
+								type: "file",
+								content: '[Desktop Entry];\nx=0;\ny=0;'
+							},
+							{
+								id: incrementalId(),
+								name: "/file2",
+								type: "file",
+								content: '[Desktop Entry];\nx=0;\ny=1;'
+							},
+							{
+								id: incrementalId(),
+								name: "/folder",
+								type: "file",
+								content: '[Desktop Entry];\nx=0;\ny=2;'
+							}
+						]
 					}
 				]
 			}

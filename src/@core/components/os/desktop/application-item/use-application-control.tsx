@@ -3,14 +3,17 @@ import { useFile } from "../../../../filesystem/hooks/use-file";
 import { useGridSize } from "../../../../hooks/use-grid-size";
 import { type HTMLMotionProps, useMotionValue } from "framer-motion";
 import { positionToGridPosition } from "../../../../utils/grid";
-import { useApplicationsConfigFileManager } from "./use-applications-config-file-manager";
+import { applicationConfigurationParser, useApplicationsConfigFileManager } from "./use-applications-config-file-manager";
 
 export function useApplicationControl(applicationName: string) {
 	const { isPositionFree } = useApplicationsConfigFileManager();
 
-	const { file, writeFile } = useFile(`/usr/applications/${applicationName}`, {
-		forceCreation: true
-	});
+	const { file: configurationFile, writeFile } = useFile(
+		`/usr/applications/${applicationName}`,
+		{
+			forceCreation: true
+		}
+	);
 
 	const [isFree, setIsFree] = useState(true);
 	const [isDragging, setIsDragging] = useState(false);
@@ -19,12 +22,16 @@ export function useApplicationControl(applicationName: string) {
 	const gridSize = useGridSize();
 
 	const gridPosition = useMemo(() => {
-		if (file?.content === undefined || !/^\d+,\d+$/.test(file.content)) {
+		const configuration = applicationConfigurationParser(
+			configurationFile?.content
+		);
+
+		if (configuration.x === undefined || configuration.y === undefined) {
 			return [0, 0];
 		}
 
-		return file.content.split(",").map((pos) => +pos);
-	}, [file?.content]);
+		return [+configuration.x, +configuration.y];
+	}, [configurationFile?.content]);
 
 	const x = useMotionValue(gridPosition[0] * gridSize.width);
 	const y = useMotionValue(gridPosition[1] * gridSize.height);
@@ -36,6 +43,14 @@ export function useApplicationControl(applicationName: string) {
 		yBlur.set(gridPosition[1] * gridSize.height);
 		setIsFree(true);
 	}, [gridSize, xBlur, yBlur, gridPosition]);
+
+	const updateConfigurationFile = useCallback(
+		(x: number, y: number, defaultProgram: string) => {
+			const content = `[Desktop Entry];\nx=${x};\ny=${y};\ndefaultExecName=${defaultProgram};`;
+			writeFile(content);
+		},
+		[writeFile]
+	);
 
 	const onDrag = useCallback(() => {
 		const { x: newX, y: newY } = positionToGridPosition([x.get(), y.get()]);
@@ -56,11 +71,18 @@ export function useApplicationControl(applicationName: string) {
 		const isFree = isPositionFree(newX, newY, applicationName);
 
 		if (isFree) {
-			writeFile(`${newX},${newY}`);
+			updateConfigurationFile(newX, newY, "monaco");
 		} else {
 			resetPosition();
 		}
-	}, [applicationName, x, y, resetPosition, writeFile, isPositionFree]);
+	}, [
+		applicationName,
+		x,
+		y,
+		resetPosition,
+		updateConfigurationFile,
+		isPositionFree
+	]);
 
 	const onHoverStart = useCallback(() => {
 		setIsHover(true);
@@ -75,11 +97,12 @@ export function useApplicationControl(applicationName: string) {
 		y.set(gridPosition[1] * gridSize.height);
 	}, [gridPosition, x, y, gridSize]);
 
+	// Application default value
 	useEffect(() => {
-		if (file !== null && file.content === undefined) {
-			writeFile("0,0");
+		if (configurationFile !== null && configurationFile.content === undefined) {
+			updateConfigurationFile(0, 0, "monaco");
 		}
-	}, [file, writeFile]);
+	}, [configurationFile, updateConfigurationFile]);
 
 	return {
 		itemComponentProps: {
