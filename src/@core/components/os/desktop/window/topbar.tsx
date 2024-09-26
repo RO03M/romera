@@ -1,8 +1,8 @@
 import { Icon } from "@iconify/react";
-import { Typography, styled } from "@mui/material";
 import { icons } from "../../../icons";
 import { Row } from "../../../ui/row";
 import type { HTMLAttributes } from "preact/compat";
+import styled from "styled-components";
 
 interface TopbarProp {
 	onMaximizeClick?: () => void;
@@ -18,44 +18,53 @@ export const Topbar = (props: TopbarProp) => {
 		<Wrapper onPointerDown={onPointerDown} as={"div"}>
 			<Title>{title}</Title>
 			<Row>
-				<Button>
+				<TopbarButton>
 					<Icon icon={icons.horizontalLine} />
-				</Button>
-				<Button onClick={onMaximizeClick}>
+				</TopbarButton>
+				<TopbarButton onClick={onMaximizeClick}>
 					<Icon icon={icons.square} />
-				</Button>
-				<Button onClick={onClose}>
+				</TopbarButton>
+				<TopbarButton closeButton onClick={onClose}>
 					<Icon icon={icons.close} />
-				</Button>
+				</TopbarButton>
 			</Row>
 		</Wrapper>
 	);
 };
 
-const Wrapper = styled<"div">("div", { label: "topbar" })({
-	width: "100%",
-	height: 40,
-	display: "flex",
-	justifyContent: "flex-end",
-	alignItems: "center",
-	borderRadius: "4px 4px 0 0",
-	backgroundColor: "black",
-	touchAction: "none"
-	// backgroundColor: `#${Math.floor(Math.random() * 255 ** 3).toString(16)}`
-});
+const Wrapper = styled.div(
+	{
+		width: "100%",
+		height: 37,
+		display: "flex",
+		justifyContent: "flex-end",
+		alignItems: "center",
+		borderRadius: "4px 4px 0 0",
+		backgroundColor: "black",
+		touchAction: "none",
+		"& > *": {
+			height: "100%"
+		}
+	},
+	{
+		name: "window-topbar"
+	}
+);
 
-const Title = styled(Typography)({
+const Title = styled.span({
 	flex: 1,
 	marginLeft: 1,
-	userSelect: "none"
+	userSelect: "none",
+	display: "flex",
+	alignItems: "center"
 });
 
-const Button = styled<"div">("div")({
+const TopbarButton = styled.div<{ closeButton?: boolean }>((props) => ({
 	display: "flex",
 	alignItems: "center",
 	justifyContent: "center",
 	paddingInline: 10,
 	"&:hover": {
-		backgroundColor: "black"
+		backgroundColor: props.closeButton ? props.theme.colors.red[500] : props.theme.colors.grey[900],
 	}
-});
+}));

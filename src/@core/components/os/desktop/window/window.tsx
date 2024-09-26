@@ -6,14 +6,18 @@ import { useWindow } from "./use-window";
 import { useCallback } from "preact/hooks";
 import { Suspense, type ComponentType } from "preact/compat";
 import type { ProcessComponentProps } from "../../../../processes/types";
+import { useProcessesStore } from "../../../../processes/use-processes-store";
 
 interface WindowProps {
+	pid: number;
 	contentArgs?: ProcessComponentProps;
 	Content?: ComponentType<ProcessComponentProps>;
 }
 
 export function Window(props: WindowProps) {
-	const { contentArgs, Content } = props;
+	const { pid, contentArgs, Content } = props;
+
+	const { killProcesses } = useProcessesStore();
 
 	const windowProps = useWindow();
 
@@ -26,6 +30,7 @@ export function Window(props: WindowProps) {
 
 	return (
 		<Wrapper
+			aria-pid={pid}
 			drag
 			dragControls={dragControls}
 			dragListener={false}
@@ -95,7 +100,7 @@ export function Window(props: WindowProps) {
 				verticalAlignment={"end"}
 				onDrag={windowProps.handleBottomLeftDrag}
 			/>
-			<Topbar title={"debug"} onPointerDown={startDrag} />
+			<Topbar title={"debug"} onClose={() => killProcesses([pid])} onPointerDown={startDrag} />
 			<ContentWrapper>
 				<Suspense fallback={"..."}>
 					{Content !== undefined && <Content {...contentArgs} />}
