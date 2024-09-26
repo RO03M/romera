@@ -42,10 +42,23 @@ export function useApplicationExecutable(name: string) {
 		return defaultProgramName;
 	}, [defaultProgramName, preferableProgramName]);
 
-    const ProgramComponent = useMemo(() => programTable[programName], [programName]);
+	const iconRelativeUrl = useMemo(() => {
+		switch (programName) {
+			case "explorer":
+				return "./application-icons/folder.png";
+			default:
+				return "./application-icons/blank-icon.png";
+		}
+	}, [programName]);
+
+	const ProgramComponent = useMemo(
+		() => programTable[programName],
+		[programName]
+	);
 
 	return {
+		iconRelativeUrl,
 		programName,
-        ProgramComponent
-    };
+		ProgramComponent
+	};
 }

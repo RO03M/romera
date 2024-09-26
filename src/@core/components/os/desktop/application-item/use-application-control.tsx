@@ -3,7 +3,7 @@ import { useFile } from "../../../../filesystem/hooks/use-file";
 import { useGridSize } from "../../../../hooks/use-grid-size";
 import { type HTMLMotionProps, useMotionValue } from "framer-motion";
 import { positionToGridPosition } from "../../../../utils/grid";
-import { applicationConfigurationParser, useApplicationsConfigFileManager } from "./use-applications-config-file-manager";
+import { applicationConfigurationParser, applicationConfigurationStringifier, useApplicationsConfigFileManager } from "./use-applications-config-file-manager";
 
 export function useApplicationControl(applicationName: string) {
 	const { isPositionFree } = useApplicationsConfigFileManager();
@@ -45,11 +45,18 @@ export function useApplicationControl(applicationName: string) {
 	}, [gridSize, xBlur, yBlur, gridPosition]);
 
 	const updateConfigurationFile = useCallback(
-		(x: number, y: number, defaultProgram: string) => {
-			const content = `[Desktop Entry];\nx=${x};\ny=${y};\ndefaultExecName=${defaultProgram};`;
-			writeFile(content);
+		(x: number, y: number) => {
+
+			const currentConfiguration = applicationConfigurationParser(
+				configurationFile?.content
+			);
+
+			currentConfiguration.x = String(x);
+			currentConfiguration.y = String(y);
+
+			writeFile(applicationConfigurationStringifier(currentConfiguration));
 		},
-		[writeFile]
+		[configurationFile, writeFile]
 	);
 
 	const onDrag = useCallback(() => {
@@ -71,7 +78,7 @@ export function useApplicationControl(applicationName: string) {
 		const isFree = isPositionFree(newX, newY, applicationName);
 
 		if (isFree) {
-			updateConfigurationFile(newX, newY, "monaco");
+			updateConfigurationFile(newX, newY);
 		} else {
 			resetPosition();
 		}
@@ -97,10 +104,9 @@ export function useApplicationControl(applicationName: string) {
 		y.set(gridPosition[1] * gridSize.height);
 	}, [gridPosition, x, y, gridSize]);
 
-	// Application default value
 	useEffect(() => {
 		if (configurationFile !== null && configurationFile.content === undefined) {
-			updateConfigurationFile(0, 0, "monaco");
+			updateConfigurationFile(0, 0);
 		}
 	}, [configurationFile, updateConfigurationFile]);
 

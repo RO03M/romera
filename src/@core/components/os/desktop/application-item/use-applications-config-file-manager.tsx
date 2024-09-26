@@ -24,6 +24,17 @@ export function applicationConfigurationParser(configurationText = "") {
 	return configuration;
 }
 
+export function applicationConfigurationStringifier(
+	configuration: Record<string, string>
+) {
+	const content = ["[Desktop Entry];"];
+	for (const [key, value] of Object.entries(configuration)) {
+		content.push(`${key}=${value};`);
+	}
+
+	return content.join("\n");
+}
+
 export function useApplicationsConfigFileManager() {
 	const { dir: applicationsDir } = useDir("/usr/applications");
 

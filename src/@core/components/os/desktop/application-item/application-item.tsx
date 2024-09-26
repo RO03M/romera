@@ -17,7 +17,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 	const { name } = props;
 
 	const { item, blur, itemComponentProps } = useApplicationControl(name);
-	const { programName, ProgramComponent } = useApplicationExecutable(name);
+	const { iconRelativeUrl, programName, ProgramComponent } = useApplicationExecutable(name);
 	const { createWindowProcess } = useProcessesStore();
 
 	const gridSize = useGridSize();
@@ -54,7 +54,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 						})
 					}
 				>
-					<Icon />
+					<Icon style={{ backgroundImage: `url("${iconRelativeUrl}")` }} />
 					<span>{name}</span>
 				</ContentContainer>
 			</motion.div>
