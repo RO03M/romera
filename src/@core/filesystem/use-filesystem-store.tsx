@@ -125,9 +125,9 @@ const interval = setInterval(() => {
 								nodes: [
 									{
 										id: incrementalId(),
-										name: "/hello",
+										name: "/jsfile.js",
 										type: "file",
-										content: "Hello file content"
+										content: "const fuck = false;"
 									},
 									{
 										id: incrementalId(),
@@ -158,9 +158,9 @@ const interval = setInterval(() => {
 						nodes: [
 							{
 								id: incrementalId(),
-								name: "/hello",
+								name: "/jsfile.js",
 								type: "file",
-								content: '[Desktop Entry];\nx=0;\ny=0;'
+								content: '[Desktop Entry];\nx=0;\ny=0;\ndefaultExecName=terminal'
 							},
 							{
 								id: incrementalId(),

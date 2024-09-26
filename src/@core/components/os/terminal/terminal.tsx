@@ -7,17 +7,20 @@ import { normalize } from "../../../filesystem/utils/path";
 import { type TerminalOutput, TerminalOutputList } from "./output-list";
 import { useProcessesStore } from "../../../processes/use-processes-store";
 import { incrementalId } from "../../../utils/incremental-id";
+import type { ProcessComponentProps } from "../../../processes/types";
 
-export function Terminal() {
+export function Terminal(props: ProcessComponentProps) {
+	const { workingDirectory = "/" } = props;
+
 	const [id] = useState(incrementalId("tty"));
 	// Rename to currentWorkingDirectory
-	const [currentNodePath, setCurrentNodePath] = useState("/");
+	const [currentWorkingDirectory, setCurrentWorkingDirectory] = useState(workingDirectory);
 	const [isPending, setIsPending] = useState(false);
 	const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
 	const [input, setInput] = useState("");
 
-	const { cmd, findDirectory } = useFilesystem();
-	const { processes, createProcess } = useProcessesStore();
+	const { findDirectory } = useFilesystem();
+	const { createProcess } = useProcessesStore();
 
 	const echo = useCallback((message: string) => {
 		const output: TerminalOutput = {
@@ -42,20 +45,20 @@ export function Terminal() {
 			if (path.startsWith("/")) {
 				absolutePath = normalize(path);
 			} else {
-				absolutePath = normalize(`${currentNodePath}/${path}`);
+				absolutePath = normalize(`${currentWorkingDirectory}/${path}`);
 			}
 
 			const node = findDirectory(absolutePath);
 
 			if (node) {
-				setCurrentNodePath(absolutePath);
+				setCurrentWorkingDirectory(absolutePath);
 
 				return "";
 			}
 
 			return `Terminal: cd: ${path} no such directory`;
 		},
-		[currentNodePath, findDirectory]
+		[currentWorkingDirectory, findDirectory]
 	);
 
 	const onSubmit = useCallback(
@@ -73,7 +76,7 @@ export function Terminal() {
 					pendingMode();
 					createProcess(input, {
 						id,
-						workingDirectory: currentNodePath,
+						workingDirectory: currentWorkingDirectory,
 						echo,
 						pendingMode,
 						free
@@ -83,7 +86,7 @@ export function Terminal() {
 
 			const output: TerminalOutput = {
 				command: input,
-				path: currentNodePath,
+				path: currentWorkingDirectory,
 				username: "romera"
 			};
 
@@ -91,16 +94,7 @@ export function Terminal() {
 
 			setInput("");
 		},
-		[
-			id,
-			input,
-			currentNodePath,
-			pendingMode,
-			free,
-			echo,
-			cd,
-			createProcess
-		]
+		[id, input, currentWorkingDirectory, pendingMode, free, echo, cd, createProcess]
 	);
 
 	return (
@@ -110,7 +104,7 @@ export function Terminal() {
 				<TerminalInput
 					isPending={isPending}
 					username={"romera"}
-					nodePath={currentNodePath}
+					nodePath={currentWorkingDirectory}
 					input={{
 						onInput: (event) => setInput(event.currentTarget.value),
 						value: input

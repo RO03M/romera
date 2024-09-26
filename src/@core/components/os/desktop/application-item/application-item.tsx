@@ -4,11 +4,9 @@ import { useGridSize } from "../../../../hooks/use-grid-size";
 import { DragBackground } from "./drag-background";
 import { useApplicationControl } from "./use-application-control";
 import { useProcessesStore } from "../../../../processes/use-processes-store";
-import { CodeEditor } from "../../../../../programs/code-editor";
 import type { Node } from "../../../../filesystem/node";
-import { useMemo } from "preact/hooks";
-import { Explorer } from "../../../../../programs/explorer/explorer";
 import { normalize } from "../../../../filesystem/utils/path";
+import { useApplicationExecutable } from "./use-application-executable";
 
 interface ApplicationItemProps {
 	name: string;
@@ -16,23 +14,13 @@ interface ApplicationItemProps {
 }
 
 export function ApplicationItem(props: ApplicationItemProps) {
-	const { name, type } = props;
+	const { name } = props;
 
 	const { item, blur, itemComponentProps } = useApplicationControl(name);
+	const { programName, ProgramComponent } = useApplicationExecutable(name);
 	const { createWindowProcess } = useProcessesStore();
 
 	const gridSize = useGridSize();
-
-	const ExecutableComponent = useMemo(() => {
-		switch (type) {
-			case "file":
-				return CodeEditor;
-			case "directory":
-				return Explorer;
-			default:
-				return CodeEditor;
-		}
-	}, [type]);
 
 	return (
 		<>
@@ -59,8 +47,9 @@ export function ApplicationItem(props: ApplicationItemProps) {
 				}}
 			>
 				<ContentContainer
+					aria-program-name={programName}
 					onDblClickCapture={() =>
-						createWindowProcess(ExecutableComponent, {
+						createWindowProcess(ProgramComponent, {
 							workingDirectory: normalize(`/home/romera/desktop/${name}`)
 						})
 					}

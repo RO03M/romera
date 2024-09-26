@@ -4,7 +4,7 @@ import { Topbar } from "./topbar";
 import { ResizeBar } from "./resize-bar";
 import { useWindow } from "./use-window";
 import { useCallback } from "preact/hooks";
-import type { ComponentType, ReactNode } from "preact/compat";
+import { Suspense, type ComponentType } from "preact/compat";
 import type { ProcessComponentProps } from "../../../../processes/types";
 
 interface WindowProps {
@@ -96,7 +96,11 @@ export function Window(props: WindowProps) {
 				onDrag={windowProps.handleBottomLeftDrag}
 			/>
 			<Topbar title={"debug"} onPointerDown={startDrag} />
-			<ContentWrapper>{Content !== undefined && <Content {...contentArgs} />}</ContentWrapper>
+			<ContentWrapper>
+				<Suspense fallback={"..."}>
+					{Content !== undefined && <Content {...contentArgs} />}
+				</Suspense>
+			</ContentWrapper>
 		</Wrapper>
 	);
 }

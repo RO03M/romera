@@ -1,5 +1,3 @@
-import type { ReactNode } from "preact/compat";
-
 interface INode {
 	id: number;
 	name: string;
@@ -20,11 +18,4 @@ export interface Directory extends INode {
 	type: "directory";
 }
 
-export interface Gip extends INode {
-	type: "gip";
-	content?: {
-		component: ReactNode;
-	};
-}
-
-export type Node = File | Directory | Gip;
+export type Node = File | Directory;
