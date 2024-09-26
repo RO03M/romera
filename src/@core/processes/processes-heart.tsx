@@ -6,13 +6,18 @@ import type { Process } from "./types";
 
 export function ProcessesHeart() {
 	const { fsMethods, findNode } = useFilesystem();
-	const { processes, setPidsToRunning, killProcesses } = useProcessesStore();
+	const { processes, setPidsToRunning, createProcess, killProcesses } = useProcessesStore();
+
+	const processesMethods = useMemo(() => ({
+		createProcess
+	}), [createProcess]);
 
 	const std = useMemo(
 		() => ({
-			fs: fsMethods
+			fs: fsMethods,
+			processes: processesMethods
 		}),
-		[fsMethods]
+		[fsMethods, processesMethods]
 	);
 
 	const heartbeat = useCallback(() => {

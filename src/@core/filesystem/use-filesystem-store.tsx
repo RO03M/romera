@@ -92,20 +92,12 @@ return new Promise((resolve, reject) => {
 					{
 						id: incrementalId(),
 						type: "file",
-						name: "/sleep",
+						name: "/watch",
 						content: `
-const [sleepTime = 1] = context.args;
-return new Promise((resolve, reject) => {
-	let i = 0;
-	const interval = setInterval(() => {
-		i++;
-		context.tty.echo(i + "seconds elapsed");
-		if (i >= sleepTime) {
-			resolve();
-			clearInterval(interval);
-		}
-	}, 1000);
-});
+const command = context.args.join(" ");
+const interval = setInterval(() => {
+	std.processes.createProcess(command, context.tty);
+}, 1000);
 						`
 					}
 				]
