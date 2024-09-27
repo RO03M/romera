@@ -5,11 +5,13 @@ import { ProcessesHeart } from "./@core/processes/processes-heart";
 import "./app.css";
 import { theme } from "./theme";
 import { Dock } from "./@core/components/os/dock/dock";
+import { TopPanel } from "./@core/components/os/top-panel/top-panel";
 
 export function App() {
 	return (
 		<ThemeProvider theme={theme}>
 			<div id={"main"}>
+				<TopPanel />
 				<Desktop />
 				<Dock />
 				<WindowManager />
