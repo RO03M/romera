@@ -120,5 +120,6 @@ const Wrapper = styled(motion.div)({
 });
 
 const ContentWrapper = styled<"div">("div")({
-	flex: 1
+	flex: 1,
+	maxHeight: "calc(100% - 40px)"
 });

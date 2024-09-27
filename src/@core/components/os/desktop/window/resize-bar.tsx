@@ -21,7 +21,7 @@ export function ResizeBar(props: ResizeBarProps) {
 			case "vertical":
 				return [THICKNESS, "100%"];
 			case "corner":
-				return [THICKNESS, THICKNESS];
+				return [THICKNESS * 2.5, THICKNESS * 2.5];
 			case "horizontal":
 				return ["100%", THICKNESS];
 		}

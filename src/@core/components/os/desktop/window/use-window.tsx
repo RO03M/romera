@@ -3,12 +3,21 @@ import { clamp } from "../../../../utils/math";
 import { useCallback, useState } from "preact/hooks";
 import { useWindowSize } from "../../../../hooks/use-window-size";
 
+type PreservedDataBeforeMaximization = {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	top: number;
+	left: number;
+};
+
 export function useWindow() {
 	const windowSize = useWindowSize();
 
 	const [maximized, setMaximized] = useState(false);
-	const [widthBeforeMaximize, setWidthBeforeMaximize] = useState(400);
-	const [heightBeforeMaximize, setHeightBeforeMaximize] = useState(400);
+	const [preservedDataBeforeMaximization, setPreservedDataBeforeMaximization] =
+		useState<PreservedDataBeforeMaximization | null>(null);
 
 	const height = useMotionValue(400);
 	const width = useMotionValue(400);
@@ -115,22 +124,37 @@ export function useWindow() {
 	};
 
 	const maximize = useCallback(() => {
+		setPreservedDataBeforeMaximization({
+			x: x.get(),
+			y: y.get(),
+			top: top.get(),
+			left: left.get(),
+			width: width.get(),
+			height: height.get()
+		});
 		x.set(0);
 		y.set(0);
 		top.set(0);
 		left.set(0);
-		setWidthBeforeMaximize(width.get());
-		setHeightBeforeMaximize(height.get());
 		width.set(windowSize.width);
 		height.set(windowSize.height);
 		setMaximized(true);
 	}, [x, y, top, left, width, height, windowSize]);
 
 	const minimize = useCallback(() => {
-		width.set(widthBeforeMaximize);
-		height.set(heightBeforeMaximize);
 		setMaximized(false);
-	}, [width, height, widthBeforeMaximize, heightBeforeMaximize]);
+
+		if (preservedDataBeforeMaximization === null) {
+			return;
+		}
+
+		x.set(preservedDataBeforeMaximization.x);
+		y.set(preservedDataBeforeMaximization.y);
+		top.set(preservedDataBeforeMaximization.top);
+		left.set(preservedDataBeforeMaximization.left);
+		width.set(preservedDataBeforeMaximization.width);
+		height.set(preservedDataBeforeMaximization.height);
+	}, [x, y, top, left, width, height, preservedDataBeforeMaximization]);
 
 	const toggleMaximization = useCallback(() => {
 		if (maximized) {
