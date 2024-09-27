@@ -1,4 +1,4 @@
-import { styled } from "@mui/material";
+import styled from "styled-components";
 import { ApplicationItem } from "./application-item";
 import { useDesktopItems } from "./use-desktop-items";
 import { useCallback, useEffect, useState } from "preact/hooks";
@@ -36,8 +36,9 @@ export function Desktop() {
 	);
 }
 
-const Wrapper = styled<"div">("div")({
+const Wrapper = styled.div((props) => ({
 	width: "100vw",
 	height: "100vh",
-	overflow: "hidden"
-});
+	overflow: "hidden",
+	backgroundColor: props.theme.colors.purple[600]
+}));

@@ -3,7 +3,12 @@ import { useFile } from "../../../../filesystem/hooks/use-file";
 import { useGridSize } from "../../../../hooks/use-grid-size";
 import { type HTMLMotionProps, useMotionValue } from "framer-motion";
 import { positionToGridPosition } from "../../../../utils/grid";
-import { applicationConfigurationParser, applicationConfigurationStringifier, useApplicationsConfigFileManager } from "./use-applications-config-file-manager";
+import {
+	applicationConfigurationParser,
+	applicationConfigurationStringifier,
+	useApplicationsConfigFileManager
+} from "./use-applications-config-file-manager";
+import { system } from "../../../../../constants";
 
 export function useApplicationControl(applicationName: string) {
 	const { isPositionFree } = useApplicationsConfigFileManager();
@@ -18,6 +23,10 @@ export function useApplicationControl(applicationName: string) {
 	const [isFree, setIsFree] = useState(true);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isHover, setIsHover] = useState(false);
+
+	const yOffset = useMemo(() => {
+		return system.topPanel.height;
+	}, []);
 
 	const gridSize = useGridSize();
 
@@ -34,9 +43,9 @@ export function useApplicationControl(applicationName: string) {
 	}, [configurationFile?.content]);
 
 	const x = useMotionValue(gridPosition[0] * gridSize.width);
-	const y = useMotionValue(gridPosition[1] * gridSize.height);
+	const y = useMotionValue(gridPosition[1] * gridSize.height + yOffset);
 	const xBlur = useMotionValue(gridPosition[0] * gridSize.width);
-	const yBlur = useMotionValue(gridPosition[1] * gridSize.height);
+	const yBlur = useMotionValue(gridPosition[1] * gridSize.height + yOffset);
 
 	const resetPosition = useCallback(() => {
 		xBlur.set(gridPosition[0] * gridSize.width);
@@ -46,7 +55,6 @@ export function useApplicationControl(applicationName: string) {
 
 	const updateConfigurationFile = useCallback(
 		(x: number, y: number) => {
-
 			const currentConfiguration = applicationConfigurationParser(
 				configurationFile?.content
 			);
@@ -64,8 +72,8 @@ export function useApplicationControl(applicationName: string) {
 
 		setIsFree(isPositionFree(newX, newY, applicationName));
 		xBlur.set(newX * gridSize.width);
-		yBlur.set(newY * gridSize.height);
-	}, [applicationName, gridSize, x, y, xBlur, yBlur, isPositionFree]);
+		yBlur.set(newY * gridSize.height + yOffset);
+	}, [applicationName, yOffset, gridSize, x, y, xBlur, yBlur, isPositionFree]);
 
 	const onDragStart = useCallback(() => {
 		setIsDragging(true);
@@ -73,7 +81,10 @@ export function useApplicationControl(applicationName: string) {
 
 	const onDragEnd = useCallback(() => {
 		setIsDragging(false);
-		const { x: newXGrid, y: newYGrid } = positionToGridPosition([x.get(), y.get()]);
+		const { x: newXGrid, y: newYGrid } = positionToGridPosition([
+			x.get(),
+			y.get()
+		]);
 
 		const isFree = isPositionFree(newXGrid, newYGrid, applicationName);
 		const isInBounds = gridSize.isInBounds(newXGrid, newYGrid);
@@ -103,8 +114,10 @@ export function useApplicationControl(applicationName: string) {
 
 	useEffect(() => {
 		x.set(gridPosition[0] * gridSize.width);
-		y.set(gridPosition[1] * gridSize.height);
-	}, [gridPosition, x, y, gridSize]);
+		y.set(gridPosition[1] * gridSize.height + yOffset);
+		xBlur.set(gridPosition[0] * gridSize.width);
+		yBlur.set(gridPosition[1] * gridSize.height + yOffset);
+	}, [yOffset, gridPosition, x, y, xBlur, yBlur, gridSize]);
 
 	useEffect(() => {
 		if (configurationFile !== null && configurationFile.content === undefined) {
