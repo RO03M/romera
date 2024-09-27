@@ -73,12 +73,13 @@ export function useApplicationControl(applicationName: string) {
 
 	const onDragEnd = useCallback(() => {
 		setIsDragging(false);
-		const { x: newX, y: newY } = positionToGridPosition([x.get(), y.get()]);
+		const { x: newXGrid, y: newYGrid } = positionToGridPosition([x.get(), y.get()]);
 
-		const isFree = isPositionFree(newX, newY, applicationName);
+		const isFree = isPositionFree(newXGrid, newYGrid, applicationName);
+		const isInBounds = gridSize.isInBounds(newXGrid, newYGrid);
 
-		if (isFree) {
-			updateConfigurationFile(newX, newY);
+		if (isFree && isInBounds) {
+			updateConfigurationFile(newXGrid, newYGrid);
 		} else {
 			resetPosition();
 		}
@@ -86,6 +87,7 @@ export function useApplicationControl(applicationName: string) {
 		applicationName,
 		x,
 		y,
+		gridSize.isInBounds,
 		resetPosition,
 		updateConfigurationFile,
 		isPositionFree

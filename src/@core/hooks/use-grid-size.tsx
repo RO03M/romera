@@ -13,6 +13,18 @@ export function useGridSize() {
 		return windowHeight / Math.floor(windowHeight / desktop.grid.height);
 	}, [windowHeight]);
 
+	const isInBounds = useCallback(
+		(gridX: number, gridY: number) => {
+			const xMaxGrids = windowWidth / gridWidth;
+			const yMaxGrids = windowHeight / gridHeight - 1; // subtracting 1 because of the dockbar
+
+			return (
+				gridX < xMaxGrids && gridX >= 0 && gridY < yMaxGrids && gridY >= 0
+			);
+		},
+		[gridWidth, gridHeight, windowWidth, windowHeight]
+	);
+
 	const positionToGridPosition = useCallback(
 		(position: [number, number]) => ({
 			x: Math.round(position[0] / gridWidth),
@@ -24,6 +36,7 @@ export function useGridSize() {
 	return {
 		width: gridWidth,
 		height: gridHeight,
-		positionToGridPosition
+		positionToGridPosition,
+		isInBounds
 	};
 }
