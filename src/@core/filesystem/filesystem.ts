@@ -137,4 +137,25 @@ export class Filesystem {
 			node.nodes = node.nodes?.filter((node) => node.name !== nodeName);
 		});
 	}
+
+	public pathFromNodeId(nid: Node["id"], root: Node = this.root, inheritPath = "/"): string | null {
+		if (nid === root.id) {
+			return normalize(inheritPath);
+		}
+	
+		if (root.nodes === undefined) {
+			return null;
+		}
+	
+		let result: string | null = null;
+	
+		for (const child of root.nodes) {
+			result = this.pathFromNodeId(nid, child, inheritPath + child.name);
+			if (result !== null) {
+				break;
+			}
+		}
+	
+		return result;
+	}
 }

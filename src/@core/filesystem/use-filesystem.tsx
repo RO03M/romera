@@ -1,10 +1,6 @@
 import { useCallback, useMemo } from "preact/hooks";
-import { useFilesystemStore } from "./use-filesystem-store";
 import { normalize } from "./utils/path";
-import { getPathFromNode } from "./utils/get-path-from-node";
 import type { Node } from "./node";
-import { updateNodeFromTree } from "./utils/node-operations/update-node-from-tree";
-import { createNodeOnTree } from "./utils/node-operations/create-node-on-tree";
 import { Filesystem } from "./filesystem";
 
 interface BashContext {
@@ -17,8 +13,9 @@ export interface CommandOptions {
 }
 
 export function useFilesystem() {
-	const filesystem = Filesystem.singleton();
-	const store = useFilesystemStore();
+	const filesystem = useMemo(() => {
+		return Filesystem.singleton();
+	}, []);
 
 	const findNode = useCallback(
 		(path: string) => {
@@ -46,9 +43,9 @@ export function useFilesystem() {
 
 	const pathFromNode = useCallback(
 		(node: Node) => {
-			return getPathFromNode(node, store.node);
+			return filesystem.pathFromNodeId(node.id);
 		},
-		[store.node]
+		[filesystem]
 	);
 
 	const findDirectory = useCallback(
@@ -79,9 +76,9 @@ export function useFilesystem() {
 
 	const putFile = useCallback(
 		(path: string, value: string) => {
-			store.setNode(updateNodeFromTree(path, store.node, value));
+			filesystem.updateNode(path, value);
 		},
-		[store.node, store.setNode]
+		[filesystem]
 	);
 
 	const fsMethods = useMemo(
@@ -132,7 +129,6 @@ export function useFilesystem() {
 
 	return {
 		filesystem,
-		store,
 		fsMethods,
 		// cmd,
 		findNode,
