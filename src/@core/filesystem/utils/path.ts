@@ -40,3 +40,10 @@ export function normalize(path: string) {
 
 	return formattedPath;
 }
+
+export function splitParentPathAndNodeName(path: string) {
+	const parentPath = normalize(path.split("/").slice(0, -1).join("/"));
+	const nodeName = normalize(path.split("/").slice(-1).join("/"));
+
+	return [parentPath, nodeName];
+}
