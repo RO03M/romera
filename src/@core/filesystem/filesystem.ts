@@ -1,23 +1,12 @@
 import { incrementalId } from "../utils/incremental-id";
+import { initialRoot } from "./initial-filesystem-nodes/index";
 import type { Node } from "./node";
 import { normalize, splitParentPathAndNodeName } from "./utils/path";
 
 export class Filesystem {
-	public readonly INCREMENTAL_KEY = "filesystem_";
 	private static instance: Filesystem | null = null;
 
-	public root: Node = {
-		id: incrementalId(this.INCREMENTAL_KEY),
-		name: "/",
-		type: "directory",
-		nodes: [
-			{
-				id: incrementalId(this.INCREMENTAL_KEY),
-				name: "/bin",
-				type: "directory"
-			}
-		]
-	};
+	public root: Node = initialRoot;
 
 	public static singleton(): Filesystem {
 		if (Filesystem.instance === null) {
@@ -105,7 +94,7 @@ export class Filesystem {
 		if (pathAlreadyExists) {
 			return {
 				status: false,
-				message: "NODE_ALREAD_EXISTS"
+				message: "NODE_ALREADY_EXISTS"
 			};
 		}
 
@@ -119,7 +108,7 @@ export class Filesystem {
 			}
 
 			const newNode: Node = {
-				id: incrementalId(this.INCREMENTAL_KEY),
+				id: incrementalId(),
 				name: normalize(nodeName),
 				type: nodeType
 			};
@@ -133,6 +122,13 @@ export class Filesystem {
 			status: true,
 			node: newNode
 		};
+	}
+
+	public updateNode(path: string, content: Node["content"]) {
+		return this.doActionOnNode(path, (node) => {
+			node.content = content;
+			return node;
+		});
 	}
 
 	public deleteNode(path: string) {

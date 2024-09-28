@@ -53,7 +53,7 @@ if (file !== null) {
 						name: "/mkdir",
 						content: `
 const [dirName] = context.args;
-
+console.log(dirName);
 if (!dirName) {
 	context.tty.echo("Missing directory name");
 }

@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from "preact/hooks";
 import { useFilesystemStore } from "./use-filesystem-store";
-import { findNodeFromTree } from "./utils/find-node-from-tree";
 import { normalize } from "./utils/path";
 import { getPathFromNode } from "./utils/get-path-from-node";
 import type { Node } from "./node";
 import { updateNodeFromTree } from "./utils/node-operations/update-node-from-tree";
 import { createNodeOnTree } from "./utils/node-operations/create-node-on-tree";
+import { Filesystem } from "./filesystem";
 
 interface BashContext {
 	path: string;
@@ -17,34 +17,32 @@ export interface CommandOptions {
 }
 
 export function useFilesystem() {
+	const filesystem = Filesystem.singleton();
 	const store = useFilesystemStore();
 
 	const findNode = useCallback(
 		(path: string) => {
-			return findNodeFromTree(path, store.node);
+			return filesystem.findNode(path);
 		},
-		[store.node]
+		[filesystem]
 	);
 
 	const createNode = useCallback(
 		(parentPath: string, node: Omit<Node, "id">) => {
-			const response = createNodeOnTree(parentPath, store.node, node);
-
-			if (response.status === true && response.nodeTree !== undefined) {
-				store.setNode(response.nodeTree);
-			}
-
-			return response;
+			return filesystem.createNode(parentPath, node.name, node.type);
 		},
-		[store.node, store.setNode]
+		[filesystem]
 	);
 
-	const createFile = useCallback((path: string, fileName: string) => {
-		return createNode(path, {
-			name: fileName,
-			type: "file"
-		});
-	}, [createNode]);
+	const createFile = useCallback(
+		(path: string, fileName: string) => {
+			return createNode(path, {
+				name: fileName,
+				type: "file"
+			});
+		},
+		[createNode]
+	);
 
 	const pathFromNode = useCallback(
 		(node: Node) => {
@@ -86,53 +84,57 @@ export function useFilesystem() {
 		[store.node, store.setNode]
 	);
 
-	const fsMethods = useMemo(() => ({
-		findNode,
-		createNode,
-		path: {
-			normalize
-		}
-	}), [findNode, createNode]);
-
-	const std = useMemo(
+	const fsMethods = useMemo(
 		() => ({
-			fs: {
-				findNode,
-				createNode,
-				path: {
-					normalize
-				}
+			findNode,
+			createNode,
+			path: {
+				normalize
 			}
 		}),
 		[findNode, createNode]
 	);
 
-	const cmd = useCallback(
-		(program: string, options: CommandOptions = { args: [] }) => {
-			const { args, bashContext } = options;
-			const functionFile = findNode(`/bin/${program}`);
+	// const std = useMemo(
+	// 	() => ({
+	// 		fs: {
+	// 			findNode,
+	// 			createNode,
+	// 			path: {
+	// 				normalize
+	// 			}
+	// 		}
+	// 	}),
+	// 	[findNode, createNode]
+	// );
 
-			if (!functionFile || functionFile.type !== "file") {
-				return { found: false, output: null };
-			}
+	// const cmd = useCallback(
+	// 	(program: string, options: CommandOptions = { args: [] }) => {
+	// 		const { args, bashContext } = options;
+	// 		const functionFile = findNode(`/bin/${program}`);
 
-			// Isso seria o exemplo de um processo
-			const invoke = new Function("std", "context", functionFile.content ?? "");
+	// 		if (!functionFile || functionFile.type !== "file") {
+	// 			return { found: false, output: null };
+	// 		}
 
-			const output = invoke(std, {
-				args,
-				bashContext
-			});
+	// 		// Isso seria o exemplo de um processo
+	// 		const invoke = new Function("std", "context", functionFile.content ?? "");
 
-			return { found: true, output };
-		},
-		[std, findNode]
-	);
+	// 		const output = invoke(std, {
+	// 			args,
+	// 			bashContext
+	// 		});
+
+	// 		return { found: true, output };
+	// 	},
+	// 	[std, findNode]
+	// );
 
 	return {
+		filesystem,
 		store,
 		fsMethods,
-		cmd,
+		// cmd,
 		findNode,
 		pathFromNode,
 		findDirectory,
