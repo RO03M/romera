@@ -88,11 +88,12 @@ export function useFilesystem() {
 
 	const fsMethods = useMemo(() => ({
 		findNode,
+		createFile,
 		createNode,
 		path: {
 			normalize
 		}
-	}), [findNode, createNode]);
+	}), [findNode, createNode, createFile]);
 
 	const std = useMemo(
 		() => ({

@@ -4,6 +4,8 @@ import { useFilesystem } from "../filesystem/use-filesystem";
 import { formatInput } from "../components/os/terminal/utils/format-input";
 import type { Process } from "./types";
 
+type Foo<T> = Record<string, Record<string, T | (() => void)> | (() => void)>;
+
 export function ProcessesHeart() {
 	const { fsMethods, findNode } = useFilesystem();
 	const {
@@ -52,6 +54,61 @@ export function ProcessesHeart() {
 			if (typeof functionFile.content !== "string") {
 				continue;
 			}
+
+			const blobURL = URL.createObjectURL(
+				new Blob(
+					[
+						"(",
+						(() => {
+							self.onmessage = ({ data }) => {
+								console.log("data from main thread: ", data);
+							};
+
+							setTimeout(() => {
+								self.postMessage(["std.fs.createFile", "/", "workerfile"]);
+								// self.postMessage([
+								// 	"processes.createWindowProcessFromProgramTable",
+								// 	"terminal",
+								// 	"/"
+								// ]);
+								self.close();
+							}, 5000);
+							console.log("Works!");
+						}).toString(),
+						")()"
+					],
+					{ type: "application/javascript" }
+				)
+			);
+
+			const worker = new Worker(blobURL, {
+				name: `process-pid-${process.pid}`
+			});
+
+			worker.onmessage = ({ data }) => {
+				const [method, ...args] = data;
+				if (typeof method !== "string") {
+					return;
+				}
+
+				const paramPath = method.split(".");
+
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				let last: any = { std, process };
+
+				for (let i = 0; i < paramPath.length; i++) {
+					if (!(paramPath[i] in last)) {
+						console.log("Não achei");
+						break;
+					}
+
+					last = last[paramPath[i]];
+				}
+
+				if (last !== undefined && typeof last === "function") {
+					last(...args);
+				}
+			};
 
 			const invoke = new Function("std", "context", functionFile.content ?? "");
 
