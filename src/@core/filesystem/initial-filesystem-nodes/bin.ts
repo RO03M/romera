@@ -10,24 +10,61 @@ export const bin: Node = {
 			id: incrementalId(),
 			type: "file",
 			name: "/ls",
-			content: `const node = std.fs.findNode(context.tty.workingDirectory) ?? [];
+			content: `
 
-context.tty.echo(node.nodes.map((node) => "        " + node.name));`
+		
+async function main() {
+	const pwd = await syscall("pwd");
+	const node = await syscall("fs_fdir", pwd);
+
+	if (!node) {
+		await syscall("echo", "Error finding PWD");
+		exit();
+	}
+
+	await syscall("echo", node?.nodes?.map((node) => "        " + node.name));
+}`
+		},
+		{
+			id: incrementalId(),
+			type: "file",
+			name: "/worker",
+			content: `// worker file is responsible to test the basic syscall operations while using workers
+async function main(...args) {
+	const foo = await syscall(
+		"std.fs.path.normalize",
+		"//asd/homepage/"
+	);
+
+	await syscall("echo", "worker testing");
+
+	await syscall("echo", "passed args: " + args.toString());
+
+	await sleep(5000);
+
+	const pwd = await syscall("pwd");
+	await syscall("echo", "currdir: " + pwd);
+	await syscall("echo", "puff, slept for 5 seconds!");
+	await syscall("echo", "you are free to go now!");
+
+	exit();
+}
+`
 		},
 		{
 			id: incrementalId(),
 			type: "file",
 			name: "/cat",
 			content: `//cat command
+async function main(fileName) {
+	const pwd = await syscall("pwd");
+	const filePath = await syscall("fs_normalized", pwd + "/" + fileName);
 
-const [path] = context.args;
+	const file = await syscall("fs_ffile", filePath);
 
-const filePath = std.fs.path.normalize(context.tty.workingDirectory + "/" + path);
-
-const file = std.fs.findNode(filePath);
-
-if (file !== null) {
-context.tty.echo(file.content);
+	if (file !== null) {
+		await syscall("echo", file.content);
+	}
 }`
 		},
 		{

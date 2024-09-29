@@ -3,9 +3,11 @@ import { useProcessesStore } from "./use-processes-store";
 import { useFilesystem } from "../filesystem/use-filesystem";
 import { formatInput } from "../components/os/terminal/utils/format-input";
 import type { Process } from "./types";
+import { RScriptTranslator } from "./rscript-translator";
+import { normalize } from "../filesystem/utils/path";
 
 export function ProcessesHeart() {
-	const { fsMethods, findNode } = useFilesystem();
+	const { fsMethods, findNode, findFile, findDirectory } = useFilesystem();
 	const {
 		processes,
 		setPidsToRunning,
@@ -23,12 +25,13 @@ export function ProcessesHeart() {
 		[createProcess, killProcesses, createWindowProcessFromProgramTable]
 	);
 
-	const std = useMemo(
+	const syscallMethods = useMemo(
 		() => ({
-			fs: fsMethods,
-			processes: processesMethods
+			fs_ffile: findFile,
+			fs_fdir: findDirectory,
+			fs_normalized: normalize
 		}),
-		[fsMethods, processesMethods]
+		[findFile, findDirectory]
 	);
 
 	const heartbeat = useCallback(() => {
@@ -53,18 +56,75 @@ export function ProcessesHeart() {
 				continue;
 			}
 
-			const invoke = new Function("std", "context", functionFile.content ?? "");
-
-			const output = invoke(std, {
-				args,
-				tty: process.ttyContext
-			});
-
 			startedPids.push(process.pid);
-			Promise.resolve(output).then(() => {
-				process?.ttyContext?.free();
-				killProcesses([process.pid]);
+
+			const translator = new RScriptTranslator(functionFile.content, args);
+			translator.cookScript();
+			const scriptBlobURL = translator.generateBlob();
+
+			const worker = new Worker(scriptBlobURL, {
+				name: `process-pid-${process.pid}`
 			});
+
+			worker.onerror = () => {
+				killProcesses([process.pid]);
+				process?.ttyContext?.free();
+			}
+
+			worker.onmessage = ({ data }) => {
+				if (data === 0) {
+					killProcesses([process.pid]);
+					process?.ttyContext?.free();
+					worker.terminate();
+					return;
+				}
+
+				if (data.type !== undefined) {
+					switch (data.type) {
+						case "SYSCALL": {
+							const { method, args, responseId } = data;
+							if (typeof method !== "string") {
+								return;
+							}
+
+							const methods: Record<string, ((...args: string[]) => unknown) | undefined> = {
+								...syscallMethods,
+								echo: process.ttyContext?.echo,
+								pwd: () => process.ttyContext?.workingDirectory
+							}
+
+							if (method in methods) {
+								if (
+									methods[method] === undefined ||
+									typeof methods[method] !== "function"
+								) {
+									worker.postMessage({
+										type: "SYSCALL_RESPONSE",
+										id: responseId,
+										response: "SYSCALL_METHOD_NOT_READY"
+									});
+								} else {
+									const syscallResponse = methods[method](...args);
+
+									worker.postMessage({
+										type: "SYSCALL_RESPONSE",
+										id: responseId,
+										response: syscallResponse
+									});
+								}
+							} else {
+								worker.postMessage({
+									type: "SYSCALL_RESPONSE",
+									id: responseId,
+									response: "SYSCALL_NOT_FOUND"
+								});
+							}
+
+							return;
+						}
+					}
+				}
+			};
 		}
 
 		if (startedPids.length > 0) {
@@ -74,7 +134,7 @@ export function ProcessesHeart() {
 		if (pidsToKill.length > 0) {
 			killProcesses(pidsToKill);
 		}
-	}, [processes, std, killProcesses, findNode, setPidsToRunning]);
+	}, [processes, syscallMethods, killProcesses, findNode, setPidsToRunning]);
 
 	useEffect(() => {
 		const interval = setInterval(heartbeat, 100);
