@@ -73,22 +73,22 @@ async function main(fileName) {
 			name: "/mkdir",
 			content: `//mkdir command
 
-const [dirName] = context.args;
+async function main(dirName) {
+	if (!dirName) {
+		await syscall("echo", "Missing directory name");
+		exit();
+	}
 
-if (!dirName) {
-context.tty.echo("Missing directory name");
-}
+	const pwd = await syscall("pwd");
 
-const newDirectory = {
-name: dirName,
-type: "directory"
-};
-
-const { status } = std.fs.createNode(context.tty.workingDirectory, newDirectory);
-
-if (!status) {
-context.tty.echo("Cannot create directory " + dirName);
+	const { status } = await syscall("mkdir", pwd, dirName);
+	
+	if (!status) {
+		await syscall("echo", "Cannot create directory " + dirName);
+		exit();
+	}
 }`
+
 		},
 		{
 			id: incrementalId(),

@@ -7,7 +7,8 @@ import { RScriptTranslator } from "./rscript-translator";
 import { normalize } from "../filesystem/utils/path";
 
 export function ProcessesHeart() {
-	const { fsMethods, findNode, findFile, findDirectory } = useFilesystem();
+	const { fsMethods, findNode, findFile, findDirectory, createDirectory } =
+		useFilesystem();
 	const {
 		processes,
 		setPidsToRunning,
@@ -29,9 +30,10 @@ export function ProcessesHeart() {
 		() => ({
 			fs_ffile: findFile,
 			fs_fdir: findDirectory,
-			fs_normalized: normalize
+			fs_normalized: normalize,
+			mkdir: createDirectory
 		}),
-		[findFile, findDirectory]
+		[findFile, findDirectory, createDirectory]
 	);
 
 	const heartbeat = useCallback(() => {
@@ -69,7 +71,7 @@ export function ProcessesHeart() {
 			worker.onerror = () => {
 				killProcesses([process.pid]);
 				process?.ttyContext?.free();
-			}
+			};
 
 			worker.onmessage = ({ data }) => {
 				if (data === 0) {
@@ -87,11 +89,14 @@ export function ProcessesHeart() {
 								return;
 							}
 
-							const methods: Record<string, ((...args: string[]) => unknown) | undefined> = {
+							const methods: Record<
+								string,
+								((...args: string[]) => unknown) | undefined
+							> = {
 								...syscallMethods,
 								echo: process.ttyContext?.echo,
 								pwd: () => process.ttyContext?.workingDirectory
-							}
+							};
 
 							if (method in methods) {
 								if (

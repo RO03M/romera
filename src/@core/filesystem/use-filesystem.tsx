@@ -41,6 +41,14 @@ export function useFilesystem() {
 		[createNode]
 	);
 
+	const createDirectory = useCallback((path: string, dirName: string) => {
+		return createNode(path, {
+			name: dirName,
+			type: "directory",
+			nodes: []
+		});
+	}, [createNode]);
+
 	const pathFromNode = useCallback(
 		(node: Node) => {
 			return filesystem.pathFromNodeId(node.id);
@@ -92,51 +100,16 @@ export function useFilesystem() {
 		[findNode, createNode]
 	);
 
-	// const std = useMemo(
-	// 	() => ({
-	// 		fs: {
-	// 			findNode,
-	// 			createNode,
-	// 			path: {
-	// 				normalize
-	// 			}
-	// 		}
-	// 	}),
-	// 	[findNode, createNode]
-	// );
-
-	// const cmd = useCallback(
-	// 	(program: string, options: CommandOptions = { args: [] }) => {
-	// 		const { args, bashContext } = options;
-	// 		const functionFile = findNode(`/bin/${program}`);
-
-	// 		if (!functionFile || functionFile.type !== "file") {
-	// 			return { found: false, output: null };
-	// 		}
-
-	// 		// Isso seria o exemplo de um processo
-	// 		const invoke = new Function("std", "context", functionFile.content ?? "");
-
-	// 		const output = invoke(std, {
-	// 			args,
-	// 			bashContext
-	// 		});
-
-	// 		return { found: true, output };
-	// 	},
-	// 	[std, findNode]
-	// );
-
 	return {
 		filesystem,
 		fsMethods,
-		// cmd,
 		findNode,
 		pathFromNode,
 		findDirectory,
 		findFile,
 		putFile,
 		createNode,
-		createFile
+		createFile,
+		createDirectory
 	};
 }
