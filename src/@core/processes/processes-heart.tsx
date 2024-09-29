@@ -7,7 +7,7 @@ import { RScriptTranslator } from "./rscript-translator";
 import { normalize } from "../filesystem/utils/path";
 
 export function ProcessesHeart() {
-	const { fsMethods, findNode, findFile, findDirectory, createDirectory } =
+	const { findNode, findFile, findDirectory, createDirectory } =
 		useFilesystem();
 	const {
 		processes,
@@ -17,23 +17,22 @@ export function ProcessesHeart() {
 		killProcesses
 	} = useProcessesStore();
 
-	const processesMethods = useMemo(
-		() => ({
-			createProcess,
-			killProcesses,
-			createWindowProcessFromProgramTable
-		}),
-		[createProcess, killProcesses, createWindowProcessFromProgramTable]
-	);
-
 	const syscallMethods = useMemo(
 		() => ({
 			fs_ffile: findFile,
 			fs_fdir: findDirectory,
 			fs_normalized: normalize,
+			create_proc_default_rgui: createWindowProcessFromProgramTable,
+			exec: createProcess,
 			mkdir: createDirectory
 		}),
-		[findFile, findDirectory, createDirectory]
+		[
+			findFile,
+			findDirectory,
+			createDirectory,
+			createProcess,
+			createWindowProcessFromProgramTable
+		]
 	);
 
 	const heartbeat = useCallback(() => {
@@ -60,7 +59,10 @@ export function ProcessesHeart() {
 
 			startedPids.push(process.pid);
 
-			const translator = new RScriptTranslator(functionFile.content, args);
+			const translator = new RScriptTranslator(
+				functionFile.content,
+				args
+			);
 			translator.cookScript();
 			const scriptBlobURL = translator.generateBlob();
 
@@ -91,7 +93,8 @@ export function ProcessesHeart() {
 
 							const methods: Record<
 								string,
-								((...args: string[]) => unknown) | undefined
+								// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+								((...args: any[]) => unknown) | undefined
 							> = {
 								...syscallMethods,
 								echo: process.ttyContext?.echo,
@@ -111,10 +114,15 @@ export function ProcessesHeart() {
 								} else {
 									const syscallResponse = methods[method](...args);
 
+									const treatedResponse =
+										syscallResponse === undefined
+											? ""
+											: JSON.parse(JSON.stringify(syscallResponse));
+
 									worker.postMessage({
 										type: "SYSCALL_RESPONSE",
 										id: responseId,
-										response: syscallResponse
+										response: treatedResponse
 									});
 								}
 							} else {

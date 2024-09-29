@@ -88,50 +88,58 @@ async function main(dirName) {
 		exit();
 	}
 }`
-
 		},
 		{
 			id: incrementalId(),
 			type: "file",
 			name: "/sleep",
 			content: `//sleep command
-
-const [sleepTime = 1] = context.args;
-return new Promise((resolve, reject) => {
-let i = 0;
-const interval = setInterval(() => {
-i++;
-context.tty.echo(i + " seconds elapsed");
-if (i >= sleepTime) {
-resolve();
-clearInterval(interval);
-}
-}, 1000);
-});
-            `
+async function main(time) {
+	await new Promise(async (resolve, reject) => {
+		let i = 0;
+		const interval = setInterval(async () => {
+			i++;
+			await syscall("echo", i + " seconds elapsed");
+			if (i >= time) {
+				resolve();
+				clearInterval(interval);
+			}
+		}, 1000);
+	});
+}`
 		},
 		{
 			id: incrementalId(),
 			type: "file",
 			name: "/watch",
 			content: `
-const command = context.args.join(" ");
-const interval = setInterval(() => {
-std.processes.createProcess(command, context.tty);
-}, 1000);
-            `
+async function main(...args) {
+	const command = args.join(" ");
+
+	return new Promise((res) => {
+		const interval = setInterval(() => {
+			// await syscall
+			// std.processes.createProcess(command, context.tty);
+		}, 1000);
+	});
+}`
 		},
 		{
 			id: incrementalId(),
 			type: "file",
 			name: "/code",
 			content: `
-const [path] = context.args;
+async function main(path) {
+	if (!path) {
+		exit();
+	}
+	
+	const pwd = await syscall("pwd");
 
-const filePath = std.fs.path.normalize(context.tty.workingDirectory + "/" + path);
-
-std.processes.createWindowProcessFromProgramTable("monaco", { workingDirectory: filePath });
-            `
+	const filePath = await syscall("fs_normalized", pwd + "/" + path);
+	
+	await syscall("create_proc_default_rgui", "monaco", { workingDirectory: filePath });
+}`
 		}
 	]
 };
