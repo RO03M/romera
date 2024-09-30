@@ -15,7 +15,7 @@ export const usr: Node = {
 					id: incrementalId(),
 					name: "/jsfile.js",
 					type: "file",
-					content: "[Desktop Entry];\nx=0;\ny=0;\ndefaultExecName=terminal"
+					content: "[Desktop Entry];\nx=0;\ny=0;\ndefaultExecName=monaco"
 				},
 				{
 					id: incrementalId(),
@@ -27,7 +27,7 @@ export const usr: Node = {
 					id: incrementalId(),
 					name: "/folder",
 					type: "file",
-					content: "[Desktop Entry];\nx=0;\ny=2;"
+					content: "[Desktop Entry];\nx=0;\ny=2;\ndefaultExecName=terminal;"
 				}
 			]
 		}
