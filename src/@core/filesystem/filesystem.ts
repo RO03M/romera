@@ -72,8 +72,10 @@ export class Filesystem {
 	}
 
 	public createNode(path: string, nodeName: string, nodeType: Node["type"]) {
-		const absolutePath = normalize(`${path}/${nodeName}`);
-		const parentNode = this.findNode(path);
+		const [parentPathFromNodeName, fileName] = splitParentPathAndNodeName(nodeName);
+		const absoluteParentPath = normalize(`${path}/${parentPathFromNodeName}`);
+		const absolutePath = normalize(`${absoluteParentPath}/${fileName}`);
+		const parentNode = this.findNode(absoluteParentPath);
 
 		if (parentNode === null) {
 			return {
@@ -98,7 +100,7 @@ export class Filesystem {
 			};
 		}
 
-		const newNode = this.doActionOnNode(path, (node) => {
+		const newNode = this.doActionOnNode(absoluteParentPath, (node) => {
 			if (!node) {
 				return null;
 			}
@@ -109,7 +111,7 @@ export class Filesystem {
 
 			const newNode: Node = {
 				id: incrementalId(),
-				name: normalize(nodeName),
+				name: normalize(fileName),
 				type: nodeType
 			};
 

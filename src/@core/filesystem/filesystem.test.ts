@@ -1,196 +1,122 @@
-// import { describe, expect, it } from "vitest";
-// import { doActionOnNode } from "./do-action-on-node";
-// import { mockFilesystem } from "../test-data";
-// import type { Node } from "../../node";
-// import { updateNodeFromTree } from "./update-node-from-tree";
-// import { findNodeFromTree } from "../find-node-from-tree";
-// import { createNodeOnTree } from "./create-node-on-tree";
-// import { normalize } from "../path";
+import { describe, expect, it } from "vitest";
+import { Filesystem } from "./filesystem";
+import { normalize } from "./utils/path";
 
-// describe("Filesystem general node operations", () => {
-// 	describe("Do action on node", () => {
-// 		it("Should be able to find a directory node", () => {
-// 			const [_, dir] = doActionOnNode("/bin", mockFilesystem, (node) => {
-// 				return node;
-// 			});
+describe("Filesystem general node operations", () => {
+	const filesystem = Filesystem.singleton();
 
-// 			expect(dir).toBeDefined();
-// 			expect(dir).toHaveProperty("name", "/bin");
-// 			expect(dir).toHaveProperty("type", "directory");
-// 			expect(dir!.name).toBe("/bin");
-// 		});
+	describe("Find node method", () => {
+		it("Should be able to find a directory", () => {
+			const node = filesystem.findNode("/bin");
 
-// 		it("Should be able to find a file node", () => {
-// 			const [_, file] = doActionOnNode("/bin/ls", mockFilesystem, (node) => {
-// 				return node;
-// 			});
+			expect(node).not.toBeNull();
+			expect(node).toHaveProperty("name", "/bin");
+			expect(node).toHaveProperty("type", "directory");
+		});
 
-// 			expect(file).toBeDefined();
-// 			expect(file).toHaveProperty("name", "/ls");
-// 			expect(file).toHaveProperty("type", "file");
-// 		});
+		it("Should be able to find a file", () => {
+			const node = filesystem.findNode("/bin/cat");
 
-// 		it("Should be able to find the node and do something with it", () => {
-// 			const [result, foundNode] = doActionOnNode(
-// 				"/bin/ls",
-// 				mockFilesystem,
-// 				(node) => {
-// 					if (node.type !== "file") {
-// 						return null;
-// 					}
+			expect(node).not.toBeNull();
+			expect(node).toHaveProperty("name", "/cat");
+			expect(node).toHaveProperty("type", "file");
+		});
+	});
 
-// 					node.content = "changed";
-// 					const foundNode = { ...node };
-// 					foundNode.content = "can't change me";
+	describe("Create node method", () => {
+		describe("Success cases! Happy life", () => {
+			describe("Default options", () => {
+				it("Should be able to create a file in the root dir", () => {
+					const result = filesystem.createNode("/", "newNode", "file");
+					const node = filesystem.findNode("/newNode");
 
-// 					return foundNode;
-// 				}
-// 			);
+					expect(result).toHaveProperty("status", true);
+					expect(node).not.toBeNull();
+				});
 
-// 			expect(result).toBeDefined();
-// 			expect(foundNode).toBeDefined();
-// 			expect(findNodeFromTree("/bin/ls", result)).toHaveProperty(
-// 				"content",
-// 				"changed"
-// 			);
-// 			expect(findNodeFromTree("/bin/ls", mockFilesystem)).toHaveProperty(
-// 				"content",
-// 				"ls file"
-// 			);
-// 			expect(foundNode?.content).toBe("can't change me");
-// 		});
-// 	});
+				it("Should be able to create a file in any directory", () => {
+					const result = filesystem.createNode("/bin", "newNode", "file");
+					const node = filesystem.findNode("/bin/newNode");
 
-// 	describe("Find node method", () => {
-// 		it("Should be able to find a directory", () => {
-// 			const node = findNodeFromTree("/bin", mockFilesystem);
+					expect(result).toHaveProperty("status", true);
+					expect(node).not.toBeNull();
+				});
 
-// 			expect(node).toBeDefined();
-// 			expect(node).toHaveProperty("name", "/bin");
-// 			expect(node).toHaveProperty("type", "directory");
-// 		});
+				it("Should be able to create a directory in any directory", () => {
+					filesystem.createNode("/home", "romera2", "directory");
+					const node = filesystem.findNode("/home/romera2");
 
-// 		it("Should be able to find a file", () => {
-// 			const node = findNodeFromTree("/bin/cat", mockFilesystem);
+					expect(node).not.toBeNull();
+				});
 
-// 			expect(node).toBeDefined();
-// 			expect(node).toHaveProperty("name", "/cat");
-// 			expect(node).toHaveProperty("type", "file");
-// 		});
-// 	});
+				it("Should create be able to create a node without being in the directory", () => {
+					const dirName = "nestedCreation";
+					const path = `/home/romera/${dirName}`;
+					filesystem.createNode("/", path, "directory");
+					const node = filesystem.findNode(path);
 
-// 	describe("Create node method", () => {
-// 		describe("Success cases! Happy life", () => {
-// 			it("Should be able to create a file in the root dir", () => {
-// 				const newFile: Omit<Node, "id"> = {
-// 					name: "newNode",
-// 					type: "file"
-// 				};
+					expect(node).not.toBeNull();
+					expect(node).toHaveProperty("name", normalize(dirName));
+				});
+			});
+		});
 
-// 				const result = createNodeOnTree("/", mockFilesystem, newFile);
+		describe("Error cases", () => {
+			describe("Default options", () => {
+				it("Should return a error if the provided path doesn't exist", () => {
+					const { status, message } = filesystem.createNode(
+						"/randompaththatdoesntexist",
+						"mkdir",
+						"file"
+					);
 
-// 				expect(result.nodeTree).toBeDefined();
+					expect(status).toBeFalsy();
+					expect(message).toBe("INVALID_PARENT_PATH");
+				});
 
-// 				const newNodeInNodeTree = findNodeFromTree(
-// 					"/newNode",
-// 					result.nodeTree!
-// 				);
+				it("Should return error if the provided path is of a file", () => {
+					const { status, message } = filesystem.createNode(
+						"/bin/ls",
+						"mkdir",
+						"file"
+					);
 
-// 				expect(newNodeInNodeTree).toBeDefined();
-// 				expect(newNodeInNodeTree).toHaveProperty(
-// 					"name",
-// 					normalize(newFile.name)
-// 				);
-// 			});
+					expect(status).toBeFalsy();
+					expect(message).toBe("PARENT_NODE_IS_NOT_A_DIRECTORY");
+				});
 
-// 			it("Should be able to create a file in any directory", () => {
-// 				const newFile: Omit<Node, "id"> = {
-// 					name: "/mkdir",
-// 					type: "file"
-// 				};
+				it("Should return error if there is already an existing node in that path (same type and name)", () => {
+					const { status, message } = filesystem.createNode(
+						"/bin",
+						"ls",
+						"file"
+					);
 
-// 				const result = createNodeOnTree("/bin", mockFilesystem, newFile);
+					expect(status).toBeFalsy();
+					expect(message).toBe("NODE_ALREADY_EXISTS");
+				});
 
-// 				expect(result.status).toBeTruthy();
-// 				expect(result.nodeTree).toBeDefined();
-// 				expect(findNodeFromTree("/bin/mkdir", result.nodeTree!)).toBeDefined();
-// 			});
+				it("Should return error if a directory doesn't exist and we try to create a file to it using nested creation", () => {
+					const dirName = "nestedCreation";
+					const path = `/home/directorythatdoesntexist/${dirName}`;
+					const result = filesystem.createNode("/", path, "directory");
 
-// 			it("Should be able to create a directory in any directory", () => {
-// 				const newFile: Omit<Node, "id"> = {
-// 					name: "./romera2",
-// 					type: "directory"
-// 				};
+					expect(result).toHaveProperty("status", false);
+					expect(result).toHaveProperty("message", "INVALID_PARENT_PATH");
+				});
+			});
+		});
+	});
 
-// 				const result = createNodeOnTree("/home", mockFilesystem, newFile);
+	describe("Update node content method", () => {
+		it("Should be able to update a file", () => {
+			const value = "changed value from hello";
+			filesystem.createNode("/", "file2change", "file");
+			filesystem.updateNode("/file2change", value);
+			const node = filesystem.findNode("/file2change");
 
-// 				expect(result.status).toBeTruthy();
-// 				expect(result.nodeTree).toBeDefined();
-// 				expect(
-// 					findNodeFromTree("/home/romera2", result.nodeTree!)
-// 				).toBeDefined();
-// 			});
-// 		});
-
-// 		describe("Error cases", () => {
-// 			it("Should return a error if the provided path doesn't exist", () => {
-// 				const file: Omit<Node, "id"> = {
-// 					name: "/mkdir",
-// 					type: "file"
-// 				};
-
-// 				const { status, message } = createNodeOnTree(
-// 					"/randompaththatdoesntexist",
-// 					mockFilesystem,
-// 					file
-// 				);
-
-// 				expect(status).toBeFalsy();
-// 				expect(message).toBe("INVALID_PARENT_PATH");
-// 			});
-
-// 			it("Should return error if the provided path is of a file", () => {
-// 				const file: Omit<Node, "id"> = {
-// 					name: "/mkdir",
-// 					type: "file"
-// 				};
-
-// 				const { status, message } = createNodeOnTree(
-// 					"/bin/ls",
-// 					mockFilesystem,
-// 					file
-// 				);
-
-// 				expect(status).toBeFalsy();
-// 				expect(message).toBe("PARENT_NODE_IS_NOT_A_DIRECTORY");
-// 			});
-
-// 			it("Should return error if there is already an existing node in that path (same type and name)", () => {
-// 				const file: Omit<Node, "id"> = {
-// 					name: "/ls",
-// 					type: "file"
-// 				};
-
-// 				const { status, message } = createNodeOnTree(
-// 					"/bin",
-// 					mockFilesystem,
-// 					file
-// 				);
-
-// 				expect(status).toBeFalsy();
-// 				expect(message).toBe("NODE_ALREAD_EXISTS");
-// 			});
-// 		});
-// 	});
-
-// 	describe("Update node content method", () => {
-// 		it("Should be able to update a file", () => {
-// 			const value = "changed value from hello";
-// 			const result = updateNodeFromTree("/home/hello", mockFilesystem, value);
-// 			const node = findNodeFromTree("/home/hello", result);
-
-// 			expect(node).toBeDefined();
-// 			expect(node).toHaveProperty("content", value);
-// 		});
-// 	});
-// });
+			expect(node).not.toBeNull();
+			expect(node).toHaveProperty("content", value);
+		});
+	});
+});
