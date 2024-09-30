@@ -2,17 +2,7 @@ import styled from "styled-components";
 import { ApplicationItem } from "./application-item";
 import { useDesktopItems } from "./use-desktop-items";
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { nativeJsFileToNode } from "../../../filesystem/native-js-file-to-node";
 import { getFilesFromDataTransferItems } from "datatransfer-files-promise";
-
-function teste(file: File) {
-	const reader = new FileReader();
-	reader.readAsDataURL(file);
-	reader.onload = () => {
-		console.log(reader.result);
-	};
-	reader.onerror = (error) => console.error(error);
-}
 
 export function Desktop() {
 	const { items } = useDesktopItems();
