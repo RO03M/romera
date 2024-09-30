@@ -59,6 +59,25 @@ describe("Filesystem general node operations", () => {
 					expect(node).toHaveProperty("name", normalize(dirName));
 				});
 			});
+			describe("Custom options", () => {
+				describe("Make parents", () => {
+					it("It should be able to create multiple directories with a single input", () => {
+						const result = filesystem.createNode("/path/path2/path3/path4", "path5", "directory", { makeParents: true });
+						const node = filesystem.findNode("/path/path2/path3/path4/path5");
+
+						expect(result).toHaveProperty("status", true);
+						expect(node).not.toBeNull();
+					});
+
+					it("Should be able to create a file using nested node creation", () => {
+						const result = filesystem.createNode("/home", "/dirtestcase1/file", "file", { makeParents: true });
+						const node = filesystem.findNode("/home/dirtestcase1/file");
+
+						expect(result).toHaveProperty("status", true);
+						expect(node).not.toBeNull();
+					});
+				});
+			});
 		});
 
 		describe("Error cases", () => {

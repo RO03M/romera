@@ -1,6 +1,7 @@
 import { incrementalId } from "../utils/incremental-id";
 import { initialRoot } from "./initial-filesystem-nodes/index";
 import type { Node } from "./node";
+import type { CreateNodeOptions } from "./types";
 import { normalize, splitParentPathAndNodeName } from "./utils/path";
 
 export class Filesystem {
@@ -71,11 +72,32 @@ export class Filesystem {
 		return node;
 	}
 
-	public createNode(path: string, nodeName: string, nodeType: Node["type"]) {
-		const [parentPathFromNodeName, fileName] = splitParentPathAndNodeName(nodeName);
+	public createNode(
+		path: string,
+		nodeName: string,
+		nodeType: Node["type"],
+		options: CreateNodeOptions = {}
+	) {
+		const { makeParents = false } = options;
+		const [parentPathFromNodeName, fileName] =
+			splitParentPathAndNodeName(nodeName);
 		const absoluteParentPath = normalize(`${path}/${parentPathFromNodeName}`);
 		const absolutePath = normalize(`${absoluteParentPath}/${fileName}`);
-		const parentNode = this.findNode(absoluteParentPath);
+		let parentNode = this.findNode(absoluteParentPath);
+
+		if (parentNode === null && makeParents) {
+			const splittedPath = absoluteParentPath
+				.split("/")
+				.filter((path) => path !== "");
+			let previousPath = "/";
+
+			for (let i = 0; i < splittedPath.length; i++) {
+				this.createNode(previousPath, splittedPath[i], "directory");
+				previousPath += normalize(splittedPath[i]);
+			}
+
+			parentNode = this.findNode(absoluteParentPath);
+		}
 
 		if (parentNode === null) {
 			return {
@@ -140,24 +162,28 @@ export class Filesystem {
 		});
 	}
 
-	public pathFromNodeId(nid: Node["id"], root: Node = this.root, inheritPath = "/"): string | null {
+	public pathFromNodeId(
+		nid: Node["id"],
+		root: Node = this.root,
+		inheritPath = "/"
+	): string | null {
 		if (nid === root.id) {
 			return normalize(inheritPath);
 		}
-	
+
 		if (root.nodes === undefined) {
 			return null;
 		}
-	
+
 		let result: string | null = null;
-	
+
 		for (const child of root.nodes) {
 			result = this.pathFromNodeId(nid, child, inheritPath + child.name);
 			if (result !== null) {
 				break;
 			}
 		}
-	
+
 		return result;
 	}
 }
