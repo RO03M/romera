@@ -65,11 +65,10 @@ export function Terminal(props: ProcessComponentProps) {
 		(event: SubmitEvent) => {
 			event.preventDefault();
 			const { program, args } = formatInput(input);
-			let outputMessage = "";
 
 			switch (program) {
 				case "cd": {
-					outputMessage = cd(args.join());
+					cd(args.join());
 					break;
 				}
 				default: {
