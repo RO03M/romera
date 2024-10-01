@@ -11,7 +11,7 @@ export function WindowManager() {
 	}, [processes]);
 
 	return (
-		<Wrapper>
+		<Wrapper id={"window-manager"}>
 			{windowProcesses.map((process) => (
 				<Window
 					key={process.pid}
@@ -25,11 +25,10 @@ export function WindowManager() {
 }
 
 const Wrapper = styled.div({
-	width: "100%",
-	height: "100%",
+	width: "100vw",
+	height: "100vh",
 	position: "absolute",
-	overflow: "hidden"
-}, {
-	id: "window-manager",
-	name: "window-manager-container"
+	overflow: "hidden",
+	top: 0,
+	left: 0
 });

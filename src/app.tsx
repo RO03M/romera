@@ -12,9 +12,9 @@ export function App() {
 		<ThemeProvider theme={theme}>
 			<div id={"main"}>
 				<TopPanel />
+				<WindowManager />
 				<Desktop />
 				<Dock />
-				<WindowManager />
 				<ProcessesHeart />
 			</div>
 		</ThemeProvider>

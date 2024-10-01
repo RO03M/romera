@@ -116,7 +116,8 @@ const Wrapper = styled(motion.div)({
 	left: 0,
 	display: "flex",
 	flexDirection: "column",
-	backgroundColor: "#0f0f0f"
+	backgroundColor: "#0f0f0f",
+	zIndex: 1
 });
 
 const ContentWrapper = styled<"div">("div")({
