@@ -1,6 +1,6 @@
 import { styled } from "@mui/material";
 import { TerminalInput } from "./input";
-import { useCallback, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { useFilesystem } from "../../../filesystem/use-filesystem";
 import { formatInput } from "./utils/format-input";
 import { normalize } from "../../../filesystem/utils/path";
@@ -8,13 +8,17 @@ import { type TerminalOutput, TerminalOutputList } from "./output-list";
 import { useProcessesStore } from "../../../processes/use-processes-store";
 import { incrementalId } from "../../../utils/incremental-id";
 import type { ProcessComponentProps } from "../../../processes/types";
+import { useTTYStore } from "../../../system/tty";
 
 export function Terminal(props: ProcessComponentProps) {
 	const { workingDirectory = "/" } = props;
 
+	const { ttys, addTTY } = useTTYStore();
+
 	const [id] = useState(incrementalId("tty"));
 	// Rename to currentWorkingDirectory
-	const [currentWorkingDirectory, setCurrentWorkingDirectory] = useState(workingDirectory);
+	const [currentWorkingDirectory, setCurrentWorkingDirectory] =
+		useState(workingDirectory);
 	const [isPending, setIsPending] = useState(false);
 	const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
 	const [input, setInput] = useState("");
@@ -71,6 +75,12 @@ export function Terminal(props: ProcessComponentProps) {
 					cd(args.join());
 					break;
 				}
+				case "broadcast": {
+					console.log(ttys);
+					// biome-ignore lint/complexity/noForEach: <explanation>
+					ttys.forEach((tty) => tty.echo("teste"));
+					break;
+				}
 				default: {
 					pendingMode();
 					createProcess(input, {
@@ -93,8 +103,22 @@ export function Terminal(props: ProcessComponentProps) {
 
 			setInput("");
 		},
-		[id, input, currentWorkingDirectory, pendingMode, free, echo, cd, createProcess]
+		[
+			id,
+			input,
+			currentWorkingDirectory,
+			ttys,
+			pendingMode,
+			free,
+			echo,
+			cd,
+			createProcess
+		]
 	);
+
+	useEffect(() => {
+		addTTY({ id, echo });
+	}, [id, addTTY, echo]);
 
 	return (
 		<Wrapper onSubmit={onSubmit}>
