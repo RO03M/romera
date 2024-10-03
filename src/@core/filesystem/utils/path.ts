@@ -50,6 +50,17 @@ export function splitPath(filepath: string) {
 	return normalized.split("/").map((part) => `/${part}`);
 }
 
+export function format(options: { root: string, base: string }) {
+	const { root, base } = options;
+
+	// base is an absolute path
+	if (base.startsWith("/")) {
+		return normalize(base);
+	}
+
+	return normalize(`${root}/${base}`);
+}
+
 export function dirname(filepath: string) {
 	return normalize(filepath.split("/").slice(0, -1).join("/"));
 }
