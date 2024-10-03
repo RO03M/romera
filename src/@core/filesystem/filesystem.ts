@@ -2,7 +2,7 @@ import { incrementalId } from "../utils/incremental-id";
 import { Stat } from "./stat";
 import textEncoder from "./text-encoder";
 import type { HydrationData, ReadDirOptions } from "./types";
-import { normalize, splitParentPathAndNodeName, splitPath } from "./utils/path";
+import { format, normalize, splitParentPathAndNodeName, splitPath } from "./utils/path";
 
 const STAT_KEY = 0;
 
@@ -41,9 +41,11 @@ export class Filesystem {
 	private lookup(filepath: string, followSymbolicLink = true) {
 		let dir: FSMap = this.root;
 		const parts = splitPath(filepath);
+		let dirtyPath = "";
 
 		for (let i = 0; i < parts.length; i++) {
 			const part = parts[i];
+			dirtyPath += part;
 
 			const currentDir = dir.get(part);
 
@@ -63,8 +65,9 @@ export class Filesystem {
 					continue;
 				}
 				
-				if (stat.type === "symlink" && Boolean(stat.target)) {
-					dir = this.lookup(stat.target!);
+				if (stat.type === "symlink" && stat.target !== undefined) {
+					const targetPath = format({ root: normalize(dirtyPath), base: stat.target! });
+					dir = this.lookup(targetPath);
 				}
 			}
 		}
@@ -150,9 +153,10 @@ export class Filesystem {
 	}
 
 	public symlink(target: string, path: string) {
+		const targetPath = format({ root: path, base: target });
 		const [dirname, basename] = splitParentPathAndNodeName(path);
 		const dir = this.lookup(dirname);
-		const targetStat = this.stat(target);
+		const targetStat = this.stat(targetPath);
 
 		if (targetStat === null) {
 			throw new Error("Invalid target");

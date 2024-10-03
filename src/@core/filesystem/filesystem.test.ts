@@ -75,6 +75,15 @@ describe("Filesystem general node operations", () => {
 
 			expect(content).toBe(swwftxt);
 		});
+
+		it("Should work with relative paths", () => {
+			filesystem.mkdir("/bin/symlink-relative-path-dir");
+			filesystem.mkdir("/bin/teste");
+			filesystem.symlink("../../symlink-relative-path-dir", "/bin/teste/relative-link");
+
+			expect(filesystem.lstat("/bin/teste/relative-link")).not.toBeNull();
+			expect(filesystem.stat("/bin/teste/relative-link")).toEqual(filesystem.stat("/bin/symlink-relative-path-dir"));
+		});
 	});
 
 	// it("Should be able to rename a directory", () => {
