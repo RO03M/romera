@@ -5,10 +5,11 @@ import { formatInput } from "../components/os/terminal/utils/format-input";
 import type { Process } from "./types";
 import { RScriptTranslator } from "./rscript-translator";
 import { normalize } from "../filesystem/utils/path";
+import { filesystem } from "../../app";
 
 export function ProcessesHeart() {
-	const { findNode, findFile, findDirectory, createDirectory } =
-		useFilesystem();
+	// const { findNode, findFile, findDirectory, createDirectory } =
+	// 	useFilesystem();
 	const {
 		processes,
 		setPidsToRunning,
@@ -19,17 +20,15 @@ export function ProcessesHeart() {
 
 	const syscallMethods = useMemo(
 		() => ({
-			fs_ffile: findFile,
-			fs_fdir: findDirectory,
+			stat: filesystem.stat,
+			lstat: filesystem.lstat,
+			readdir: (filepath: string) => filesystem.readdir(filepath),
 			fs_normalized: normalize,
 			create_proc_default_rgui: createWindowProcessFromProgramTable,
 			exec: createProcess,
-			mkdir: createDirectory
+			mkdir: filesystem.mkdir
 		}),
 		[
-			findFile,
-			findDirectory,
-			createDirectory,
 			createProcess,
 			createWindowProcessFromProgramTable
 		]
@@ -44,23 +43,25 @@ export function ProcessesHeart() {
 
 		for (const process of runningProcesses) {
 			const { program, args } = formatInput(process?.cmd ?? "");
-			const functionFile = findNode(`/bin/${program}`);
+			const programContent = filesystem.readFile(`/bin/${program}`, { decode: true });
 
-			if (!functionFile) {
+			console.log(programContent);
+
+			if (!programContent) {
 				pidsToKill.push(process.pid);
 				process?.ttyContext?.free();
 				continue;
 			}
 
 			// remover a verificação da string
-			if (typeof functionFile.content !== "string") {
+			if (typeof programContent !== "string") {
 				continue;
 			}
 
 			startedPids.push(process.pid);
 
 			const translator = new RScriptTranslator(
-				functionFile.content,
+				programContent,
 				args
 			);
 			translator.cookScript();
@@ -147,7 +148,7 @@ export function ProcessesHeart() {
 		if (pidsToKill.length > 0) {
 			killProcesses(pidsToKill);
 		}
-	}, [processes, syscallMethods, killProcesses, findNode, setPidsToRunning]);
+	}, [processes, syscallMethods, killProcesses, setPidsToRunning]);
 
 	useEffect(() => {
 		const interval = setInterval(heartbeat, 100);

@@ -1,43 +1,35 @@
-import { incrementalId } from "../../utils/incremental-id";
-import type { Node } from "../node";
+import type { HydrationData } from "../types";
 
-export const home: Node = {
-	id: incrementalId(),
+export const home: HydrationData = {
 	name: "/home",
-	type: "directory",
+	type: "dir",
 	nodes: [
 		{
-			id: incrementalId(),
 			name: "/hello",
 			type: "file",
 			content: "Hello world!"
 		},
 		{
-			id: incrementalId(),
 			name: "/romera",
-			type: "directory",
+			type: "dir",
 			nodes: [
 				{
-					id: incrementalId(),
 					name: "/desktop",
-					type: "directory",
+					type: "dir",
 					nodes: [
 						{
-							id: incrementalId(),
 							name: "/jsfile.js",
 							type: "file",
 							content: "const fuck = false;"
 						},
 						{
-							id: incrementalId(),
 							name: "/file2",
 							type: "file",
 							content: "Hello world!"
 						},
 						{
-							id: incrementalId(),
 							name: "/folder",
-							type: "directory"
+							type: "dir"
 						}
 					]
 				}

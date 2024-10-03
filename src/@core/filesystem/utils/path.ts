@@ -41,9 +41,26 @@ export function normalize(path: string) {
 	return formattedPath;
 }
 
-export function splitParentPathAndNodeName(path: string) {
-	const parentPath = normalize(path.split("/").slice(0, -1).join("/"));
-	const nodeName = normalize(path.split("/").slice(-1).join("/"));
+export function splitPath(filepath: string) {
+	const normalized = normalize(filepath);
+	if (normalized === "/") {
+		return ["/"];
+	}
 
-	return [parentPath, nodeName];
+	return normalized.split("/").map((part) => `/${part}`);
+}
+
+export function dirname(filepath: string) {
+	return normalize(filepath.split("/").slice(0, -1).join("/"));
+}
+
+export function basename(filepath: string) {
+	return normalize(filepath.split("/").slice(-1).join("/"));
+}
+
+export function splitParentPathAndNodeName(path: string) {
+	const dir = dirname(path);
+	const base = basename(path);
+
+	return [dir, base];
 }

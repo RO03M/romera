@@ -1,13 +1,10 @@
-import { incrementalId } from "../../utils/incremental-id";
-import type { Node } from "../node";
+import type { HydrationData } from "../types";
 
-export const bin: Node = {
-	id: incrementalId(),
+export const bin: HydrationData = {
 	name: "/bin",
-	type: "directory",
+	type: "dir",
 	nodes: [
 		{
-			id: incrementalId(),
 			type: "file",
 			name: "/ls",
 			content: `
@@ -15,18 +12,17 @@ export const bin: Node = {
 		
 async function main() {
 	const pwd = await syscall("pwd");
-	const node = await syscall("fs_fdir", pwd);
+	const stats = await syscall("readdir", pwd);
 
-	if (!node) {
+	if (!stats) {
 		await syscall("echo", "Error finding PWD");
 		exit();
 	}
 
-	await syscall("echo", node?.nodes?.map((node) => "        " + node.name));
+	await syscall("echo", stats.map((dir) => "        " + dir));
 }`
 		},
 		{
-			id: incrementalId(),
 			type: "file",
 			name: "/worker",
 			content: `// worker file is responsible to test the basic syscall operations while using workers
@@ -52,7 +48,6 @@ async function main(...args) {
 `
 		},
 		{
-			id: incrementalId(),
 			type: "file",
 			name: "/cat",
 			content: `//cat command
@@ -68,14 +63,13 @@ async function main(fileName) {
 }`
 		},
 		{
-			id: incrementalId(),
 			type: "file",
 			name: "/mkdir",
 			content: `//mkdir command
 
 async function main(dirName) {
 	if (!dirName) {
-		await syscall("echo", "Missing directory name");
+		await syscall("echo", "Missing dir name");
 		exit();
 	}
 
@@ -84,13 +78,12 @@ async function main(dirName) {
 	const { status } = await syscall("mkdir", pwd, dirName);
 	
 	if (!status) {
-		await syscall("echo", "Cannot create directory " + dirName);
+		await syscall("echo", "Cannot create dir " + dirName);
 		exit();
 	}
 }`
 		},
 		{
-			id: incrementalId(),
 			type: "file",
 			name: "/sleep",
 			content: `//sleep command
@@ -109,7 +102,6 @@ async function main(time) {
 }`
 		},
 		{
-			id: incrementalId(),
 			type: "file",
 			name: "/watch",
 			content: `
@@ -125,7 +117,6 @@ async function main(...args) {
 }`
 		},
 		{
-			id: incrementalId(),
 			type: "file",
 			name: "/code",
 			content: `
@@ -138,7 +129,7 @@ async function main(path) {
 
 	const filePath = await syscall("fs_normalized", pwd + "/" + path);
 	
-	await syscall("create_proc_default_rgui", "monaco", { workingDirectory: filePath });
+	await syscall("create_proc_default_rgui", "monaco", { workingdir: filePath });
 }`
 		}
 	]

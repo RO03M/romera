@@ -1,6 +1,13 @@
-export interface CreateNodeOptions {
-	/**
-	 * Create node parents if necessary
-	 */
-	makeParents?: boolean;
+export type StatType = "file" | "dir" | "symlink";
+
+export interface HydrationData {
+	name: string;
+	type: StatType;
+	target?: string;
+	content?: string;
+	nodes?: HydrationData[];
+}
+
+export interface ReadDirOptions {
+	decode?: boolean;
 }

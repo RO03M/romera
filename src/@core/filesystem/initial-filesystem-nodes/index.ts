@@ -1,16 +1,10 @@
-import { incrementalId } from "../../utils/incremental-id";
-import type { Node } from "../node";
+import type { HydrationData } from "../types";
 import { bin } from "./bin";
 import { home } from "./home";
 import { usr } from "./usr";
 
-export const initialRoot: Node = {
-	id: incrementalId(),
+export const initialRoot: HydrationData = {
 	name: "/",
-	type: "directory",
-	nodes: [
-		bin,
-		home,
-		usr
-	]
+	type: "dir",
+	nodes: [bin, home, usr]
 };

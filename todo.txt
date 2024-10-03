@@ -1,7 +1,2 @@
-processos como web workers!!
-
-    var blobURL = URL.createObjectURL( new Blob([ "(", function() {
-        console.log("Works!");
-    }.toString(), ")()" ], { type: 'application/javascript' } ))
-
-    var worker = new Worker(blobURL);
+Filesystem mais rápido utilizando Maps
+Adicionar informação de Load Average
