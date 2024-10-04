@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { getFilesFromDataTransferItems } from "datatransfer-files-promise";
 
 export function Desktop() {
-	const { files } = useDesktopItems();
+	const { items } = useDesktopItems();
 	const [focusedItem, setFocusedItem] = useState<number | null>(null);
 
 	const resetFocus = useCallback(() => {
@@ -34,27 +34,28 @@ export function Desktop() {
 	}, [resetFocus]);
 
 	return (
-		<Wrapper
+		<DesktopArea
 			id={"desktop-area"}
 			onDrop={onFileDrop}
 			onDragOver={(event) => event.preventDefault()}
 		>
-			{files.map((file) => (
+			{items.map((file) => (
 				<ApplicationItem
 					key={file.inode}
 					type={file.type}
-					name={"file"}
+					name={file.name}
+					icon={file.icon}
+					focused={focusedItem === file.inode}
 					onFocus={() => {
 						setFocusedItem(file.inode);
 					}}
-					focused={focusedItem === file.inode}
 				/>
 			))}
-		</Wrapper>
+		</DesktopArea>
 	);
 }
 
-const Wrapper = styled.div((props) => ({
+const DesktopArea = styled.div((props) => ({
 	width: "100vw",
 	height: "100vh",
 	overflow: "hidden",

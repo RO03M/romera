@@ -1,9 +1,15 @@
 import { EEXIST, ENOENT } from "../../errors";
 import { incrementalId } from "../utils/incremental-id";
+import { Dirent } from "./dirent";
 import { Stat } from "./stat";
 import textEncoder from "./text-encoder";
 import type { HydrationData, ReadDirOptions, ReadFileOptions } from "./types";
-import { format, normalize, splitParentPathAndNodeName, splitPath } from "./utils/path";
+import {
+	format,
+	normalize,
+	splitParentPathAndNodeName,
+	splitPath
+} from "./utils/path";
 
 const STAT_KEY = 0;
 
@@ -26,7 +32,7 @@ export class Filesystem {
 			if (absolutePath !== "/") {
 				this.mkdir(absolutePath);
 			}
-	
+
 			if (data.nodes) {
 				for (const child of data.nodes) {
 					this.hydrate(child, absolutePath);
@@ -65,9 +71,12 @@ export class Filesystem {
 				if (!(stat instanceof Stat)) {
 					continue;
 				}
-				
+
 				if (stat.type === "symlink" && stat.target !== undefined) {
-					const targetPath = format({ root: normalize(dirtyPath), base: stat.target! });
+					const targetPath = format({
+						root: normalize(dirtyPath),
+						base: stat.target!
+					});
 					dir = this.lookup(targetPath);
 				}
 			}
@@ -102,11 +111,18 @@ export class Filesystem {
 		});
 
 		if (withFileTypes) {
-			return filenames.map((filename) => {
-				const resolvedPath = normalize(`${path}/${filename}`);
+			return filenames
+				.map((filename) => {
+					const resolvedPath = normalize(`${path}/${filename}`);
 
-				return this.stat(resolvedPath);
-			});
+					const stat = this.stat(resolvedPath);
+					if (stat === null) {
+						return null;
+					}
+
+					return new Dirent(filename, stat.inode, stat.type);
+				})
+				.filter((dirent) => dirent instanceof Dirent);
 		}
 
 		return filenames;
@@ -203,7 +219,12 @@ export class Filesystem {
 		}
 
 		const data = this.inodeTable.get(stat.inode);
-		if (!decode || data === undefined) {
+
+		if (data === undefined) {
+			return null;
+		}
+
+		if (!decode) {
 			return data;
 		}
 
@@ -211,7 +232,7 @@ export class Filesystem {
 	}
 
 	public unlink(filepath: string) {
-		const stat = this.lstat(filepath)
+		const stat = this.lstat(filepath);
 
 		if (stat === null) {
 			throw new Error("File not found");

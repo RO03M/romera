@@ -4,24 +4,28 @@ import { DragBackground } from "./drag-background";
 import { useApplicationControl } from "./use-application-control";
 import { useProcessesStore } from "../../../../processes/use-processes-store";
 import { normalize } from "../../../../filesystem/utils/path";
-import { useApplicationExecutable } from "./use-application-executable";
 import styled from "styled-components";
 import type { Stat } from "../../../../filesystem/stat";
+import { useMemo } from "preact/hooks";
+import { getExecutableFromApplication } from "./get-executable-from-application";
+import { programTable } from "../../../../../programs/program-table";
 
 interface ApplicationItemProps {
 	name: string;
+	icon: string;
 	type: Stat["type"];
 	focused?: boolean;
 	onFocus?: () => void;
 }
 
 export function ApplicationItem(props: ApplicationItemProps) {
-	const { name, focused = false, onFocus } = props;
+	const { name, icon, focused = false, onFocus } = props;
 
 	const { item, blur, itemComponentProps } = useApplicationControl(name);
-	const { iconRelativeUrl, programName, ProgramComponent } =
-		useApplicationExecutable(name);
 	const { createWindowProcess } = useProcessesStore();
+
+	const programName = useMemo(() => getExecutableFromApplication(name), [name]);
+	const ProgramComponent = useMemo(() => programTable[programName], [programName]);
 
 	const gridSize = useGridSize();
 
@@ -63,7 +67,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 						})
 					}
 				>
-					<Icon style={{ backgroundImage: `url("${iconRelativeUrl}")` }} />
+					<Icon style={{ backgroundImage: `url("${icon}")` }} />
 					<span>{name}</span>
 				</ContentContainer>
 			</motion.div>
