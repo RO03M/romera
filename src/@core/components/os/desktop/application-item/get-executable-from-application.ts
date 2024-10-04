@@ -6,6 +6,10 @@ export function getExecutableFromApplication(name: string) {
 	const stat = filesystem.stat(`/home/romera/desktop/${normalize(name)}`);
 	const configuration = getConfigFromApplication(name);
 
+    if (configuration.defaultExecName !== "") {
+        return configuration.defaultExecName;
+    }
+
 	if (stat?.isDirectory()) {
 		return "explorer";
 	}
