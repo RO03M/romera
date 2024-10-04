@@ -14,21 +14,21 @@ export const filesystem = new Filesystem("rome-os-fs");
 filesystem.hydrate(initialRoot);
 
 export function App() {
-	return (
-		<div style={{ width: "100vw", height: "100vh" }}>
-			<ProcessesHeart />
-			<Terminal />
-		</div>
-	);
-
 	// return (
-	// 	<ThemeProvider theme={theme}>
-	// 		<div id={"main"}>
-	// 			<TopPanel />
-	// 			<WindowManager />
-	// 			<Desktop />
-	// 			<Dock />
-	// 		</div>
-	// 	</ThemeProvider>
+	// 	<div style={{ width: "100vw", height: "100vh" }}>
+	// 		<ProcessesHeart />
+	// 		<Terminal />
+	// 	</div>
 	// );
+
+	return (
+		<ThemeProvider theme={theme}>
+			<div id={"main"}>
+				<TopPanel />
+				<WindowManager />
+				<Desktop />
+				<Dock />
+			</div>
+		</ThemeProvider>
+	);
 }

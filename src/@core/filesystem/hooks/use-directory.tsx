@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "preact/hooks";
 import { useFilesystem } from "../use-filesystem";
 
 export function useDir(path?: string) {
-	const { findDirectory, pathFromNode, createFile } = useFilesystem();
+	const { findDirectory, createFile } = useFilesystem();
 
 	const dir = useMemo(() => {
 		if (!path) {
@@ -12,23 +12,15 @@ export function useDir(path?: string) {
 		return findDirectory(path);
 	}, [path, findDirectory]);
 
-	const dirPath = useMemo(() => {
-		if (dir === null) {
-			return null;
-		}
-
-		return pathFromNode(dir);
-	}, [dir, pathFromNode]);
-
 	const createFileInDirectory = useCallback((fileName: string) => {
-		if (dirPath === null) {
+		if (path === undefined) {
 			return false;
 		}
 
-		createFile(dirPath, fileName);
+		createFile(path, fileName);
 
 		return true;
-	}, [dirPath, createFile]);
+	}, [path, createFile]);
 
 	return {
 		dir,

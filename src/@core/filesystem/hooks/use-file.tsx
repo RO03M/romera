@@ -6,7 +6,7 @@ interface UseFileOptions {
 }
 
 export function useFile(path?: string, options?: UseFileOptions) {
-	const { findFile, putFile, createFile, pathFromNode } = useFilesystem();
+	const { findFile, putFile, createFile } = useFilesystem();
 
 	const file = useMemo(() => {
 		if (!path) {
@@ -34,15 +34,13 @@ export function useFile(path?: string, options?: UseFileOptions) {
 				return;
 			}
 
-			const path = pathFromNode(file);
-
 			if (!path) {
 				return;
 			}
 
 			putFile(path, value);
 		},
-		[file, pathFromNode, putFile]
+		[file, path, putFile]
 	);
 
 	return {

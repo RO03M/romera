@@ -1,7 +1,6 @@
-import { useCallback, useMemo } from "preact/hooks";
-import { normalize } from "./utils/path";
-import type { Node } from "./node";
-import { Filesystem } from "./filesystem";
+import { useCallback } from "preact/hooks";
+import { format } from "./utils/path";
+import { filesystem } from "../../app";
 
 interface BashContext {
 	path: string;
@@ -12,61 +11,38 @@ export interface CommandOptions {
 	args: string[];
 }
 
+/**
+ * @deprecated
+ * Use the filesystem global, this will cause multiple rerenders that may slow down the application
+ */
 export function useFilesystem() {
-	const filesystem = useMemo(() => {
-		return Filesystem.singleton();
-	}, []);
-
 	const findNode = useCallback(
 		(path: string) => {
-			return filesystem.findNode(path);
+			return filesystem.stat(path);
 		},
-		[filesystem]
-	);
-
-	const createNode = useCallback(
-		(parentPath: string, node: Omit<Node, "id">) => {
-			return filesystem.createNode(parentPath, node.name, node.type);
-		},
-		[filesystem]
+		[]
 	);
 
 	const createFile = useCallback(
-		(path: string, fileName: string) => {
-			return createNode(path, {
-				name: fileName,
-				type: "file"
-			});
+		(path: string, filename: string) => {
+			const resolvedPath = format({ root: path, base: filename });
+			return filesystem.writeFile(resolvedPath, "");
 		},
-		[createNode]
+		[]
 	);
 
-	const createDirectory = useCallback((path: string, dirName: string) => {
-		return createNode(path, {
-			name: dirName,
-			type: "directory",
-			nodes: []
-		});
-	}, [createNode]);
-
-	const pathFromNode = useCallback(
-		(node: Node) => {
-			return filesystem.pathFromNodeId(node.id);
-		},
-		[filesystem]
-	);
+	const createDirectory = useCallback((path: string, dirname: string) => {
+		const resolvedPath = format({ root: path, base: dirname });
+		return filesystem.mkdir(resolvedPath);
+	}, []);
 
 	const findDirectory = useCallback(
 		(path: string) => {
-			const node = findNode(path);
+			const stat = filesystem.stat(path);
 
-			if (node === null || node.type !== "directory") {
-				return null;
-			}
-
-			return node;
+			return stat;
 		},
-		[findNode]
+		[]
 	);
 
 	const findFile = useCallback(
@@ -84,31 +60,16 @@ export function useFilesystem() {
 
 	const putFile = useCallback(
 		(path: string, value: string) => {
-			filesystem.updateNode(path, value);
+			filesystem.writeFile(path, value);
 		},
-		[filesystem]
-	);
-
-	const fsMethods = useMemo(
-		() => ({
-			findNode,
-			createNode,
-			path: {
-				normalize
-			}
-		}),
-		[findNode, createNode]
+		[]
 	);
 
 	return {
-		filesystem,
-		fsMethods,
 		findNode,
-		pathFromNode,
 		findDirectory,
 		findFile,
 		putFile,
-		createNode,
 		createFile,
 		createDirectory
 	};
