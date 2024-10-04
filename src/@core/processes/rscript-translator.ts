@@ -21,7 +21,10 @@ export class RScriptTranslator {
 
     self.onmessage = ({ data }) => {
         if (data.type === "SYSCALL_RESPONSE" && data.id !== undefined) {
-            responsesFromMainThread[data.id] = data.response;
+            responsesFromMainThread[data.id] = {
+                message: data.response,
+                status: data.status
+            };
         }
     };
 
@@ -46,7 +49,11 @@ export class RScriptTranslator {
                 tries++;
                 if (id in responsesFromMainThread) {
                     clearInterval(checkResponseInterval);
-                    resolve(responsesFromMainThread[id]);
+                    if (responsesFromMainThread[id].status == 1) {
+                        resolve(responsesFromMainThread[id].message);
+                    } else {
+                        reject(responsesFromMainThread[id].message);
+                    }
                     delete responsesFromMainThread[id];
                 }
             }, 10);

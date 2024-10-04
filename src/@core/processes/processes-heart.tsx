@@ -4,7 +4,7 @@ import { useFilesystem } from "../filesystem/use-filesystem";
 import { formatInput } from "../components/os/terminal/utils/format-input";
 import type { Process } from "./types";
 import { RScriptTranslator } from "./rscript-translator";
-import { normalize } from "../filesystem/utils/path";
+import { format, normalize } from "../filesystem/utils/path";
 import { filesystem } from "../../app";
 
 export function ProcessesHeart() {
@@ -20,13 +20,14 @@ export function ProcessesHeart() {
 
 	const syscallMethods = useMemo(
 		() => ({
-			stat: filesystem.stat,
-			lstat: filesystem.lstat,
+			stat: (filepath: string) => filesystem.stat(filepath),
+			lstat: (filepath: string) => filesystem.lstat(filepath),
 			readdir: (filepath: string) => filesystem.readdir(filepath),
 			fs_normalized: normalize,
 			create_proc_default_rgui: createWindowProcessFromProgramTable,
 			exec: createProcess,
-			mkdir: filesystem.mkdir
+			mkdir: (filepath: string) => filesystem.mkdir(filepath),
+			pathFormat: (root: string, base: string) => format({ root, base })
 		}),
 		[
 			createProcess,
@@ -44,8 +45,6 @@ export function ProcessesHeart() {
 		for (const process of runningProcesses) {
 			const { program, args } = formatInput(process?.cmd ?? "");
 			const programContent = filesystem.readFile(`/bin/${program}`, { decode: true });
-
-			console.log(programContent);
 
 			if (!programContent) {
 				pidsToKill.push(process.pid);
@@ -113,18 +112,28 @@ export function ProcessesHeart() {
 										response: "SYSCALL_METHOD_NOT_READY"
 									});
 								} else {
-									const syscallResponse = methods[method](...args);
-
-									const treatedResponse =
-										syscallResponse === undefined
-											? ""
-											: JSON.parse(JSON.stringify(syscallResponse));
-
-									worker.postMessage({
-										type: "SYSCALL_RESPONSE",
-										id: responseId,
-										response: treatedResponse
-									});
+									try {
+										const syscallResponse = methods[method](...args);
+	
+										const treatedResponse =
+											syscallResponse === undefined
+												? ""
+												: JSON.parse(JSON.stringify(syscallResponse));
+	
+										worker.postMessage({
+											type: "SYSCALL_RESPONSE",
+											id: responseId,
+											response: treatedResponse,
+											status: 1
+										});
+									} catch(error) {
+										worker.postMessage({
+											type: "SYSCALL_RESPONSE",
+											id: responseId,
+											response: error,
+											status: 0
+										})
+									}
 								}
 							} else {
 								worker.postMessage({

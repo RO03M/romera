@@ -1,3 +1,4 @@
+import { EEXIST, ENOENT } from "../../errors";
 import { incrementalId } from "../utils/incremental-id";
 import { Stat } from "./stat";
 import textEncoder from "./text-encoder";
@@ -54,7 +55,7 @@ export class Filesystem {
 			}
 
 			if (currentDir === undefined) {
-				throw new Error("Not found");
+				throw ENOENT;
 			}
 
 			dir = currentDir;
@@ -105,6 +106,15 @@ export class Filesystem {
 	}
 
 	public mkdir(filepath: string) {
+		try {
+			this.lookup(filepath);
+			throw EEXIST;
+		} catch {}
+
+		if (this.stat(filepath) !== null) {
+			throw EEXIST;
+		}
+
 		const [dirname, basename] = splitParentPathAndNodeName(filepath);
 		const dir = this.lookup(dirname);
 

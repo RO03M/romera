@@ -74,13 +74,11 @@ async function main(dirName) {
 	}
 
 	const pwd = await syscall("pwd");
-
-	const { status } = await syscall("mkdir", pwd, dirName);
-	
-	if (!status) {
+	const resolvedPath = await syscall("pathFormat", pwd, dirName);
+	await syscall("mkdir", resolvedPath).catch(async () => {
 		await syscall("echo", "Cannot create dir " + dirName);
 		exit();
-	}
+	});
 }`
 		},
 		{
