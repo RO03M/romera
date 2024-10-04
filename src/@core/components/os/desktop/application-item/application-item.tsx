@@ -3,14 +3,14 @@ import { useGridSize } from "../../../../hooks/use-grid-size";
 import { DragBackground } from "./drag-background";
 import { useApplicationControl } from "./use-application-control";
 import { useProcessesStore } from "../../../../processes/use-processes-store";
-import type { Node } from "../../../../filesystem/node";
 import { normalize } from "../../../../filesystem/utils/path";
 import { useApplicationExecutable } from "./use-application-executable";
 import styled from "styled-components";
+import type { Stat } from "../../../../filesystem/stat";
 
 interface ApplicationItemProps {
 	name: string;
-	type: Node["type"];
+	type: Stat["type"];
 	focused?: boolean;
 	onFocus?: () => void;
 }
@@ -19,7 +19,8 @@ export function ApplicationItem(props: ApplicationItemProps) {
 	const { name, focused = false, onFocus } = props;
 
 	const { item, blur, itemComponentProps } = useApplicationControl(name);
-	const { iconRelativeUrl, programName, ProgramComponent } = useApplicationExecutable(name);
+	const { iconRelativeUrl, programName, ProgramComponent } =
+		useApplicationExecutable(name);
 	const { createWindowProcess } = useProcessesStore();
 
 	const gridSize = useGridSize();

@@ -1,16 +1,13 @@
 import { useMemo } from "preact/hooks";
-import { useDir } from "../../../filesystem/hooks/use-directory";
+import { filesystem } from "../../../../app";
+import { Stat } from "../../../filesystem/stat";
 
 export function useDesktopItems() {
-	const { dir: desktopDir } = useDir("/home/romera/desktop");
+	const files = useMemo(() => {
+		return filesystem
+			.readdir("/home/romera/desktop", { withFileTypes: true })
+			.filter((stat) => stat instanceof Stat);
+	}, []);
 
-	const items = useMemo(() => {
-		if (desktopDir !== null && desktopDir.nodes !== undefined) {
-			return desktopDir.nodes;
-		}
-
-		return [];
-	}, [desktopDir]);
-
-	return { items };
+	return { files };
 }

@@ -2,7 +2,7 @@ import { EEXIST, ENOENT } from "../../errors";
 import { incrementalId } from "../utils/incremental-id";
 import { Stat } from "./stat";
 import textEncoder from "./text-encoder";
-import type { HydrationData, ReadDirOptions } from "./types";
+import type { HydrationData, ReadDirOptions, ReadFileOptions } from "./types";
 import { format, normalize, splitParentPathAndNodeName, splitPath } from "./utils/path";
 
 const STAT_KEY = 0;
@@ -93,16 +93,23 @@ export class Filesystem {
 		return this.stat(filepath, true);
 	}
 
-	public readdir(path: string) {
+	public readdir(path: string, options: ReadDirOptions = {}) {
+		const { withFileTypes = false } = options;
 		const dir = this.lookup(path);
 
-		return Array.from(dir.keys()).map((key, index) => {
-			if (index === 0) {
-				return;
-			}
+		const filenames = Array.from(dir.keys()).filter((filename) => {
+			return typeof filename === "string";
+		});
 
-			return key;
-		}).filter(Boolean);
+		if (withFileTypes) {
+			return filenames.map((filename) => {
+				const resolvedPath = normalize(`${path}/${filename}`);
+
+				return this.stat(resolvedPath);
+			});
+		}
+
+		return filenames;
 	}
 
 	public mkdir(filepath: string) {
@@ -182,7 +189,7 @@ export class Filesystem {
 		dir.set(basename, entry);
 	}
 
-	public readFile(filepath: string, options: ReadDirOptions = {}) {
+	public readFile(filepath: string, options: ReadFileOptions = {}) {
 		const { decode = false } = options;
 
 		const stat = this.stat(filepath);

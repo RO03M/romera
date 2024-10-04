@@ -8,6 +8,10 @@ export interface HydrationData {
 	nodes?: HydrationData[];
 }
 
-export interface ReadDirOptions {
+export interface ReadFileOptions {
 	decode?: boolean;
+}
+
+export interface ReadDirOptions {
+	withFileTypes?: boolean;
 }
