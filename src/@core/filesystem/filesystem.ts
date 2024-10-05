@@ -1,9 +1,15 @@
 import { EEXIST, ENOENT } from "../../errors";
+import { btc } from "../utils/better-try-catch";
 import { incrementalId } from "../utils/incremental-id";
 import { Dirent } from "./dirent";
 import { Stat } from "./stat";
 import textEncoder from "./text-encoder";
-import type { HydrationData, ReadDirOptions, ReadFileOptions } from "./types";
+import type {
+	HydrationData,
+	MakeDirectoryOptions,
+	ReadDirOptions,
+	ReadFileOptions
+} from "./types";
 import {
 	format,
 	normalize,
@@ -61,7 +67,7 @@ export class Filesystem {
 			}
 
 			if (currentDir === undefined) {
-				throw ENOENT;
+				throw new ENOENT(normalize(dirtyPath));
 			}
 
 			dir = currentDir;
@@ -128,7 +134,9 @@ export class Filesystem {
 		return filenames;
 	}
 
-	public mkdir(filepath: string) {
+	public mkdir(filepath: string, options: MakeDirectoryOptions = {}) {
+		const { parents } = options;
+
 		try {
 			this.lookup(filepath);
 			throw EEXIST;
@@ -139,14 +147,31 @@ export class Filesystem {
 		}
 
 		const [dirname, basename] = splitParentPathAndNodeName(filepath);
+
+		if (parents) {
+			this.recursiveMkdir(dirname);
+		}
+
 		const dir = this.lookup(dirname);
 
 		const entry: FSMap = new Map();
 		const stat = new Stat("dir", incrementalId(), 0);
 		entry.set(STAT_KEY, stat);
-		dir.set(basename, entry);
+		dir!.set(basename, entry);
 
 		return stat;
+	}
+
+	private recursiveMkdir(filepath: string) {
+		const parts = splitPath(filepath);
+		let currentPath = "";
+			
+		for (const part of parts) {
+			currentPath += part;
+			currentPath = normalize(currentPath);
+
+			btc(() => this.mkdir(currentPath));
+		}
 	}
 
 	public rmdir(filepath: string) {

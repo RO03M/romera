@@ -4,26 +4,35 @@ import { Filesystem } from "./filesystem";
 const filesystem = new Filesystem("fs-unit-tests");
 
 describe("Filesystem general node operations", () => {
-	it("Should be able to find the root directory stat", () => {
-		const stat = filesystem.stat("/");
-		expect(stat).toBeDefined();
-	});
+	describe("directory", () => {
+		it("Should be able to find the root directory stat", () => {
+			const stat = filesystem.stat("/");
+			expect(stat).toBeDefined();
+		});
+	
+		it("Should be able to create a directory", () => {
+			filesystem.mkdir("/teste");
+			const stat = filesystem.stat("/teste");
+	
+			expect(stat).not.toBeNull();
+	
+			filesystem.mkdir("/teste/teste");
+		});
+	
+		it("Should be able to create nest create", () => {
+			filesystem.mkdir("/nested/directory/test", { parents: true });
+			const stat = filesystem.stat("/nested/directory/test");
 
-	it("Should be able to create a directory", () => {
-		filesystem.mkdir("/teste");
-		const stat = filesystem.stat("/teste");
+			expect(stat).not.toBeNull();
+		});
 
-		expect(stat).toBeDefined();
-
-		filesystem.mkdir("/teste/teste");
-	});
-
-	it("Should be able to remove a directory", () => {
-		filesystem.mkdir("/tmp");
-		expect(filesystem.stat("/tmp")).not.toBeNull();
-
-		filesystem.rmdir("/tmp");
-		expect(filesystem.stat("/tmp")).toBeNull();
+		it("Should be able to remove a directory", () => {
+			filesystem.mkdir("/tmp");
+			expect(filesystem.stat("/tmp")).not.toBeNull();
+	
+			filesystem.rmdir("/tmp");
+			expect(filesystem.stat("/tmp")).toBeNull();
+		});
 	});
 
 	it("Should be able to create file with writeFile", () => {
