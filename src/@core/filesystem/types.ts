@@ -4,8 +4,12 @@ export interface HydrationData {
 	name: string;
 	type: StatType;
 	target?: string;
-	content?: string;
+	content?: string | Uint8Array;
 	nodes?: HydrationData[];
+}
+
+export interface MakeDirectoryOptions {
+	parents?: boolean;
 }
 
 export interface ReadFileOptions {

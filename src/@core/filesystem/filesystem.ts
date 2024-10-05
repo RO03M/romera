@@ -45,6 +45,7 @@ export class Filesystem {
 				}
 			}
 		} else if (data.type === "file") {
+			console.log(data);
 			this.writeFile(absolutePath, data.content ?? "");
 		} else if (data.type === "symlink" && data.target !== undefined) {
 			this.symlink(data.target, absolutePath);
@@ -202,7 +203,7 @@ export class Filesystem {
 			stat.size = data.byteLength;
 
 			entry.set(STAT_KEY, stat);
-
+			console.log(entry, dir);
 			dir.set(basename, entry);
 			this.inodeTable.set(stat.inode, data);
 		} else {

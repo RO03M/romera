@@ -12,19 +12,6 @@ export function Desktop() {
 		setFocusedItem(null);
 	}, []);
 
-	const onFileDrop = useCallback(async (event: DragEvent) => {
-		event.preventDefault();
-		if (event.dataTransfer === null) {
-			return;
-		}
-
-		const files = await getFilesFromDataTransferItems(
-			event.dataTransfer.items
-		);
-
-		console.log(files);
-	}, []);
-
 	useEffect(() => {
 		document.addEventListener("click", resetFocus);
 
@@ -34,11 +21,7 @@ export function Desktop() {
 	}, [resetFocus]);
 
 	return (
-		<DesktopArea
-			id={"desktop-area"}
-			onDrop={onFileDrop}
-			onDragOver={(event) => event.preventDefault()}
-		>
+		<DesktopArea id={"desktop-area"}>
 			{items.map((file) => (
 				<ApplicationItem
 					key={file.inode}
