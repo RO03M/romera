@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { ApplicationItem } from "./application-item";
 import { useDesktopItems } from "./use-desktop-items";
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { getFilesFromDataTransferItems } from "datatransfer-files-promise";
 
 export function Desktop() {
 	const { items } = useDesktopItems();

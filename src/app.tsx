@@ -24,7 +24,7 @@ export function App() {
 
 		const data = await getFilesFromDataTransferItems(event.dataTransfer.items);
 		for (const entries of data) {
-			filesystem.hydrate(entries);
+			filesystem.hydrate(entries, "/home/romera/desktop");
 		}
 		console.log(filesystem.root);
 		// const files = await getFilesFromDataTransferItems(event.dataTransfer.items);

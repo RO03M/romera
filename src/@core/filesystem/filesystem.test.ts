@@ -96,4 +96,17 @@ describe("Filesystem general node operations", () => {
 			expect(filesystem.stat("/bin/teste/relative-link")).toEqual(filesystem.stat("/bin/symlink-relative-path-dir"));
 		});
 	});
+
+	describe("watch events", () => {
+		it("Should be able to subscribe to events", () => {
+			function callback() {
+				return true;
+			}
+
+			filesystem.watch("/home/romera/desktop", callback);
+
+
+			expect(callback).toBeCalled();
+		});
+	});
 });

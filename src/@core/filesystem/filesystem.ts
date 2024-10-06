@@ -2,6 +2,7 @@ import { EEXIST, ENOENT } from "../../errors";
 import { btc } from "../utils/better-try-catch";
 import { incrementalId } from "../utils/incremental-id";
 import { Dirent } from "./dirent";
+import { FilesystemWatcher } from "./filesystem-watcher";
 import { Stat } from "./stat";
 import textEncoder from "./text-encoder";
 import type {
@@ -22,6 +23,7 @@ const STAT_KEY = 0;
 type FSMap = Map<string | 0, Stat | FSMap>;
 
 export class Filesystem {
+	private watcher: FilesystemWatcher = new FilesystemWatcher();
 	public fsName: string;
 	public inodeTable: Map<Stat["inode"], Uint8Array> = new Map();
 	public root: FSMap = new Map([
@@ -165,7 +167,7 @@ export class Filesystem {
 	private recursiveMkdir(filepath: string) {
 		const parts = splitPath(filepath);
 		let currentPath = "";
-			
+
 		for (const part of parts) {
 			currentPath += part;
 			currentPath = normalize(currentPath);

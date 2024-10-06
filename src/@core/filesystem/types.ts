@@ -19,3 +19,5 @@ export interface ReadFileOptions {
 export interface ReadDirOptions {
 	withFileTypes?: boolean;
 }
+
+export type WatchEvents = "change" | "deleted" | "rename" | "created";
