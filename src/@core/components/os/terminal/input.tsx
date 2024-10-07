@@ -1,7 +1,14 @@
-import { styled } from "@mui/material";
 import { UnstyledInput } from "../../ui/inputs/unstyled-input";
-import type { InputHTMLAttributes } from "preact/compat";
+import {
+	forwardRef,
+	useEffect,
+	useRef,
+	useState,
+	type InputHTMLAttributes
+} from "preact/compat";
 import { LineStart } from "./line-start";
+import styled from "styled-components";
+import { MutableRef } from "preact/hooks";
 
 interface TerminalInputProps {
 	isPending?: boolean;
@@ -10,33 +17,71 @@ interface TerminalInputProps {
 	username: string;
 }
 
-export function TerminalInput(props: TerminalInputProps) {
+export const TerminalInput = forwardRef<
+	HTMLInputElement | null,
+	TerminalInputProps
+>(function TerminalInput(props, ref) {
 	const { nodePath, username, input, isPending = false } = props;
 
-	if (isPending) {
-		return <span />;
-	}
+	const inputRef = useRef<HTMLInputElement | null>(null);
+
+	useEffect(() => {
+		if (!isPending && inputRef?.current) {
+			inputRef.current.focus();
+		}
+	}, [isPending]);
+
+	useEffect(() => {
+		function onKeyDown(event: KeyboardEvent) {
+			console.log(inputRef.current?.selectionStart, inputRef.current?.selectionEnd);
+		}
+
+		document.addEventListener("keydown", onKeyDown);
+
+		return () => {
+			document.removeEventListener("keydown", onKeyDown)
+		}
+	}, []);
 
 	return (
-		<Wrapper>
+		<Wrapper $isPending={isPending}>
 			<LineStart username={username} path={nodePath} />
-			<UnstyledInput {...input} as={"input"} />
+			<Input
+				{...input}
+				as={"input"}
+				ref={(element) => {
+					inputRef.current = element;
+					if (typeof ref === "function") {
+						ref(element);
+					} else if (ref) {
+						ref.current = element;
+					}
+				}}
+			/>
 		</Wrapper>
 	);
-}
-
-const Wrapper = styled<"div">("div")({
-	position: "relative",
-	display: "flex",
-	flexDirection: "row"
 });
 
-export const NodePathTypography = styled<"span">("span")({
+const Wrapper = styled.div<{ $isPending: boolean }>((props) => ({
+	position: "relative",
+	display: props.$isPending ? "none" : "flex",
+	flexDirection: "row"
+}));
+
+export const NodePathTypography = styled.span({
 	color: "darkblue",
 	"&::after": {
 		content: "'$'",
 		color: "white"
 	}
+});
+
+const Input = styled(UnstyledInput)({
+	width: "100%",
+	background: "none",
+	border: "none",
+	outline: "none"
+	// caretColor: "transparent"
 });
 
 // const Caret = styled<"div">("div")({

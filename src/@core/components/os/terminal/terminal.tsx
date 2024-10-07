@@ -1,6 +1,6 @@
 import { styled } from "@mui/material";
 import { TerminalInput } from "./input";
-import { useCallback, useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { formatInput } from "./utils/format-input";
 import { normalize } from "../../../filesystem/utils/path";
 import { type TerminalOutput, TerminalOutputList } from "./output-list";
@@ -16,14 +16,14 @@ export function Terminal(props: ProcessComponentProps) {
 	const { ttys, addTTY } = useTTYStore();
 
 	const [id] = useState(incrementalId("tty"));
-	// Rename to currentWorkingDirectory
 	const [currentWorkingDirectory, setCurrentWorkingDirectory] =
 		useState(workingDirectory);
 	const [isPending, setIsPending] = useState(false);
 	const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
 	const [input, setInput] = useState("");
 
-	// const { findDirectory } = useFilesystem();
+	const inputRef = useRef<HTMLInputElement | null>(null);
+
 	const { createProcess } = useProcessesStore();
 
 	const echo = useCallback((message: string) => {
@@ -76,7 +76,6 @@ export function Terminal(props: ProcessComponentProps) {
 					break;
 				}
 				case "broadcast": {
-					console.log(ttys);
 					// biome-ignore lint/complexity/noForEach: <explanation>
 					ttys.forEach((tty) => tty.echo("teste"));
 					break;
@@ -121,19 +120,18 @@ export function Terminal(props: ProcessComponentProps) {
 	}, [id, addTTY, echo]);
 
 	return (
-		<Wrapper onSubmit={onSubmit}>
+		<Wrapper onSubmit={onSubmit} onClick={() => inputRef.current?.focus()}>
 			<TerminalOutputList outputs={outputs} />
-			<div>
-				<TerminalInput
-					isPending={isPending}
-					username={"romera"}
-					nodePath={currentWorkingDirectory}
-					input={{
-						onInput: (event) => setInput(event.currentTarget.value),
-						value: input
-					}}
-				/>
-			</div>
+			<TerminalInput
+				isPending={isPending}
+				username={"romera"}
+				nodePath={currentWorkingDirectory}
+				ref={inputRef}
+				input={{
+					onInput: (event) => setInput(event.currentTarget.value),
+					value: input
+				}}
+			/>
 		</Wrapper>
 	);
 }

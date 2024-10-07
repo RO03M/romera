@@ -15,7 +15,7 @@ export function TerminalOutputList(props: TerminalOutputListProps) {
 	const { outputs } = props;
 
 	return (
-		<div>
+		<>
 			{outputs.map((output, key) => (
 				<div
 					style={{ whiteSpace: "pre-wrap" }}
@@ -29,6 +29,6 @@ export function TerminalOutputList(props: TerminalOutputListProps) {
 					{output.message !== undefined && <div>{output.message}</div>}
 				</div>
 			))}
-		</div>
+		</>
 	);
 }
