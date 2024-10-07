@@ -1,4 +1,4 @@
-import { useMemo } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import { filesystem } from "../../../../app";
 import type { Dirent } from "../../../filesystem/dirent";
 import { getConfigFromApplication } from "./application-item/application-config-file";
@@ -11,15 +11,17 @@ interface DesktopItem extends Dirent {
 }
 
 export function useDesktopItems() {
-	const items = useMemo(() => {
+	const [items, setItems] = useState<DesktopItem[]>([]);
+
+	const fetchItems = useCallback(() => {
 		const files = filesystem
 			.readdir("/home/romera/desktop", { withFileTypes: true })
 			.filter((dirent) => typeof dirent !== "string");
 
-		const items: DesktopItem[] = [];
+		const tempItems: DesktopItem[] = [];
 		for (const file of files) {
 			const config = getConfigFromApplication(file.name);
-			items.push({
+			tempItems.push({
 				...file,
 				x: config.x,
 				y: config.y,
@@ -27,8 +29,19 @@ export function useDesktopItems() {
 			});
 		}
 
-		return items;
+		setItems(tempItems);
 	}, []);
+
+	useEffect(() => {
+		fetchItems();
+		filesystem.watch("/home/romera/desktop", (event) => {
+			if (event !== "change") {
+				return;
+			}
+
+			fetchItems();
+		});
+	}, [fetchItems]);
 
 	return { items };
 }

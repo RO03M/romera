@@ -108,7 +108,6 @@ export function useWindow() {
 		event: MouseEvent | TouchEvent | PointerEvent,
 		info: PanInfo
 	) => {
-		console.log(width.get());
 		event.stopPropagation();
 		const newHeight = clamp(height.get() - info.delta.y, 200);
 		if (newHeight !== height.get()) {

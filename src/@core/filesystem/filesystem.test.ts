@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Filesystem } from "./filesystem";
 
 const filesystem = new Filesystem("fs-unit-tests");
@@ -99,14 +99,27 @@ describe("Filesystem general node operations", () => {
 
 	describe("watch events", () => {
 		it("Should be able to subscribe to events", () => {
-			function callback() {
-				return true;
-			}
+			const callback = vi.fn(() => {});
 
 			filesystem.watch("/home/romera/desktop", callback);
+			filesystem.mkdir("/home/romera/desktop", { parents: true });
+			filesystem.writeFile("/home/romera/desktop/watch1", "watch 1");
 
+			expect(callback).toBeCalledTimes(2); // created and changed when created the watch1 file
+			expect(callback).toHaveBeenCalledWith("created")
+			expect(callback).toHaveBeenCalledWith("change")
+		});
 
-			expect(callback).toBeCalled();
+		it("Should be able to subscribe twice or more to one single path", () => {
+			const callback1 = vi.fn(() => {});
+			const callback2 = vi.fn(() => {});
+
+			filesystem.watch("/watchtest2", callback1);
+			filesystem.watch("/watchtest2", callback2);
+			filesystem.mkdir("/watchtest2");
+
+			expect(callback1).toHaveBeenCalledWith("created");
+			expect(callback2).toHaveBeenCalledWith("created");
 		});
 	});
 });

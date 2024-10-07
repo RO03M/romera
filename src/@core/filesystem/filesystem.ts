@@ -9,7 +9,8 @@ import type {
 	HydrationData,
 	MakeDirectoryOptions,
 	ReadDirOptions,
-	ReadFileOptions
+	ReadFileOptions,
+	WatchCallback
 } from "./types";
 import {
 	format,
@@ -159,6 +160,8 @@ export class Filesystem {
 		const entry: FSMap = new Map();
 		const stat = new Stat("dir", incrementalId(), 0);
 		entry.set(STAT_KEY, stat);
+		this.watcher.emit(dirname, "change");
+		this.watcher.emit(filepath, "created");
 		dir!.set(basename, entry);
 
 		return stat;
@@ -207,6 +210,8 @@ export class Filesystem {
 
 			dir.set(basename, entry);
 			this.inodeTable.set(stat.inode, data);
+			this.watcher.emit(dirname, "change");
+			this.watcher.emit(filepath, "created");
 		} else {
 			throw new Error("Invalid data type");
 		}
@@ -242,7 +247,7 @@ export class Filesystem {
 		}
 
 		if (stat?.isDirectory()) {
-			throw new Error("Stat is a directory");
+			return null;
 		}
 
 		const data = this.inodeTable.get(stat.inode);
@@ -268,5 +273,9 @@ export class Filesystem {
 		if (stat.type === "dir") {
 			throw new Error(`${filepath} is a directory`);
 		}
+	}
+
+	public watch(filepath: string, callback: WatchCallback) {
+		this.watcher.watch(filepath, callback);
 	}
 }

@@ -6,17 +6,21 @@ import "./app.css";
 import { theme } from "./theme";
 import { Dock } from "./@core/components/os/dock/dock";
 import { TopPanel } from "./@core/components/os/top-panel/top-panel";
-import { Terminal } from "./@core/components/os/terminal/terminal";
 import { Filesystem } from "./@core/filesystem/filesystem";
 import { initialRoot } from "./@core/filesystem/initial-filesystem-nodes";
 import { useCallback } from "preact/hooks";
 import { getFilesFromDataTransferItems } from "./@core/utils/datatransfer-to-files";
+import { positionToGridPosition } from "./@core/utils/grid";
+import { ApplicationConfig } from "./@core/components/os/desktop/application-item/application-config-file";
 
 export const filesystem = new Filesystem("rome-os-fs");
 filesystem.hydrate(initialRoot);
 
 export function App() {
 	const onFileDrop = useCallback(async (event: DragEvent) => {
+		const { x, y } = positionToGridPosition([event.clientX, event.clientY]);
+
+		const config = new ApplicationConfig({ x: x.toString(), y: y.toString() });
 		event.preventDefault();
 		if (event.dataTransfer === null) {
 			return;
@@ -25,19 +29,8 @@ export function App() {
 		const data = await getFilesFromDataTransferItems(event.dataTransfer.items);
 		for (const entries of data) {
 			filesystem.hydrate(entries, "/home/romera/desktop");
+			filesystem.writeFile(`/usr/applications/${entries.name}`, config.stringify());
 		}
-		console.log(filesystem.root);
-		// const files = await getFilesFromDataTransferItems(event.dataTransfer.items);
-
-		// for (const file of files) {
-		// 	const buffer = await file
-		// 		.arrayBuffer()
-		// 		.then((buffer) => new Uint8Array(buffer));
-
-		// 	console.log(file, file.filepath, buffer);
-		// }
-
-		// console.log(files);
 	}, []);
 
 	return (
@@ -47,6 +40,7 @@ export function App() {
 				onDrop={onFileDrop}
 				onDragOver={(event) => event.preventDefault()}
 			>
+				<ProcessesHeart />
 				<TopPanel />
 				<WindowManager />
 				<Desktop />

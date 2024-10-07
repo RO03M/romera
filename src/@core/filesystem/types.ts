@@ -20,4 +20,6 @@ export interface ReadDirOptions {
 	withFileTypes?: boolean;
 }
 
-export type WatchEvents = "change" | "deleted" | "rename" | "created";
+export type WatchEvent = "change" | "deleted" | "rename" | "created";
+
+export type WatchCallback = (event: WatchEvent) => void;

@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useMemo } from "preact/hooks";
 import { useProcessesStore } from "./use-processes-store";
-import { useFilesystem } from "../filesystem/use-filesystem";
 import { formatInput } from "../components/os/terminal/utils/format-input";
 import type { Process } from "./types";
 import { RScriptTranslator } from "./rscript-translator";
 import { format, normalize } from "../filesystem/utils/path";
 import { filesystem } from "../../app";
+import type { ReadFileOptions } from "../filesystem/types";
 
 export function ProcessesHeart() {
-	// const { findNode, findFile, findDirectory, createDirectory } =
-	// 	useFilesystem();
 	const {
 		processes,
 		setPidsToRunning,
@@ -23,16 +21,15 @@ export function ProcessesHeart() {
 			stat: (filepath: string) => filesystem.stat(filepath),
 			lstat: (filepath: string) => filesystem.lstat(filepath),
 			readdir: (filepath: string) => filesystem.readdir(filepath),
+			readFile: (filepath: string, options?: ReadFileOptions) =>
+				filesystem.readFile(filepath, options),
 			fs_normalized: normalize,
 			create_proc_default_rgui: createWindowProcessFromProgramTable,
 			exec: createProcess,
 			mkdir: (filepath: string) => filesystem.mkdir(filepath),
 			pathFormat: (root: string, base: string) => format({ root, base })
 		}),
-		[
-			createProcess,
-			createWindowProcessFromProgramTable
-		]
+		[createProcess, createWindowProcessFromProgramTable]
 	);
 
 	const heartbeat = useCallback(() => {
@@ -43,8 +40,15 @@ export function ProcessesHeart() {
 		);
 
 		for (const process of runningProcesses) {
+			if (process.Component !== undefined) {
+				continue;
+			}
+
 			const { program, args } = formatInput(process?.cmd ?? "");
-			const programContent = filesystem.readFile(`/bin/${program}`, { decode: true });
+
+			const programContent = filesystem.readFile(`/bin/${program}`, {
+				decode: true
+			});
 
 			if (!programContent) {
 				pidsToKill.push(process.pid);
@@ -59,10 +63,7 @@ export function ProcessesHeart() {
 
 			startedPids.push(process.pid);
 
-			const translator = new RScriptTranslator(
-				programContent,
-				args
-			);
+			const translator = new RScriptTranslator(programContent, args);
 			translator.cookScript();
 			const scriptBlobURL = translator.generateBlob();
 
@@ -114,25 +115,25 @@ export function ProcessesHeart() {
 								} else {
 									try {
 										const syscallResponse = methods[method](...args);
-	
+
 										const treatedResponse =
 											syscallResponse === undefined
 												? ""
 												: JSON.parse(JSON.stringify(syscallResponse));
-	
+
 										worker.postMessage({
 											type: "SYSCALL_RESPONSE",
 											id: responseId,
 											response: treatedResponse,
 											status: 1
 										});
-									} catch(error) {
+									} catch (error) {
 										worker.postMessage({
 											type: "SYSCALL_RESPONSE",
 											id: responseId,
 											response: error,
 											status: 0
-										})
+										});
 									}
 								}
 							} else {

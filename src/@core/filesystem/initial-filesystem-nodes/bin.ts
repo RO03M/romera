@@ -55,10 +55,11 @@ async function main(fileName) {
 	const pwd = await syscall("pwd");
 	const filePath = await syscall("fs_normalized", pwd + "/" + fileName);
 
-	const file = await syscall("fs_ffile", filePath);
+	const stat = await syscall("stat", filePath);
 
-	if (file !== null) {
-		await syscall("echo", file.content);
+	if (stat !== null) {
+		const content = await syscall("readFile", filePath, { decode: true });
+		await syscall("echo", content);
 	}
 }`
 		},

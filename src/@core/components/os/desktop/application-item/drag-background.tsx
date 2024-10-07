@@ -23,7 +23,7 @@ export function DragBackground(props: DragBackgroundProps) {
 				borderRadius: "16px",
 				backdropFilter: "blur(7px)",
 				zIndex: 9999,
-				border: "1px solid rgba(255, 255, console.log()255, 0.03)"
+				border: "1px solid rgba(255, 255, 255, 0.03)"
 			}}
 		/>
 	);
