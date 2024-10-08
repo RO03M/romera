@@ -1,8 +1,8 @@
 import { Editor } from "@monaco-editor/react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { useEffect, useState } from "preact/hooks";
-import { useFile } from "../@core/filesystem/hooks/use-file";
+import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import type { ProcessComponentProps } from "../@core/processes/types";
+import { filesystem } from "../app";
 
 type CodeEditorProps = ProcessComponentProps;
 
@@ -11,16 +11,34 @@ export function CodeEditor(props: CodeEditorProps) {
 
 	const [value, setValue] = useState<string | undefined>("");
 
-	const { file, writeFile } = useFile(workingDirectory);
+	const fileContent = useMemo(() => {
+		if (workingDirectory === undefined) {
+			return "";
+		}
+		const content = filesystem.readFile(workingDirectory, { decode: true });
+		if (content === null) {
+			return "";
+		}
 
-	useHotkeys("ctrl+s", () => writeFile(value), {
+		return content as string;
+	}, [workingDirectory]);
+
+	const writeFile = useCallback(() => {
+		if (workingDirectory === undefined) {
+			return;
+		}
+
+		filesystem.writeFile(workingDirectory, value ?? "");
+	}, [value, workingDirectory]);
+
+	useHotkeys("ctrl+s", writeFile, {
 		preventDefault: true,
 		enableOnFormTags: true
 	});
 
 	useEffect(() => {
-		setValue(file?.content ?? "");
-	}, [file]);
+		setValue(fileContent);
+	}, [fileContent]);
 
 	return (
 		<Editor
