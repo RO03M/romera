@@ -160,9 +160,9 @@ export class Filesystem {
 		const entry: FSMap = new Map();
 		const stat = new Stat("dir", incrementalId(), 0);
 		entry.set(STAT_KEY, stat);
+		dir!.set(basename, entry);
 		this.watcher.emit(dirname, "change");
 		this.watcher.emit(filepath, "created");
-		dir!.set(basename, entry);
 
 		return stat;
 	}

@@ -18,6 +18,8 @@ export function useDesktopItems() {
 			.readdir("/home/romera/desktop", { withFileTypes: true })
 			.filter((dirent) => typeof dirent !== "string");
 
+		console.log("teste", files);
+
 		const tempItems: DesktopItem[] = [];
 		for (const file of files) {
 			const config = getConfigFromApplication(file.name);
