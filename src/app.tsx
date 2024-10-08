@@ -12,6 +12,7 @@ import { useCallback } from "preact/hooks";
 import { getFilesFromDataTransferItems } from "./@core/utils/datatransfer-to-files";
 import { positionToGridPosition } from "./@core/utils/grid";
 import { ApplicationConfig } from "./@core/components/os/desktop/application-item/application-config-file";
+import { extname } from "./@core/filesystem/utils/path";
 
 export const filesystem = new Filesystem("rome-os-fs");
 filesystem.hydrate(initialRoot);
@@ -20,14 +21,15 @@ export function App() {
 	const onFileDrop = useCallback(async (event: DragEvent) => {
 		const { x, y } = positionToGridPosition([event.clientX, event.clientY]);
 
-		const config = new ApplicationConfig({ x: x.toString(), y: y.toString() });
 		event.preventDefault();
 		if (event.dataTransfer === null) {
 			return;
 		}
-
+		
 		const data = await getFilesFromDataTransferItems(event.dataTransfer.items);
 		for (const entries of data) {
+			const config = new ApplicationConfig({ x: x.toString(), y: y.toString() });
+			config.setDefaultExecNameFromExt(extname(entries.name));
 			filesystem.hydrate(entries, "/home/romera/desktop");
 			filesystem.writeFile(`/usr/applications/${entries.name}`, config.stringify());
 		}

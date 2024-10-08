@@ -56,6 +56,24 @@ export class ApplicationConfig {
 	public get defaultExecName() {
 		return this.data.defaultExecName;
 	}
+
+	private set defaultExecName(programName: string) {
+		this.data.defaultExecName = programName;
+	}
+
+	public setDefaultExecNameFromExt(extension?: string) {
+		switch(extension) {
+			case ".png":
+				this.defaultExecName = "imageviewer";
+				break;
+			case ".json":
+				this.defaultExecName = "monaco";
+				break;
+			default:
+				this.defaultExecName = "monaco";
+				break;
+		}
+	}
 }
 
 export function getConfigFromApplication(applicationName: string) {
