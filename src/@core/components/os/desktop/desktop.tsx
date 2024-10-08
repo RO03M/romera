@@ -41,5 +41,5 @@ const DesktopArea = styled.div((props) => ({
 	width: "100vw",
 	height: "100vh",
 	overflow: "hidden",
-	backgroundColor: props.theme.colors.purple[600]
+	backgroundColor: props.theme.colors.indigo[900]
 }));

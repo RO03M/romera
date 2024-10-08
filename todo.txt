@@ -2,3 +2,5 @@ Adicionar informação de Load Average
 Criar um método separado para o filedrag
 Melhorar a forma de adicionar um item novo no desktop, fazer algo centralizado e que cuide já da posição automática e do nome (evitar duplicado)
 Refatorar processos
+
+!! Adicionar imagens dos icones como arquivos no filesystem
