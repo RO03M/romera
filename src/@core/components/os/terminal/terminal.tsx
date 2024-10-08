@@ -1,6 +1,5 @@
-import { styled } from "@mui/material";
 import { TerminalInput } from "./input";
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { formatInput } from "./utils/format-input";
 import { normalize } from "../../../filesystem/utils/path";
 import { type TerminalOutput, TerminalOutputList } from "./output-list";
@@ -9,6 +8,7 @@ import { incrementalId } from "../../../utils/incremental-id";
 import type { ProcessComponentProps } from "../../../processes/types";
 import { useTTYStore } from "../../../system/tty";
 import { filesystem } from "../../../../app";
+import styled from "styled-components";
 
 export function Terminal(props: ProcessComponentProps) {
 	const { workingDirectory = "/" } = props;
@@ -20,9 +20,9 @@ export function Terminal(props: ProcessComponentProps) {
 		useState(workingDirectory);
 	const [isPending, setIsPending] = useState(false);
 	const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
-	const [input, setInput] = useState("");
+	// const [input, setInput] = useState("");
 
-	const inputRef = useRef<HTMLInputElement | null>(null);
+	const [focused, setFocused] = useState(true);
 
 	const { createProcess } = useProcessesStore();
 
@@ -66,8 +66,7 @@ export function Terminal(props: ProcessComponentProps) {
 	);
 
 	const onSubmit = useCallback(
-		(event: SubmitEvent) => {
-			event.preventDefault();
+		(input: string) => {
 			const { program, args } = formatInput(input);
 
 			switch (program) {
@@ -99,12 +98,9 @@ export function Terminal(props: ProcessComponentProps) {
 			};
 
 			setOutputs((prevOutputs) => [...prevOutputs, output]);
-
-			setInput("");
 		},
 		[
 			id,
-			input,
 			currentWorkingDirectory,
 			ttys,
 			pendingMode,
@@ -119,28 +115,44 @@ export function Terminal(props: ProcessComponentProps) {
 		addTTY({ id, echo });
 	}, [id, addTTY, echo]);
 
+	useEffect(() => {
+		function loseFocus() {
+			setFocused(false);
+		}
+		document.addEventListener("click", loseFocus);
+
+		return () => {
+			document.removeEventListener("click", loseFocus);
+		};
+	}, []);
+
 	return (
-		<Wrapper onSubmit={onSubmit} onClick={() => inputRef.current?.focus()}>
+		<Wrapper
+			onClick={(event) => {
+				event.stopPropagation();
+				setFocused(true);
+			}}
+		>
 			<TerminalOutputList outputs={outputs} />
 			<TerminalInput
+				focused={focused}
 				isPending={isPending}
 				username={"romera"}
 				nodePath={currentWorkingDirectory}
-				ref={inputRef}
-				input={{
-					onInput: (event) => setInput(event.currentTarget.value),
-					value: input
-				}}
+				onSubmit={onSubmit}
 			/>
 		</Wrapper>
 	);
 }
 
-const Wrapper = styled<"form">("form")({
+const Wrapper = styled.div({
 	backgroundColor: "#000",
 	fontWeight: 700,
 	color: "#fff",
 	width: "100%",
 	height: "100%",
-	overflowY: "scroll"
+	overflowY: "scroll",
+	textRendering: "optimizeLegibility",
+	whiteSpace: "pre",
+	letterSpacing: 0.7
 });
