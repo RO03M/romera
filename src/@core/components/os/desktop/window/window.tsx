@@ -115,6 +115,7 @@ const Wrapper = styled(motion.div)({
 	top: 0,
 	left: 0,
 	display: "flex",
+	userSelect: "none",
 	flexDirection: "column",
 	backgroundColor: "#0f0f0f",
 	zIndex: 1

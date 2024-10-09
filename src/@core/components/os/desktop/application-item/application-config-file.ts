@@ -65,12 +65,17 @@ export class ApplicationConfig {
 		switch(extension) {
 			case ".png":
 			case ".jpeg":
+			case ".svg":
+			case ".webp":
 			case ".jpg":
 			case ".gif":
 				this.defaultExecName = "imageviewer";
 				break;
 			case ".json":
 				this.defaultExecName = "monaco";
+				break;
+			case ".pdf":
+				this.defaultExecName = "pdfviewer";
 				break;
 			default:
 				this.defaultExecName = "monaco";
