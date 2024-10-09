@@ -64,6 +64,9 @@ export class ApplicationConfig {
 	public setDefaultExecNameFromExt(extension?: string) {
 		switch(extension) {
 			case ".png":
+			case ".jpeg":
+			case ".jpg":
+			case ".gif":
 				this.defaultExecName = "imageviewer";
 				break;
 			case ".json":

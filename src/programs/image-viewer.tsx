@@ -1,29 +1,20 @@
 import { useMemo } from "preact/hooks";
 import type { ProcessComponentProps } from "../@core/processes/types";
-import { filesystem } from "../app";
+import { blobFromFile } from "../@core/utils/file";
 
 export function ImageViewer(props: ProcessComponentProps) {
 	const { workingDirectory } = props;
 
-	const fileBuffer = useMemo(() => {
+	const blob = useMemo(() => {
 		if (workingDirectory === undefined) {
 			return null;
 		}
 
-		const buffer = filesystem.readFile(workingDirectory);
-		return buffer;
+		return blobFromFile(workingDirectory);
 	}, [workingDirectory]);
 
-	const blob = useMemo(() => {
-		if (fileBuffer === null || typeof fileBuffer === "string") {
-			return null;
-		}
-
-		return URL.createObjectURL(new Blob([fileBuffer], { type: "image/png" }));
-	}, [fileBuffer]);
-
 	if (blob === null) {
-		return <div>unknown</div>;
+		return <div>not found</div>;
 	}
     
 	return (

@@ -1,5 +1,5 @@
 import type { HydrationData } from "../filesystem/types";
-import { fileToBuffer } from "./file-to-buffer";
+import { fileToBuffer } from "./file";
 
 async function getFileFromFileEntry(entry: FileSystemFileEntry) {
 	return new Promise<HydrationData | null>((resolve) => {

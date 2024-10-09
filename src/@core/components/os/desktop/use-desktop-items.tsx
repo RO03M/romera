@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { filesystem } from "../../../../app";
 import type { Dirent } from "../../../filesystem/dirent";
 import { getConfigFromApplication } from "./application-item/application-config-file";
@@ -17,8 +17,6 @@ export function useDesktopItems() {
 		const files = filesystem
 			.readdir("/home/romera/desktop", { withFileTypes: true })
 			.filter((dirent) => typeof dirent !== "string");
-
-		console.log("teste", files);
 
 		const tempItems: DesktopItem[] = [];
 		for (const file of files) {
