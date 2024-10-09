@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "preact/compat";
 import styled from "styled-components";
-import { useClickOutside } from "../../../hooks/use-click-outside";
 
 interface ContextMenuProps {
 	children: ReactNode;
@@ -14,8 +13,6 @@ export function ContextMenu(props: ContextMenuProps) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef<HTMLElement | null>(null);
 
-	useClickOutside(ref, () => setOpen(false));
-
 	useEffect(() => {
 		document.addEventListener("contextmenu", (event) => {
 			event.preventDefault();
@@ -24,6 +21,10 @@ export function ContextMenu(props: ContextMenuProps) {
 			setX(event.clientX);
 			setY(event.clientY);
 			setOpen(true);
+		});
+
+		document.addEventListener("click", () => {
+			setOpen(false);
 		});
 	}, []);
 
@@ -48,12 +49,15 @@ const Wrapper = styled.nav<{ $x: number; $y: number }>((props) => ({
 	backgroundColor: `${props.theme.colors.grey[800]}55`,
 	backdropFilter: "blur(4px)",
 	userSelect: "none",
+	minWidth: 100,
 	"& li": {
 		position: "relative",
 		borderRadius: 6,
-		padding: 2,
-		paddingInline: 4,
 		cursor: "pointer",
+		display: "flex",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		width: "100%",
 		"&:hover": {
 			backgroundColor: `${props.theme.colors.grey[700]}77`
 		},
@@ -66,19 +70,21 @@ const Wrapper = styled.nav<{ $x: number; $y: number }>((props) => ({
 		"&:has(ul)": {
 			"&:after": {
 				content: "'>'",
-				position: "absolute",
-				right: 0
+				// position: "absolute",
+				// right: 10
 			}
 		}
 	},
 	"& ul": {
+		display: "flex",
+		flexDirection: "column",
 		backgroundColor: `${props.theme.colors.grey[800]}55`,
 		position: "absolute",
 		listStyle: "none",
 		margin: 0,
-		padding: 0,
+		padding: 7,
 		left: "100%",
 		top: 0,
-		width: "100%"
+		minWidth: "100%"
 	}
 }));

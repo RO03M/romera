@@ -13,7 +13,8 @@ import { getFilesFromDataTransferItems } from "./@core/utils/datatransfer-to-fil
 import { positionToGridPosition } from "./@core/utils/grid";
 import { ApplicationConfig } from "./@core/components/os/desktop/application-item/application-config-file";
 import { extname } from "./@core/filesystem/utils/path";
-import { ContextMenu } from "./@core/components/os/context-menu/context-menu";
+import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
+
 
 export const filesystem = new Filesystem("rome-os-fs");
 filesystem.hydrate(initialRoot);
@@ -49,14 +50,12 @@ export function App() {
 				onDrop={onFileDrop}
 				onDragOver={(event) => event.preventDefault()}
 			>
-				<ContextMenu>
-					<li>teste</li>
-				</ContextMenu>
 				<ProcessesHeart />
 				<TopPanel />
 				<WindowManager />
 				<Desktop />
 				<Dock />
+				<DesktopContext/>
 			</div>
 		</ThemeProvider>
 	);
