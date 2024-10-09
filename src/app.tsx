@@ -13,6 +13,7 @@ import { getFilesFromDataTransferItems } from "./@core/utils/datatransfer-to-fil
 import { positionToGridPosition } from "./@core/utils/grid";
 import { ApplicationConfig } from "./@core/components/os/desktop/application-item/application-config-file";
 import { extname } from "./@core/filesystem/utils/path";
+import { ContextMenu } from "./@core/components/os/context-menu/context-menu";
 
 export const filesystem = new Filesystem("rome-os-fs");
 filesystem.hydrate(initialRoot);
@@ -25,13 +26,19 @@ export function App() {
 		if (event.dataTransfer === null) {
 			return;
 		}
-		
+
 		const data = await getFilesFromDataTransferItems(event.dataTransfer.items);
 		for (const entries of data) {
-			const config = new ApplicationConfig({ x: x.toString(), y: y.toString() });
+			const config = new ApplicationConfig({
+				x: x.toString(),
+				y: y.toString()
+			});
 			config.setDefaultExecNameFromExt(extname(entries.name));
 			filesystem.hydrate(entries, "/home/romera/desktop");
-			filesystem.writeFile(`/usr/applications/${entries.name}`, config.stringify());
+			filesystem.writeFile(
+				`/usr/applications/${entries.name}`,
+				config.stringify()
+			);
 		}
 	}, []);
 
@@ -42,6 +49,9 @@ export function App() {
 				onDrop={onFileDrop}
 				onDragOver={(event) => event.preventDefault()}
 			>
+				<ContextMenu>
+					<li>teste</li>
+				</ContextMenu>
 				<ProcessesHeart />
 				<TopPanel />
 				<WindowManager />

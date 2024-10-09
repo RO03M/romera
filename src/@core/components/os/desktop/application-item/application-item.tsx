@@ -6,20 +6,23 @@ import { useProcessesStore } from "../../../../processes/use-processes-store";
 import { normalize } from "../../../../filesystem/utils/path";
 import styled from "styled-components";
 import type { Stat } from "../../../../filesystem/stat";
-import { useMemo } from "preact/hooks";
+import { useMemo, useRef, useState } from "preact/hooks";
 import { getExecutableFromApplication } from "./get-executable-from-application";
 import { programTable } from "../../../../../programs/program-table";
+import { useClickOutside } from "../../../../hooks/use-click-outside";
 
 interface ApplicationItemProps {
 	name: string;
 	icon: string;
 	type: Stat["type"];
-	focused?: boolean;
-	onFocus?: () => void;
 }
 
 export function ApplicationItem(props: ApplicationItemProps) {
-	const { name, icon, focused = false, onFocus } = props;
+	const { name, icon } = props;
+
+	const [focused, setFocused] = useState(false);
+
+	const ref = useRef<HTMLElement | null>(null);
 
 	const { item, blur, itemComponentProps } = useApplicationControl(name);
 	const { createWindowProcess } = useProcessesStore();
@@ -28,6 +31,8 @@ export function ApplicationItem(props: ApplicationItemProps) {
 	const ProgramComponent = useMemo(() => programTable[programName], [programName]);
 
 	const gridSize = useGridSize();
+
+	useClickOutside(ref, () => setFocused(false));
 
 	return (
 		<>
@@ -39,6 +44,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 				/>
 			)}
 			<motion.div
+				ref={ref}
 				drag
 				{...itemComponentProps}
 				dragTransition={{
@@ -57,10 +63,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 					focused={focused}
 					aria-program-name={programName}
 					aria-focused={focused}
-					onClick={(event) => {
-						event.stopPropagation();
-						onFocus?.();
-					}}
+					onClick={() => setFocused(true)}
 					onDblClickCapture={() =>
 						createWindowProcess(ProgramComponent, {
 							workingDirectory: normalize(`/home/romera/desktop/${name}`)
