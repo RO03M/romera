@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { normalize } from "./path";
+import { filename, normalize } from "./path";
 
 describe("absolute path testing", () => {
 	test("format slashes from path", () => {
@@ -32,4 +32,14 @@ describe("absolute path testing", () => {
     test("support for slash redundancy", () => {
         expect(normalize("//home/////projects")).toBe("/home/projects");
     });
+
+	describe("filename handler", () => {
+		test("Should return only the name without the extension", () => {
+			expect(filename("file.ts")).toBe("file");
+			expect(filename("/file.ts")).toBe("file");
+			expect(filename("/var/file.ts")).toBe("file");
+			expect(filename("/var/var/file.ts")).toBe("file");
+		});
+	});
+
 });

@@ -75,6 +75,12 @@ export function extname(filepath: string) {
 	return extension;
 }
 
+export function filename(filepath: string) {
+	const base = basename(filepath);
+
+	return normalize(base.replace(/\.[^.]+$/, "")).replace(/^\//, "");
+}
+
 export function splitParentPathAndNodeName(path: string) {
 	const dir = dirname(path);
 	const base = basename(path);
