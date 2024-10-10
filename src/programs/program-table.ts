@@ -5,6 +5,7 @@ import { CodeEditor } from "./code-editor";
 import type { ProcessComponentProps } from "../@core/processes/types";
 import { ImageViewer } from "./image-viewer";
 import { PdfViewer } from "./pdf-viewer";
+import { VideoViewer } from "./video-viewer";
 
 export const programTable: Record<
 	string,
@@ -14,5 +15,6 @@ export const programTable: Record<
 	explorer: Explorer,
 	monaco: CodeEditor,
 	imageviewer: ImageViewer,
+	videoViewer: VideoViewer,
 	pdfviewer: PdfViewer
 };

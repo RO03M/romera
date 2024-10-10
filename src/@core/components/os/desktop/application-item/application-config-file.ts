@@ -71,6 +71,10 @@ export class ApplicationConfig {
 			case ".gif":
 				this.defaultExecName = "imageviewer";
 				break;
+			case ".mp4":
+			case ".webm":
+				this.defaultExecName = "videoViewer";
+				break;
 			case ".json":
 				this.defaultExecName = "monaco";
 				break;
