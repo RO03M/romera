@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/compat";
+import { useEffect, useRef, useState } from "preact/compat";
 import { LineStart } from "./line-start";
 import styled, { css, keyframes } from "styled-components";
 import { clamp } from "../../../utils/math";
@@ -16,6 +16,7 @@ export function TerminalInput(props: TerminalInputProps) {
 
 	const [value, setValue] = useState("");
 	const [caretPosition, setCaretPosition] = useState(0);
+	const dummyInputRef = useRef<HTMLInputElement | null>(null);
 
 	useEffect(() => {
 		async function onKeyDown(event: KeyboardEvent) {
@@ -109,6 +110,16 @@ export function TerminalInput(props: TerminalInputProps) {
 		};
 	}, [value, focused, caretPosition, onSubmit]);
 
+	useEffect(() => {
+		if (dummyInputRef.current === null) {
+			return;
+		}
+
+		if (focused) {
+			dummyInputRef.current.focus();
+		}
+	}, [focused]);
+
 	return (
 		<Wrapper $isPending={isPending} aria-details={value}>
 			<LineStart username={username} path={nodePath} />
@@ -121,6 +132,7 @@ export function TerminalInput(props: TerminalInputProps) {
 				</Caret>
 			)}
 			<span style={{ letterSpacing: 0 }}>{value.slice(caretPosition + 1)}</span>
+			<input id={"dummy-input"} hidden ref={dummyInputRef} />
 		</Wrapper>
 	);
 }
