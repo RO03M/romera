@@ -1,13 +1,13 @@
 import {
 	useCallback,
 	useEffect,
-	useMemo,
 	useRef,
 	useState
 } from "preact/hooks";
 import { useHotkeys } from "react-hotkeys-hook";
 import styled from "styled-components";
-import { filename } from "../../../../filesystem/utils/path";
+import { filename, normalize } from "../../../../filesystem/utils/path";
+import { filesystem } from "../../../../../app";
 
 interface NameDisplayProps {
 	focused: boolean;
@@ -18,6 +18,7 @@ export function NameDisplay(props: NameDisplayProps) {
 	const { value: _value, focused = false } = props;
 
 	const [editing, setEditing] = useState(false);
+	const [oldName, setOldName] = useState(_value);
 	const [value, setValue] = useState(_value.replace(/^\//, ""));
 	const editorRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -32,8 +33,11 @@ export function NameDisplay(props: NameDisplayProps) {
 		if (event.key === "Enter") {
 			event.preventDefault();
 			setEditing(false);
+			filesystem.rename(normalize(`/home/romera/desktop/${oldName}`), value);
+			filesystem.rename(normalize(`/usr/applications/${oldName}`), value);
+			setOldName(value);
 		}
-	}, []);
+	}, [value, oldName]);
 
 	useHotkeys("f2", onF2);
 	useHotkeys("esc", () => setEditing(false));
