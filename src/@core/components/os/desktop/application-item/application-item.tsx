@@ -10,6 +10,7 @@ import { useMemo, useRef, useState } from "preact/hooks";
 import { getExecutableFromApplication } from "./get-executable-from-application";
 import { programTable } from "../../../../../programs/program-table";
 import { useClickOutside } from "../../../../hooks/use-click-outside";
+import { NameDisplay } from "./name-display";
 
 interface ApplicationItemProps {
 	name: string;
@@ -28,7 +29,10 @@ export function ApplicationItem(props: ApplicationItemProps) {
 	const { createWindowProcess } = useProcessesStore();
 
 	const programName = useMemo(() => getExecutableFromApplication(name), [name]);
-	const ProgramComponent = useMemo(() => programTable[programName], [programName]);
+	const ProgramComponent = useMemo(
+		() => programTable[programName],
+		[programName]
+	);
 
 	const gridSize = useGridSize();
 
@@ -71,7 +75,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 					}
 				>
 					<Icon style={{ backgroundImage: `url("${icon}")` }} />
-					<span>{name}</span>
+					<NameDisplay focused={focused} value={name} />
 				</ContentContainer>
 			</motion.div>
 		</>
