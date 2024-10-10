@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "preact/hooks";
-import { useDir } from "../../@core/filesystem/hooks/use-directory";
 import type { Node } from "../../@core/filesystem/node";
 import { normalize } from "../../@core/filesystem/utils/path";
 import { ExplorerList } from "./explorer-list/list";
@@ -10,10 +9,6 @@ export function Explorer(props: ProcessComponentProps) {
 
 	const [path, setPath] = useState(workingDirectory);
 
-	console.log(path);
-
-	const { dir } = useDir(path);
-
 	const nodes = useMemo(() => {
 		const parentNode: Node = {
 			id: -1,
@@ -21,12 +16,8 @@ export function Explorer(props: ProcessComponentProps) {
 			type: "directory"
 		};
 
-		if (!dir || dir?.nodes === undefined) {
-			return [parentNode];
-		}
-
-		return [parentNode, ...dir.nodes];
-	}, [dir]);
+		return [parentNode];
+	}, []);
 
 	const goToNode = useCallback(
 		(node: Node) => {
