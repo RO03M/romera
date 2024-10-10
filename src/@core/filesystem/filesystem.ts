@@ -237,6 +237,25 @@ export class Filesystem {
 		dir.set(basename, entry);
 	}
 
+	public rename(filepath: string, newName: string) {
+		const oldStat = this.stat(filepath);
+
+		if (oldStat === null) {
+			throw new ENOENT(filepath);
+		}
+
+		const [dirname, basename] = splitParentPathAndNodeName(filepath);
+		const dir = this.lookup(dirname);
+
+		if (dir.get(basename) === undefined) {
+			throw new ENOENT(filepath); // Shouldn't end down here, but fuck it
+		}
+
+		dir.set(normalize(newName), dir.get(basename)!);
+		dir.delete(basename);
+		this.watcher.emit(dirname, "change");
+	}
+
 	public readFile(filepath: string, options: ReadFileOptions = {}) {
 		const { decode = false } = options;
 

@@ -55,6 +55,23 @@ describe("Filesystem general node operations", () => {
 			expect(typeof file).toBe("string");
 		});
 	});
+	describe("Rename", () => {
+		it("Should be able to rename a file", () => {
+			filesystem.mkdir("/renamefile");
+			filesystem.writeFile("/renamefile/oldName.sh", "content");
+			const oldStat = filesystem.stat("/renamefile/oldName.sh");
+
+			filesystem.rename("/renamefile/oldName.sh", "newName.foo");
+			const newStat = filesystem.stat("/renamefile/newName.foo");
+
+			expect(newStat).not.toBeNull();
+			expect(oldStat?.inode).toBe(newStat?.inode);
+
+			expect(filesystem.stat("/renamefile/oldName.sh")).toBeNull();
+
+			expect(filesystem.readFile("/renamefile/newName.foo", { decode: true })).toBe("content");
+		});
+	});
 
 	describe("Symlinks", () => {
 		it("Should be able to create a symbolic link", () => {
