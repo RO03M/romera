@@ -19,6 +19,10 @@ export function TerminalInput(props: TerminalInputProps) {
 
 	useEffect(() => {
 		async function onKeyDown(event: KeyboardEvent) {
+			if (!focused) {
+				return;
+			}
+
 			event.preventDefault();
 			const { key, ctrlKey } = event;
 
@@ -103,7 +107,7 @@ export function TerminalInput(props: TerminalInputProps) {
 		return () => {
 			document.removeEventListener("keydown", onKeyDown);
 		};
-	}, [value, caretPosition, onSubmit]);
+	}, [value, focused, caretPosition, onSubmit]);
 
 	return (
 		<Wrapper $isPending={isPending} aria-details={value}>
