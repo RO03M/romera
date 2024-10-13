@@ -52,14 +52,14 @@ async function main(...args) {
 			name: "/cat",
 			content: `//cat command
 async function main(fileName) {
-	const pwd = await syscall("pwd");
-	const filePath = await syscall("fs_normalized", pwd + "/" + fileName);
+	const cwd = await pwd();
+	const filePath = await normalize(cwd + "/" + fileName);
 
-	const stat = await syscall("stat", filePath);
+	const stat = await fs.stat(filePath);
 
 	if (stat !== null) {
-		const content = await syscall("readFile", filePath, { decode: true });
-		await syscall("echo", content);
+		const content = await fs.readFile(filePath, true);
+		await echo(content);
 	}
 }`
 		},
@@ -79,6 +79,24 @@ async function main(dirName) {
 	await syscall("mkdir", resolvedPath).catch(async () => {
 		await syscall("echo", "Cannot create dir " + dirName);
 		exit();
+	});
+}`
+		},
+		{
+			type: "file",
+			name: "/touch",
+			content: `//mkdir command
+
+async function main(fileName) {
+	if (!fileName) {
+		await echo("Missing dir name");
+		exit();
+	}
+
+	const cwd = await pwd();
+	const resolvedPath = await pathFormat(cwd, fileName);
+	await fs.writeFile(resolvedPath, "").catch(async () => {
+		await echo("Cannot create file " + fileName);
 	});
 }`
 		},
@@ -128,9 +146,9 @@ async function main(path) {
 	
 	const pwd = await syscall("pwd");
 
-	const filePath = await syscall("fs_normalized", pwd + "/" + path);
+	const filePath = await normalize(pwd + "/" + path);
 	
-	await syscall("create_proc_default_rgui", "monaco", { workingdir: filePath });
+	await processes.fork("magic-spawn", ["monaco", filePath]);
 }`
 		}
 	]

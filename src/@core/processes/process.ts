@@ -32,8 +32,9 @@ export class Process {
 	private blobUrl: string | undefined;
 	private _stdout: unknown;
 
-	constructor(command: string, args?: string[], options?: ProcessOptions) {
+	constructor(command: string, args?: string[], options?: ProcessOptions, ppid: number | null = null) {
 		this.pid = incrementalId("process");
+		this.ppid = ppid;
 		this.command = command;
 		this.args = args ?? [];
 		this.ppid = null;
@@ -68,11 +69,13 @@ export class Process {
 		const methods = this.syscallMethods();
 
 		this.blobUrl = scriptBlobURL;
+
 		this.worker = new Worker(scriptBlobURL, {
 			name: `process-${this.pid}`
 		});
 
-		this.worker.onerror = () => {
+		this.worker.onerror = (error) => {
+			this.getTTY()?.echo(error.message ?? "Something went wrong");
 			this.terminate();
 		};
 
@@ -165,6 +168,7 @@ export class Process {
 		if (isMagicProgram(componentName)) {
 			this.Component = programTable[componentName];
 			this.componentArgs = {
+				pid: this.pid,
 				title,
 				workingDirectory: wdir
 			};
@@ -208,6 +212,7 @@ export class Process {
 			free: () => ttyContext?.free(),
 			lock: () => ttyContext?.lock(),
 			mkdir: (filepath: string) => filesystem.mkdir(filepath),
+			writeFile: (filepath: string, content: string | Uint8Array) => filesystem.writeFile(filepath, content),
 			pathFormat: (root: string, base: string) => format({ root, base })
 		};
 	}

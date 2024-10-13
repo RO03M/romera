@@ -1,4 +1,7 @@
+import type { Process } from "./process";
+
 export interface ProcessComponentProps {
+	pid: Process["pid"];
 	title?: string;
 	workingDirectory?: string;
 }
