@@ -18,18 +18,25 @@ export function DesktopContext() {
 		}
 	}, []);
 
+	const newFile = useCallback((index = 0) => {
+		const response = safe(() =>
+			filesystem.writeFile(`/home/romera/desktop/new file(${index})`, "")
+		);
+
+		if (response.error !== null) {
+			newFile(index + 1);
+		}
+	}, []);
+
 	return (
 		<ContextMenu>
 			<li>
 				<span>New</span>
 				<ul>
-					<li
-						onClick={() => newDirectory()}
-						onKeyDown={onShortcut}
-					>
+					<li onClick={() => newDirectory()} onKeyDown={onShortcut}>
 						Directory
 					</li>
-					<li onClick={() => console.log("new file")} onKeyDown={onShortcut}>
+					<li onClick={() => newFile()} onKeyDown={onShortcut}>
 						File
 					</li>
 				</ul>
