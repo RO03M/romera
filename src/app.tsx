@@ -1,7 +1,6 @@
 import { ThemeProvider } from "styled-components";
 import { Desktop } from "./@core/components/os/desktop";
 import { WindowManager } from "./@core/components/os/window-manager/window-manager";
-import "./app.css";
 import { theme } from "./theme";
 import { Dock } from "./@core/components/os/dock/dock";
 import { TopPanel } from "./@core/components/os/top-panel/top-panel";
@@ -14,6 +13,7 @@ import { ApplicationConfig } from "./@core/components/os/desktop/application-ite
 import { extname } from "./@core/filesystem/utils/path";
 import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
 import { ProcessScheduler } from "./@core/processes/process-scheduler";
+import "./app.css";
 
 
 export const filesystem = new Filesystem("rome-os-fs");
@@ -56,7 +56,6 @@ export function App() {
 				onDrop={onFileDrop}
 				onDragOver={(event) => event.preventDefault()}
 			>
-				{/* <ProcessesHeart /> */}
 				<TopPanel />
 				<WindowManager />
 				<Desktop />

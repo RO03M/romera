@@ -2,13 +2,11 @@ import { motion } from "framer-motion";
 import { useGridSize } from "../../../../hooks/use-grid-size";
 import { DragBackground } from "./drag-background";
 import { useApplicationControl } from "./use-application-control";
-// import { useProcessesStore } from "../../../../processes/use-processes-store";
 import { normalize } from "../../../../filesystem/utils/path";
 import styled from "styled-components";
 import type { Stat } from "../../../../filesystem/stat";
 import { useMemo, useRef, useState } from "preact/hooks";
 import { getExecutableFromApplication } from "./get-executable-from-application";
-// import { programTable } from "../../../../../programs/program-table";
 import { useClickOutside } from "../../../../hooks/use-click-outside";
 import { NameDisplay } from "./name-display";
 import { processScheduler } from "../../../../../app";
@@ -27,13 +25,8 @@ export function ApplicationItem(props: ApplicationItemProps) {
 	const ref = useRef<HTMLElement | null>(null);
 
 	const { item, blur, itemComponentProps } = useApplicationControl(name);
-	// const { createWindowProcess } = useProcessesStore();
 
 	const programName = useMemo(() => getExecutableFromApplication(name), [name]);
-	// const ProgramComponent = useMemo(
-	// 	() => programTable[programName],
-	// 	[programName]
-	// );
 
 	const gridSize = useGridSize();
 

@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { formatInput } from "./utils/format-input";
 import { normalize } from "../../../filesystem/utils/path";
 import { type TerminalOutput, TerminalOutputList } from "./output-list";
-// import { useProcessesStore } from "../../../processes/use-processes-store";
 import { incrementalId } from "../../../utils/incremental-id";
 import type { ProcessComponentProps } from "../../../processes/types";
 import { useTTYStore } from "../../../system/tty";
@@ -20,11 +19,8 @@ export function Terminal(props: ProcessComponentProps) {
 		useState(workingDirectory);
 	const [isPending, setIsPending] = useState(false);
 	const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
-	// const [input, setInput] = useState("");
 
 	const [focused, setFocused] = useState(true);
-
-	// const { createProcess } = useProcessesStore();
 
 	const echo = useCallback((message: string) => {
 		const output: TerminalOutput = {
