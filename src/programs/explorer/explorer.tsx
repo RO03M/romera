@@ -1,31 +1,42 @@
 import { useCallback, useMemo, useState } from "preact/hooks";
-import type { Node } from "../../@core/filesystem/node";
 import { normalize } from "../../@core/filesystem/utils/path";
 import { ExplorerList } from "./explorer-list/list";
 import type { ProcessComponentProps } from "../../@core/processes/types";
+import { filesystem } from "../../app";
+import type { Dirent } from "../../@core/filesystem/dirent";
 
 export function Explorer(props: ProcessComponentProps) {
 	const { workingDirectory } = props;
 
 	const [path, setPath] = useState(workingDirectory);
 
-	const nodes = useMemo(() => {
-		const parentNode: Node = {
-			id: -1,
+	const children = useMemo(() => {
+		if (path === undefined) {
+			return [];
+		}
+
+		return filesystem.readdir(path, {
+			withFileTypes: true
+		}) as Dirent[];
+	}, [path]);
+
+	const entries = useMemo(() => {
+		const parentNode: Dirent = {
+			inode: -1,
 			name: "/..",
-			type: "directory"
+			type: "dir"
 		};
 
-		return [parentNode];
-	}, []);
+		return [parentNode, ...children];
+	}, [children]);
 
 	const goToNode = useCallback(
-		(node: Node) => {
-			if (node.type !== "directory") {
+		(entry: Dirent) => {
+			if (entry.type !== "dir") {
 				return;
 			}
 
-			const newPath = normalize(path + node.name);
+			const newPath = normalize(path + entry.name);
 			setPath(newPath);
 		},
 		[path]
@@ -34,7 +45,7 @@ export function Explorer(props: ProcessComponentProps) {
 	return (
 		<div>
 			<span>{path}</span>
-			<ExplorerList nodes={nodes} onOpen={goToNode} />
+			<ExplorerList entries={entries} onOpen={goToNode} />
 		</div>
 	);
 }

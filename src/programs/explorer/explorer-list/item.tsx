@@ -1,31 +1,22 @@
 import { styled } from "@mui/material";
-import type { Node } from "../../../@core/filesystem/node";
-import { useMemo } from "preact/hooks";
+import type { Dirent } from "../../../@core/filesystem/dirent";
 
 interface ExplorerListItemProps {
-    node: Node;
-    onClick: (node: Node) => void;
+	entry: Dirent;
+	onClick: (entry: Dirent) => void;
 }
 
 export function ExplorerListItem(props: ExplorerListItemProps) {
-    const { node, onClick } = props;
-
-    const children = useMemo(() => {
-        if (node.type !== "directory") {
-            return [];
-        }
-
-        return node.nodes ?? [];
-    }, [node]);
+	const { entry: node, onClick } = props;
 
 	return (
 		<Wrapper
-            id={`explorer-list-item-node-${node.id}`}
-            onClick={() => onClick(node)}
-        >
+			id={`explorer-list-item-node-${node.inode}`}
+			onClick={() => onClick(node)}
+		>
 			<div>{node.name.replace(/^\//, "")}</div>
 			<div>{node.type}</div>
-			<div>{children}</div>
+			{/* <div>{children}</div> */}
 		</Wrapper>
 	);
 }
@@ -33,13 +24,13 @@ export function ExplorerListItem(props: ExplorerListItemProps) {
 const Wrapper = styled<"div">("div")({
 	width: "100%",
 	height: 30,
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
+	display: "grid",
+	gridTemplateColumns: "1fr 1fr 1fr",
 	"&:hover": {
 		backgroundColor: "#707070"
 	},
-    "& > *": {
-        overflow: "hidden",
-        textOverflow: "ellipsis"
-    }
+	"& > *": {
+		overflow: "hidden",
+		textOverflow: "ellipsis"
+	}
 });

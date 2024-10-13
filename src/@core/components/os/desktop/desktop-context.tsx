@@ -32,6 +32,10 @@ export function DesktopContext() {
 		processScheduler.spawnMagicWindow("terminal", "/home/romera/desktop");
 	}, []);
 
+	const openFileExplorer = useCallback(() => {
+		processScheduler.spawnMagicWindow("explorer", "/home/romera/desktop");
+	}, []);
+
 	return (
 		<ContextMenu>
 			<li>
@@ -47,6 +51,8 @@ export function DesktopContext() {
 			</li>
 			{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 			<li onClick={openTerminal}>Open terminal here</li>
+			{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+			<li onClick={openFileExplorer}>Open file explorer</li>
 		</ContextMenu>
 	);
 }

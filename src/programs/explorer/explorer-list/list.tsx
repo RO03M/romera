@@ -1,23 +1,19 @@
 import { styled } from "@mui/material";
-import type { Node } from "../../../@core/filesystem/node";
 import { ExplorerListItem } from "./item";
+import type { Dirent } from "../../../@core/filesystem/dirent";
 
 interface ExplorerListProps {
-	nodes: Node[];
-	onOpen: (node: Node) => void;
+	entries: Dirent[];
+	onOpen: (entry: Dirent) => void;
 }
 
 export function ExplorerList(props: ExplorerListProps) {
-	const { nodes, onOpen } = props;
+	const { entries, onOpen } = props;
 
 	return (
 		<Wrapper>
-			{nodes.map((node) => (
-				<ExplorerListItem
-					key={node.id}
-					node={node}
-					onClick={onOpen}
-				/>
+			{entries.map((entry) => (
+				<ExplorerListItem key={entry.inode} entry={entry} onClick={onOpen} />
 			))}
 		</Wrapper>
 	);
