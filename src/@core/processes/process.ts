@@ -29,6 +29,7 @@ export class Process {
 	public componentArgs?: ProcessComponentProps;
 	private readonly options: ProcessOptions;
 	private worker?: Worker;
+	private blobUrl: string | undefined;
 
 	constructor(command: string, args?: string[], options?: ProcessOptions) {
 		this.pid = incrementalId("process");
@@ -65,6 +66,7 @@ export class Process {
 
 		const methods = this.syscallMethods();
 
+		this.blobUrl = scriptBlobURL;
 		this.worker = new Worker(scriptBlobURL, {
 			name: `process-${this.pid}`
 		});
@@ -142,6 +144,9 @@ export class Process {
 		this.options.onTerminate?.();
 		this.worker?.terminate();
 		ttyContext?.free();
+		if (this.blobUrl !== undefined) {
+			URL.revokeObjectURL(this.blobUrl);
+		}
 	}
 
 	private invokeComponent() {
