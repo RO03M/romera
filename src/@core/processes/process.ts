@@ -3,6 +3,7 @@ import type { ReadFileOptions } from "../filesystem/types";
 import { format, normalize } from "../filesystem/utils/path";
 import { useTTYStore } from "../system/tty";
 import { incrementalId } from "../utils/incremental-id";
+import { safe } from "../utils/safe";
 import { RScriptTranslator } from "./rscript-translator";
 import {
 	isSyscallStream,
@@ -93,28 +94,31 @@ export class Process {
 						response: "SYSCALL_METHOD_NOT_READY"
 					});
 				} else {
-					try {
-						const syscallResponse = methods[methodTyped].bind(null, ...args)();
-						console.log(syscallResponse);
-						const treatedResponse =
-							syscallResponse === void 0
-								? ""
-								: JSON.parse(JSON.stringify(syscallResponse));
+					const response = safe(() =>
+						methods[methodTyped].bind(null, ...args)()
+					);
 
+					if (response.error) {
 						this.worker?.postMessage({
 							type: "SYSCALL_RESPONSE",
 							id: responseId,
-							response: treatedResponse,
-							status: 1
-						});
-					} catch (error) {
-						this.worker?.postMessage({
-							type: "SYSCALL_RESPONSE",
-							id: responseId,
-							response: error,
+							response: response.error.message,
 							status: 0
 						});
+						return;
 					}
+
+					const treatedResponse =
+						response.data === undefined
+							? ""
+							: JSON.parse(JSON.stringify(response.data));
+
+					this.worker?.postMessage({
+						type: "SYSCALL_RESPONSE",
+						id: responseId,
+						response: treatedResponse,
+						status: 1
+					});
 				}
 
 				return;
