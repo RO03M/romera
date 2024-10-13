@@ -28,7 +28,7 @@ async function main() {
 			content: `// worker file is responsible to test the basic syscall operations while using workers
 async function main(...args) {
 	const foo = await syscall(
-		"std.fs.path.normalize",
+		"normalize",
 		"//asd/homepage/"
 	);
 

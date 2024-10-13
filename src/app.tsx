@@ -14,10 +14,17 @@ import { positionToGridPosition } from "./@core/utils/grid";
 import { ApplicationConfig } from "./@core/components/os/desktop/application-item/application-config-file";
 import { extname } from "./@core/filesystem/utils/path";
 import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
+import { ProcessScheduler } from "./@core/processes/process-scheduler";
 
 
 export const filesystem = new Filesystem("rome-os-fs");
 filesystem.hydrate(initialRoot);
+
+export const processScheduler = new ProcessScheduler();
+
+setInterval(() => {
+	processScheduler.tick().next();
+}, 0);
 
 export function App() {
 	const onFileDrop = useCallback(async (event: DragEvent) => {

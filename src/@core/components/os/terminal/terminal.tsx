@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { formatInput } from "./utils/format-input";
 import { normalize } from "../../../filesystem/utils/path";
 import { type TerminalOutput, TerminalOutputList } from "./output-list";
-import { useProcessesStore } from "../../../processes/use-processes-store";
+// import { useProcessesStore } from "../../../processes/use-processes-store";
 import { incrementalId } from "../../../utils/incremental-id";
 import type { ProcessComponentProps } from "../../../processes/types";
 import { useTTYStore } from "../../../system/tty";
-import { filesystem } from "../../../../app";
+import { filesystem, processScheduler } from "../../../../app";
 import styled from "styled-components";
 
 export function Terminal(props: ProcessComponentProps) {
@@ -24,7 +24,7 @@ export function Terminal(props: ProcessComponentProps) {
 
 	const [focused, setFocused] = useState(true);
 
-	const { createProcess } = useProcessesStore();
+	// const { createProcess } = useProcessesStore();
 
 	const echo = useCallback((message: string) => {
 		const output: TerminalOutput = {
@@ -34,7 +34,7 @@ export function Terminal(props: ProcessComponentProps) {
 		setOutputs((prevOutputs) => [...prevOutputs, output]);
 	}, []);
 
-	const pendingMode = useCallback(() => {
+	const lock = useCallback(() => {
 		setIsPending(true);
 	}, []);
 
@@ -80,13 +80,10 @@ export function Terminal(props: ProcessComponentProps) {
 					break;
 				}
 				default: {
-					pendingMode();
-					createProcess(input, {
-						id,
-						workingDirectory: currentWorkingDirectory,
-						echo,
-						pendingMode,
-						free
+					lock();
+					processScheduler.exec(program, args, {
+						cwd: currentWorkingDirectory,
+						tty: id
 					});
 				}
 			}
@@ -99,21 +96,12 @@ export function Terminal(props: ProcessComponentProps) {
 
 			setOutputs((prevOutputs) => [...prevOutputs, output]);
 		},
-		[
-			id,
-			currentWorkingDirectory,
-			ttys,
-			pendingMode,
-			free,
-			echo,
-			cd,
-			createProcess
-		]
+		[id, currentWorkingDirectory, ttys, lock, cd]
 	);
 
 	useEffect(() => {
-		addTTY({ id, echo });
-	}, [id, addTTY, echo]);
+		addTTY({ id, echo, free, lock });
+	}, [id, addTTY, echo, free, lock]);
 
 	useEffect(() => {
 		function loseFocus() {
