@@ -107,10 +107,12 @@ async function main(time) {
 async function main(...args) {
 	const command = args.join(" ");
 
+	console.log(command);
 	return new Promise((res) => {
-		const interval = setInterval(() => {
+		const interval = setInterval(async () => {
 			// await syscall
-			// std.processes.createProcess(command, context.tty);
+			const foo = await syscall("createProcess", "ls")
+			console.log(foo);
 		}, 1000);
 	});
 }`

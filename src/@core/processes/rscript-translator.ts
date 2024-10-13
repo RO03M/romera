@@ -60,16 +60,16 @@ export class RScriptTranslator {
         });
     }
 
-    function exit(code = 0) {
-        self.postMessage(code);
+    function exit(code = 0, message = "") {
+        self.postMessage({ code, message, kill: true });
     }
 
     ${this.rawScript}
 
-    await main(${this.args.map((arg) => `'${arg}'`)}); // declared in the rawScript
-    
+    const stdout = await main(${this.args.map((arg) => `'${arg}'`)}); // declared in the rawScript
+
     // forced exit
-    exit();
+    exit(0, stdout);
 }))()
         `;
 	}

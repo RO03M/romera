@@ -22,6 +22,8 @@ export class ProcessScheduler {
 		this.sleeping.set(process.pid, process);
 		this.watcher.emit("all", "created");
 		this.watcher.emit(process.pid, "created");
+
+		return process;
 	}
 
 	public kill(pid: Process["pid"]) {

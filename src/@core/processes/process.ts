@@ -30,6 +30,7 @@ export class Process {
 	private readonly options: ProcessOptions;
 	private worker?: Worker;
 	private blobUrl: string | undefined;
+	private _stdout: unknown;
 
 	constructor(command: string, args?: string[], options?: ProcessOptions) {
 		this.pid = incrementalId("process");
@@ -76,7 +77,8 @@ export class Process {
 		};
 
 		this.worker.onmessage = ({ data }) => {
-			if (data === 0) {
+			if (data.kill) {
+				this._stdout = data.message;
 				this.terminate();
 				return;
 			}
@@ -126,6 +128,7 @@ export class Process {
 							? ""
 							: JSON.parse(JSON.stringify(response.data));
 
+					console.log(method, treatedResponse);
 					this.worker?.postMessage({
 						type: "SYSCALL_RESPONSE",
 						id: responseId,
@@ -137,6 +140,10 @@ export class Process {
 				return;
 			}
 		};
+	}
+
+	public get stdout() {
+		return this._stdout;
 	}
 
 	public terminate() {
@@ -186,6 +193,11 @@ export class Process {
 			readFile: (filepath: string, options?: ReadFileOptions) =>
 				filesystem.readFile(filepath, options),
 			normalize: (filepath: string) => normalize(filepath),
+			createProcess: (command: string, args: string[] = []) =>
+				processScheduler.exec(command, args, {
+					cwd: this.options.cwd,
+					tty: this.options.tty
+				}),
 			// create_proc_default_rgui: createWindowProcessFromProgramTable,
 			exec: (command: string, args: string[], tty: number) =>
 				processScheduler.exec(command, args, {
