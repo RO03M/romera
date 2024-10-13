@@ -1,6 +1,6 @@
 import { useCallback } from "preact/compat";
 import { ContextMenu } from "../context-menu/context-menu";
-import { filesystem } from "../../../../app";
+import { filesystem, processScheduler } from "../../../../app";
 import { safe } from "../../../utils/safe";
 
 export function DesktopContext() {
@@ -28,6 +28,10 @@ export function DesktopContext() {
 		}
 	}, []);
 
+	const openTerminal = useCallback(() => {
+		processScheduler.spawnMagicWindow("terminal", "/home/romera/desktop");
+	}, []);
+
 	return (
 		<ContextMenu>
 			<li>
@@ -41,6 +45,8 @@ export function DesktopContext() {
 					</li>
 				</ul>
 			</li>
+			{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+			<li onClick={openTerminal}>Open terminal here</li>
 		</ContextMenu>
 	);
 }
