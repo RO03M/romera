@@ -1,18 +1,25 @@
-import { useMemo } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { Window } from "../desktop/window/window";
-import { useProcessesStore } from "../../../processes/use-processes-store";
 import styled from "styled-components";
+import { processScheduler } from "../../../../app";
+import type { Process } from "../../../processes/process";
 
 export function WindowManager() {
-	const { processes } = useProcessesStore();
+	const [processes, setProcesses] = useState<Process[]>([]);
 
-	const windowProcesses = useMemo(() => {
-		return processes.filter((process) => process.Component !== undefined);
-	}, [processes]);
+	useEffect(() => {
+		processScheduler.watch("all", ["ran", "killed"], () => {
+			setProcesses(
+				processScheduler.processes.filter(
+					(processes) => processes.Component !== undefined
+				)
+			);
+		});
+	}, []);
 
 	return (
 		<Wrapper id={"window-manager"}>
-			{windowProcesses.map((process) => (
+			{processes.map((process) => (
 				<Window
 					key={process.pid}
 					pid={process.pid}

@@ -1,3 +1,4 @@
+import type { ComponentType } from "preact";
 import { filesystem, processScheduler } from "../../app";
 import type { ReadFileOptions } from "../filesystem/types";
 import { format, normalize } from "../filesystem/utils/path";
@@ -8,8 +9,12 @@ import { RScriptTranslator } from "./rscript-translator";
 import {
 	isSyscallStream,
 	type SyscallMethod,
-	type ProcessOptions
+	type ProcessOptions,
+	type ProcessComponentProps
 } from "./types";
+import { isMagicProgram, programTable } from "../../programs/program-table";
+
+export const MAGIC_SPAWN_CMD = "magic-spawn";
 
 export class Process {
 	public readonly pid: number;
@@ -20,6 +25,8 @@ export class Process {
 	public readonly tty: number | undefined;
 	public stat: number;
 
+	public Component?: ComponentType<ProcessComponentProps>;
+	public componentArgs?: ProcessComponentProps;
 	private readonly options: ProcessOptions;
 	private worker?: Worker;
 
@@ -38,6 +45,10 @@ export class Process {
 	 * @description creates and attaches a worker to the current process
 	 */
 	public start() {
+		if (this.isMagicSpawn()) {
+			this.invokeComponent();
+			return;
+		}
 		const path = this.resolveCommandPath();
 
 		const content = filesystem.readFile(path, { decode: true });
@@ -131,6 +142,33 @@ export class Process {
 		this.options.onTerminate?.();
 		this.worker?.terminate();
 		ttyContext?.free();
+	}
+
+	private invokeComponent() {
+		if (!this.isMagicSpawn()) {
+			throw new Error("Process is not a magic spawn");
+		}
+
+		const [componentName, wdir, title] = this.args;
+		if (isMagicProgram(componentName)) {
+			this.Component = programTable[componentName];
+			this.componentArgs = {
+				title,
+				workingDirectory: wdir
+			};
+		}
+	}
+
+	private isMagicSpawn() {
+		if (
+			this.command !== MAGIC_SPAWN_CMD ||
+			this.args.length === 0 ||
+			!isMagicProgram(this.args[0])
+		) {
+			return false;
+		}
+
+		return true;
 	}
 
 	private syscallMethods(): Record<string, SyscallMethod> {

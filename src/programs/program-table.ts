@@ -7,10 +7,7 @@ import { ImageViewer } from "./image-viewer";
 import { PdfViewer } from "./pdf-viewer";
 import { VideoViewer } from "./video-viewer";
 
-export const programTable: Record<
-	string,
-	ComponentType<ProcessComponentProps>
-> = {
+export const programTable = {
 	terminal: Terminal,
 	explorer: Explorer,
 	monaco: CodeEditor,
@@ -18,3 +15,7 @@ export const programTable: Record<
 	videoViewer: VideoViewer,
 	pdfviewer: PdfViewer
 };
+
+export function isMagicProgram(programName: string): programName is keyof typeof programTable {
+	return programName in programTable;
+}
