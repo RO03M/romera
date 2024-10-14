@@ -4,7 +4,7 @@ export interface HydrationData {
 	name: string;
 	type: string;
 	target?: string;
-	content?: string | number[];
+	content?: string | Uint8Array | number[];
 	nodes?: HydrationData[];
 }
 

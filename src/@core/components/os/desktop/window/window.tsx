@@ -26,6 +26,10 @@ export function Window(props: WindowProps) {
 		[dragControls]
 	);
 
+	if (contentArgs === undefined) {
+		return null;
+	}
+
 	return (
 		<Wrapper
 			aria-pid={pid}
