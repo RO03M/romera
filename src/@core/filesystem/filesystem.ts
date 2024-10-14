@@ -48,10 +48,65 @@ export class Filesystem {
 				}
 			}
 		} else if (data.type === "file") {
-			this.writeFile(absolutePath, data.content ?? "");
+			if (data.content === undefined) {
+				data.content = "";
+			}
+
+			if (Array.isArray(data.content)) {
+				this.writeFile(absolutePath, new Uint8Array(data.content));
+				return;
+			}
+
+			this.writeFile(absolutePath, data.content);
 		} else if (data.type === "symlink" && data.target !== undefined) {
 			this.symlink(data.target, absolutePath);
 		}
+	}
+
+	public getJSON() {
+		const rootJSON = this.buildJSONTree(this.root);
+		if (rootJSON === undefined) {
+			return;
+		}
+		return rootJSON[0];
+	}
+
+	private buildJSONTree(data: FSMap | Stat, inheritPath = "") {
+		if (data instanceof Stat) {
+			return;
+		}
+
+		const response: HydrationData[] = [];
+
+		for (const [key, value] of data) {
+			if (value instanceof Stat) {
+				continue;
+			}
+
+			const stat = value.get(STAT_KEY);
+			if (stat instanceof Stat) {
+				const currentPath = normalize(`${inheritPath}/${key}`);
+				const entry: HydrationData = {
+					name: key.toString(),
+					type: stat.type,
+					nodes: this.buildJSONTree(value, currentPath)
+				};
+				if (stat.target) {
+					entry.target = stat.target;
+				}
+
+				if (stat.isFile()) {
+					const content = this.inodeTable.get(stat.inode);
+					if (content !== undefined) {
+						entry.content = Array.from(content);
+					}
+				}
+
+				response.push(entry);
+			}
+		}
+
+		return response;
 	}
 
 	private lookup(filepath: string, followSymbolicLink = true) {

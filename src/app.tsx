@@ -5,7 +5,6 @@ import { theme } from "./theme";
 import { Dock } from "./@core/components/os/dock/dock";
 import { TopPanel } from "./@core/components/os/top-panel/top-panel";
 import { Filesystem } from "./@core/filesystem/filesystem";
-import { initialRoot } from "./@core/filesystem/initial-filesystem-nodes";
 import { useCallback } from "preact/hooks";
 import { getFilesFromDataTransferItems } from "./@core/utils/datatransfer-to-files";
 import { positionToGridPosition } from "./@core/utils/grid";
@@ -13,11 +12,11 @@ import { ApplicationConfig } from "./@core/components/os/desktop/application-ite
 import { extname } from "./@core/filesystem/utils/path";
 import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
 import { ProcessScheduler } from "./@core/processes/process-scheduler";
+import filesystemData from "./filesystem-data.json";
 import "./app.css";
 
-
 export const filesystem = new Filesystem("rome-os-fs");
-filesystem.hydrate(initialRoot);
+filesystem.hydrate(filesystemData);
 
 export const processScheduler = new ProcessScheduler();
 
@@ -60,7 +59,7 @@ export function App() {
 				<WindowManager />
 				<Desktop />
 				<Dock />
-				<DesktopContext/>
+				<DesktopContext />
 			</div>
 		</ThemeProvider>
 	);

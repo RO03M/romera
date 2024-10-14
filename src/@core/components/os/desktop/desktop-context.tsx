@@ -36,6 +36,21 @@ export function DesktopContext() {
 		processScheduler.spawnMagicWindow("explorer", "/home/romera/desktop");
 	}, []);
 
+	const downloadFilesystem = useCallback(() => {
+		const fsAsJSON = filesystem.getJSON();
+		if (fsAsJSON === undefined) {
+			throw new Error("Failed to create json from current filesystem");
+		}
+
+		const file = new Blob([JSON.stringify(fsAsJSON, undefined, 4)], {
+			type: "text/plain"
+		});
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(file);
+		a.download = "filesystem-romOS.json";
+		a.click();
+	}, []);
+
 	return (
 		<ContextMenu>
 			<li>
@@ -53,6 +68,8 @@ export function DesktopContext() {
 			<li onClick={openTerminal}>Open terminal here</li>
 			{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 			<li onClick={openFileExplorer}>Open file explorer</li>
+			{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+			<li onClick={downloadFilesystem}>Download filesystem</li>
 		</ContextMenu>
 	);
 }

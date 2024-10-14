@@ -2,9 +2,9 @@ export type StatType = "file" | "dir" | "symlink";
 
 export interface HydrationData {
 	name: string;
-	type: StatType;
+	type: string;
 	target?: string;
-	content?: string | Uint8Array;
+	content?: string | number[];
 	nodes?: HydrationData[];
 }
 
