@@ -54,7 +54,7 @@ export function TerminalInput(props: TerminalInputProps) {
 
 			if (ctrlKey && key.toLowerCase() === "v") {
 				const clipboardContent = await navigator.clipboard.readText();
-				
+
 				setValue((prev) => {
 					return [
 						prev.slice(0, caretPosition),
@@ -132,7 +132,7 @@ export function TerminalInput(props: TerminalInputProps) {
 				</Caret>
 			)}
 			<span style={{ letterSpacing: 0 }}>{value.slice(caretPosition + 1)}</span>
-			<input id={"dummy-input"} hidden ref={dummyInputRef} />
+			<DummyInput id={"dummy-input"} ref={dummyInputRef} />
 		</Wrapper>
 	);
 }
@@ -144,6 +144,13 @@ const Wrapper = styled.div<{ $isPending: boolean }>((props) => ({
 	whiteSpace: "pre",
 	letterSpacing: 0.7
 }));
+
+const DummyInput = styled.input({
+	opacity: 0,
+	height: 0,
+	width: 0,
+	cursor: "none"
+});
 
 export const NodePathTypography = styled.span({
 	color: "darkblue",
