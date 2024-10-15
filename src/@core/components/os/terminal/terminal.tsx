@@ -1,5 +1,5 @@
 import { TerminalInput } from "./input";
-import { useCallback, useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { formatInput } from "./utils/format-input";
 import { normalize } from "../../../filesystem/utils/path";
 import { type TerminalOutput, TerminalOutputList } from "./output-list";
@@ -8,6 +8,7 @@ import type { ProcessComponentProps } from "../../../processes/types";
 import { useTTYStore } from "../../../system/tty";
 import { filesystem, processScheduler } from "../../../../app";
 import styled from "styled-components";
+import { useClickOutside } from "../../../hooks/use-click-outside";
 
 export function Terminal(props: ProcessComponentProps) {
 	const { workingDirectory = "/" } = props;
@@ -21,6 +22,8 @@ export function Terminal(props: ProcessComponentProps) {
 	const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
 
 	const [focused, setFocused] = useState(true);
+
+	const wrapperRef = useRef<HTMLDivElement | null>(null);
 
 	const echo = useCallback((message: string) => {
 		const output: TerminalOutput = {
@@ -99,23 +102,12 @@ export function Terminal(props: ProcessComponentProps) {
 		addTTY({ id, echo, free, lock });
 	}, [id, addTTY, echo, free, lock]);
 
-	useEffect(() => {
-		function loseFocus() {
-			setFocused(false);
-		}
-		document.addEventListener("click", loseFocus);
-
-		return () => {
-			document.removeEventListener("click", loseFocus);
-		};
-	}, []);
+	useClickOutside(wrapperRef, () => setFocused(false));
 
 	return (
 		<Wrapper
-			onClick={(event) => {
-				event.stopPropagation();
-				setFocused(true);
-			}}
+			ref={wrapperRef}
+			onClick={() => setFocused(true)}
 		>
 			<TerminalOutputList outputs={outputs} />
 			<TerminalInput
