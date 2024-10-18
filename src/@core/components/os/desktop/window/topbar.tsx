@@ -15,7 +15,7 @@ interface TopbarProp {
 export const Topbar = (props: TopbarProp) => {
 	const { onPointerDown, onMaximizeClick, onClose } = props;
 	return (
-		<Wrapper onPointerDown={onPointerDown} as={"div"}>
+		<Wrapper onPointerDown={onPointerDown} as={"div"} className={"topbar"}>
 			<Row>
 				<TopbarButton>
 					<Icon icon={icons.horizontalLine} />
@@ -56,6 +56,8 @@ const TopbarButton = styled.div<{ closeButton?: boolean }>((props) => ({
 	justifyContent: "center",
 	paddingInline: 10,
 	"&:hover": {
-		backgroundColor: props.closeButton ? props.theme.colors.red[500] : props.theme.colors.grey[900],
+		backgroundColor: props.closeButton
+			? props.theme.colors.red[500]
+			: props.theme.colors.grey[900]
 	}
 }));

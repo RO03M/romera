@@ -7,6 +7,7 @@ import { useCallback } from "preact/hooks";
 import { Suspense, type ComponentType } from "preact/compat";
 import type { ProcessComponentProps } from "../../../../processes/types";
 import { processScheduler } from "../../../../../app";
+import { Rnd } from "react-rnd";
 
 interface WindowProps {
 	pid: number;
@@ -19,13 +20,6 @@ export function Window(props: WindowProps) {
 	
 	const windowProps = useWindow();
 
-	const dragControls = useDragControls();
-
-	const startDrag = useCallback(
-		(event: PointerEvent) => dragControls.start(event),
-		[dragControls]
-	);
-
 	if (contentArgs === undefined) {
 		return null;
 	}
@@ -33,76 +27,27 @@ export function Window(props: WindowProps) {
 	return (
 		<Wrapper
 			aria-pid={pid}
-			drag
-			dragControls={dragControls}
-			dragListener={false}
-			dragTransition={{
-				power: 0
+			dragHandleClassName={"topbar"}
+			size={{
+				width: windowProps.width.get(),
+				height: windowProps.height.get()
 			}}
-			style={{
-				x: windowProps.x,
-				y: windowProps.y,
-				left: windowProps.left,
-				top: windowProps.top,
-				width: windowProps.width,
-				height: windowProps.height
-			}}
-			initial={{
-				scale: 0.8
-			}}
-			animate={{
-				scale: 1
+			resizeHandleStyles={{
+				bottom: {
+					cursor: "n-resize"
+				},
+				top: {
+					cursor: "s-resize"
+				},
+				right: {
+					cursor: "e-resize"
+				},
+				left: {
+					cursor: "w-resize"
+				}
 			}}
 		>
-			<ResizeBar
-				orientation={"horizontal"}
-				horizontalAlignment={"center"}
-				verticalAlignment={"start"}
-				onDrag={windowProps.handleTopDrag}
-			/>
-			<ResizeBar
-				orientation={"vertical"}
-				horizontalAlignment={"end"}
-				verticalAlignment={"center"}
-				onDrag={windowProps.handleRightDrag}
-			/>
-			<ResizeBar
-				orientation={"horizontal"}
-				horizontalAlignment={"center"}
-				verticalAlignment={"end"}
-				onDrag={windowProps.handleBottomDrag}
-			/>
-			<ResizeBar
-				orientation={"vertical"}
-				horizontalAlignment={"start"}
-				verticalAlignment={"center"}
-				onDrag={windowProps.handleLeftDrag}
-			/>
-			<ResizeBar
-				orientation={"corner"}
-				horizontalAlignment={"start"}
-				verticalAlignment={"start"}
-				onDrag={windowProps.handleTopLeftDrag}
-			/>
-			<ResizeBar
-				orientation={"corner"}
-				horizontalAlignment={"end"}
-				verticalAlignment={"start"}
-				onDrag={windowProps.handleTopRightDrag}
-			/>
-			<ResizeBar
-				orientation={"corner"}
-				horizontalAlignment={"end"}
-				verticalAlignment={"end"}
-				onDrag={windowProps.handleBottomRightDrag}
-			/>
-			<ResizeBar
-				orientation={"corner"}
-				horizontalAlignment={"start"}
-				verticalAlignment={"end"}
-				onDrag={windowProps.handleBottomLeftDrag}
-			/>
-			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => processScheduler.kill(pid)} onPointerDown={startDrag} />
+			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => processScheduler.kill(pid)} onPointerDown={() => {}} />
 			<ContentWrapper>
 				<Suspense fallback={"..."}>
 					{Content !== undefined && <Content {...contentArgs} />}
@@ -112,7 +57,7 @@ export function Window(props: WindowProps) {
 	);
 }
 
-const Wrapper = styled(motion.div)({
+const Wrapper = styled(Rnd)({
 	position: "absolute",
 	top: 0,
 	left: 0,
