@@ -20,7 +20,7 @@ export function Desktop() {
 	);
 }
 
-const DesktopArea = styled.div((props) => ({
+const DesktopArea = styled.div(() => ({
 	display: "grid",
 	gridTemplateColumns: `repeat(auto-fill, ${desktop.grid.width}px)`,
 	gridTemplateRows: `repeat(auto-fill, ${desktop.grid.height}px)`,

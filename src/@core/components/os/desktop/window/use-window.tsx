@@ -8,7 +8,7 @@ type PreservedDataBeforeMaximization = {
 	height: number;
 };
 
-export function useWindow(rndRef: MutableRef<Rnd | null>) {
+export function useWindow(_rndRef: MutableRef<Rnd | null>) {
 	const [maximized, setMaximized] = useState(false);
 	const [preservedDataBeforeMaximization, setPreservedDataBeforeMaximization] =
 		useState<PreservedDataBeforeMaximization | null>(null);

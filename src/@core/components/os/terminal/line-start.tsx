@@ -12,7 +12,7 @@ export function LineStart(props: LineStartProps) {
 	const { username, path, command } = props;
 
 	return (
-		<Row sx={{ gap: 0.5 }}>
+		<Row style={{ gap: "0.5rem" }}>
 			{username !== undefined && (
 				<Row>
 					<UserTypography>{username}</UserTypography>

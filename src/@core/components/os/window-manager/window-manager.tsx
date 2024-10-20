@@ -1,6 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
 import { Window } from "../desktop/window/window";
-import styled from "styled-components";
 import { processScheduler } from "../../../../app";
 import type { Process } from "../../../processes/process";
 
@@ -30,12 +29,3 @@ export function WindowManager() {
 		</>
 	);
 }
-
-const Wrapper = styled.div({
-	width: "100vw",
-	height: "100vh",
-	position: "absolute",
-	overflow: "hidden",
-	top: 0,
-	left: 0
-});
