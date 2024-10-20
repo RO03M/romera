@@ -1,10 +1,10 @@
-import { styled } from "@mui/material";
 import { Topbar } from "./topbar";
 import { useWindow } from "./use-window";
 import { Suspense, useRef, type ComponentType } from "preact/compat";
 import type { ProcessComponentProps } from "../../../../processes/types";
 import { processScheduler } from "../../../../../app";
 import { Rnd } from "react-rnd";
+import styled from "styled-components";
 
 interface WindowProps {
 	pid: number;
@@ -54,7 +54,7 @@ export function Window(props: WindowProps) {
 			}}
 		>
 			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => processScheduler.kill(pid)} onPointerDown={() => {}} />
-			<ContentWrapper>
+			<ContentWrapper className={"romos-window-content-container"}>
 				<Suspense fallback={"..."}>
 					{Content !== undefined && <Content {...contentArgs} />}
 				</Suspense>
@@ -71,7 +71,7 @@ const Wrapper = styled(Rnd)({
 	zIndex: 1
 });
 
-const ContentWrapper = styled<"div">("div")({
+const ContentWrapper = styled.div({
 	flex: 1,
 	maxHeight: "calc(100% - 40px)"
 });
