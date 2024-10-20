@@ -16,6 +16,7 @@ export const Topbar = (props: TopbarProp) => {
 	const { onPointerDown, onMaximizeClick, onClose } = props;
 	return (
 		<Wrapper onPointerDown={onPointerDown} as={"div"}>
+			<DragHandler className={"topbar"} />
 			<Row>
 				<TopbarButton>
 					<Icon icon={icons.horizontalLine} />
@@ -31,9 +32,12 @@ export const Topbar = (props: TopbarProp) => {
 	);
 };
 
+const DragHandler = styled.nav({
+	flex: 1
+})
+
 const Wrapper = styled.div(
 	{
-		width: "100%",
 		height: 40,
 		display: "flex",
 		justifyContent: "flex-end",
@@ -56,6 +60,8 @@ const TopbarButton = styled.div<{ closeButton?: boolean }>((props) => ({
 	justifyContent: "center",
 	paddingInline: 10,
 	"&:hover": {
-		backgroundColor: props.closeButton ? props.theme.colors.red[500] : props.theme.colors.grey[900],
+		backgroundColor: props.closeButton
+			? props.theme.colors.red[500]
+			: props.theme.colors.grey[900]
 	}
 }));

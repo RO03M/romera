@@ -11,13 +11,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
     "@monaco-editor/react": "^4.6.0",
-    "@mui/material": "^6.0.2",
-    "framer-motion": "^11.5.4",
+    "emulators-ui": "^0.73.9",
+    "js-dos": "^7",
     "preact": "^10.23.1",
     "react-hotkeys-hook": "^4.5.1",
+    "react-rnd": "^10.4.13",
     "styled-components": "^6.1.13",
     "zustand": "^4.5.5"
   },

@@ -3,6 +3,7 @@ import { filesystem } from "../../../../app";
 import type { Dirent } from "../../../filesystem/dirent";
 import { getConfigFromApplication } from "./application-item/application-config-file";
 import { getIconFromApplication } from "./application-item/get-icon-from-application";
+import { safe } from "../../../utils/safe";
 
 interface DesktopItem extends Dirent {
 	x: number;
@@ -14,17 +15,23 @@ export function useDesktopItems() {
 	const [items, setItems] = useState<DesktopItem[]>([]);
 
 	const fetchItems = useCallback(() => {
-		const files = filesystem
-			.readdir("/home/romera/desktop", { withFileTypes: true })
-			.filter((dirent) => typeof dirent !== "string");
+		const files = safe(() =>
+			filesystem
+				.readdir("/home/romera/desktop", { withFileTypes: true })
+				.filter((dirent) => typeof dirent !== "string")
+		);
+
+		if (files.error) {
+			return;
+		}
 
 		const tempItems: DesktopItem[] = [];
-		for (const file of files) {
+		for (const file of files.data) {
 			const config = getConfigFromApplication(file.name);
 			tempItems.push({
 				...file,
-				x: config.x,
-				y: config.y,
+				x: +config.x,
+				y: +config.y,
 				icon: getIconFromApplication(file.name)
 			});
 		}

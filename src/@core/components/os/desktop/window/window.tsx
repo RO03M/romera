@@ -1,12 +1,10 @@
-import { styled } from "@mui/material";
-import { motion, useDragControls } from "framer-motion";
 import { Topbar } from "./topbar";
-import { ResizeBar } from "./resize-bar";
 import { useWindow } from "./use-window";
-import { useCallback } from "preact/hooks";
-import { Suspense, type ComponentType } from "preact/compat";
+import { Suspense, useRef, type ComponentType } from "preact/compat";
 import type { ProcessComponentProps } from "../../../../processes/types";
 import { processScheduler } from "../../../../../app";
+import { Rnd } from "react-rnd";
+import styled from "styled-components";
 
 interface WindowProps {
 	pid: number;
@@ -17,14 +15,9 @@ interface WindowProps {
 export function Window(props: WindowProps) {
 	const { pid, contentArgs, Content } = props;
 	
-	const windowProps = useWindow();
-
-	const dragControls = useDragControls();
-
-	const startDrag = useCallback(
-		(event: PointerEvent) => dragControls.start(event),
-		[dragControls]
-	);
+	const ref = useRef<Rnd | null>(null);
+	
+	const windowProps = useWindow(ref);
 
 	if (contentArgs === undefined) {
 		return null;
@@ -33,77 +26,35 @@ export function Window(props: WindowProps) {
 	return (
 		<Wrapper
 			aria-pid={pid}
-			drag
-			dragControls={dragControls}
-			dragListener={false}
-			dragTransition={{
-				power: 0
+			ref={ref}
+			dragHandleClassName={"topbar"}
+			default={{
+				width: 400,
+				height: 400,
+				x: window.innerWidth / 2 - 200,
+				y: window.innerHeight / 2 - 200
 			}}
-			style={{
-				x: windowProps.x,
-				y: windowProps.y,
-				left: windowProps.left,
-				top: windowProps.top,
-				width: windowProps.width,
-				height: windowProps.height
-			}}
-			initial={{
-				scale: 0.8
-			}}
-			animate={{
-				scale: 1
+			onDragStart={windowProps.onDragStart}
+			position={windowProps.maximized ? { x: 0, y: 0 } : undefined}
+			size={windowProps.maximized ? { width: "100%", height: "100%" } : undefined}
+			enableUserSelectHack={false}
+			resizeHandleStyles={{
+				bottom: {
+					cursor: "n-resize"
+				},
+				top: {
+					cursor: "s-resize"
+				},
+				right: {
+					cursor: "e-resize"
+				},
+				left: {
+					cursor: "w-resize"
+				}
 			}}
 		>
-			<ResizeBar
-				orientation={"horizontal"}
-				horizontalAlignment={"center"}
-				verticalAlignment={"start"}
-				onDrag={windowProps.handleTopDrag}
-			/>
-			<ResizeBar
-				orientation={"vertical"}
-				horizontalAlignment={"end"}
-				verticalAlignment={"center"}
-				onDrag={windowProps.handleRightDrag}
-			/>
-			<ResizeBar
-				orientation={"horizontal"}
-				horizontalAlignment={"center"}
-				verticalAlignment={"end"}
-				onDrag={windowProps.handleBottomDrag}
-			/>
-			<ResizeBar
-				orientation={"vertical"}
-				horizontalAlignment={"start"}
-				verticalAlignment={"center"}
-				onDrag={windowProps.handleLeftDrag}
-			/>
-			<ResizeBar
-				orientation={"corner"}
-				horizontalAlignment={"start"}
-				verticalAlignment={"start"}
-				onDrag={windowProps.handleTopLeftDrag}
-			/>
-			<ResizeBar
-				orientation={"corner"}
-				horizontalAlignment={"end"}
-				verticalAlignment={"start"}
-				onDrag={windowProps.handleTopRightDrag}
-			/>
-			<ResizeBar
-				orientation={"corner"}
-				horizontalAlignment={"end"}
-				verticalAlignment={"end"}
-				onDrag={windowProps.handleBottomRightDrag}
-			/>
-			<ResizeBar
-				orientation={"corner"}
-				horizontalAlignment={"start"}
-				verticalAlignment={"end"}
-				onDrag={windowProps.handleBottomLeftDrag}
-			/>
-			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => processScheduler.kill(pid)} onPointerDown={startDrag} />
-			<ContentWrapper>
+			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => processScheduler.kill(pid)} onPointerDown={() => {}} />
+			<ContentWrapper className={"romos-window-content-container"}>
 				<Suspense fallback={"..."}>
 					{Content !== undefined && <Content {...contentArgs} />}
 				</Suspense>
@@ -112,18 +63,15 @@ export function Window(props: WindowProps) {
 	);
 }
 
-const Wrapper = styled(motion.div)({
-	position: "absolute",
-	top: 0,
-	left: 0,
-	display: "flex",
+const Wrapper = styled(Rnd)({
+	display: "flex !important",
 	userSelect: "none",
 	flexDirection: "column",
 	backgroundColor: "#0f0f0f",
 	zIndex: 1
 });
 
-const ContentWrapper = styled<"div">("div")({
+const ContentWrapper = styled.div({
 	flex: 1,
 	maxHeight: "calc(100% - 40px)"
 });

@@ -253,12 +253,12 @@ export class Filesystem {
 
 		if (data instanceof Uint8Array) {
 			const oldStat = this.stat(filepath);
+			const oldExists = oldStat instanceof Stat;
 
 			const entry: FSMap = new Map();
-			const stat =
-				oldStat instanceof Stat
-					? oldStat
-					: new Stat("file", incrementalId(), data.byteLength);
+			const stat = oldExists
+				? oldStat
+				: new Stat("file", incrementalId(), data.byteLength);
 			stat.size = data.byteLength;
 
 			entry.set(STAT_KEY, stat);
@@ -266,7 +266,7 @@ export class Filesystem {
 			dir.set(basename, entry);
 			this.inodeTable.set(stat.inode, data);
 			this.watcher.emit(dirname, "change");
-			this.watcher.emit(filepath, "created");
+			this.watcher.emit(filepath, oldExists ? "change" : "created");
 		} else {
 			throw new Error("Invalid data type");
 		}

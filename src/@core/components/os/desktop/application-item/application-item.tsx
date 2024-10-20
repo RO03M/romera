@@ -1,15 +1,20 @@
-import { motion } from "framer-motion";
-import { useGridSize } from "../../../../hooks/use-grid-size";
-import { DragBackground } from "./drag-background";
-import { useApplicationControl } from "./use-application-control";
 import { normalize } from "../../../../filesystem/utils/path";
 import styled from "styled-components";
 import type { Stat } from "../../../../filesystem/stat";
-import { useMemo, useRef, useState } from "preact/hooks";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from "preact/hooks";
 import { getExecutableFromApplication } from "./get-executable-from-application";
 import { useClickOutside } from "../../../../hooks/use-click-outside";
 import { NameDisplay } from "./name-display";
-import { processScheduler } from "../../../../../app";
+import { filesystem, processScheduler } from "../../../../../app";
+import { desktop } from "../../../../../constants";
+import { ApplicationConfig } from "./application-config-file";
+import { useDoubleTap } from "../../../../hooks/use-double-tap";
 
 interface ApplicationItemProps {
 	name: string;
@@ -20,64 +25,81 @@ interface ApplicationItemProps {
 export function ApplicationItem(props: ApplicationItemProps) {
 	const { name, icon } = props;
 
+	const [x, setX] = useState(1);
+	const [y, setY] = useState(0);
 	const [focused, setFocused] = useState(false);
 
-	const ref = useRef<HTMLElement | null>(null);
-
-	const { item, blur, itemComponentProps } = useApplicationControl(name);
+	const ref = useRef<HTMLDivElement | null>(null);
 
 	const programName = useMemo(() => getExecutableFromApplication(name), [name]);
 
-	const gridSize = useGridSize();
-
 	useClickOutside(ref, () => setFocused(false));
 
+	const syncPosition = useCallback(() => {
+		const config = ApplicationConfig.fromFSApplication(name);
+		setX(+config.x + 1);
+		setY(+config.y + 1);
+	}, [name]);
+
+	const openProgram = useCallback(() => {
+		processScheduler.spawnMagicWindow(
+			programName,
+			normalize(`/home/romera/desktop/${name}`)
+		);
+	}, [name, programName]);
+
+	useEffect(() => {
+		filesystem.watch(`/usr/applications/${name}`, () => {
+			syncPosition();
+		});
+	}, [name, syncPosition]);
+
+	useEffect(() => {
+		syncPosition();
+	}, [syncPosition]);
+
+	useDoubleTap(ref, openProgram);
+
 	return (
-		<>
-			{blur.show && (
-				<DragBackground
-					x={blur.position.x}
-					y={blur.position.y}
-					isFree={blur.isFree}
-				/>
-			)}
-			<motion.div
-				ref={ref}
-				drag
-				{...itemComponentProps}
-				dragTransition={{
-					power: 0
-				}}
-				style={{
-					position: "absolute",
-					width: gridSize.width,
-					height: gridSize.height,
-					zIndex: blur.show ? 9999 : 0,
-					x: item.position.x,
-					y: item.position.y
-				}}
+		<Wrapper
+			ref={ref}
+			draggable={true}
+			$gridX={x}
+			$gridY={y}
+			onDblClickCapture={openProgram}
+			onDragStart={(event) => {
+				event.dataTransfer?.setData(
+					"filedrag",
+					JSON.stringify({
+						filepath: `/home/desktop/romera/${name}`,
+						name
+					})
+				);
+			}}
+		>
+			<ContentContainer
+				$focused={focused}
+				aria-program-name={programName}
+				aria-focused={focused}
+				onPointerDown={() => setFocused(true)}
 			>
-				<ContentContainer
-					focused={focused}
-					aria-program-name={programName}
-					aria-focused={focused}
-					onClick={() => setFocused(true)}
-					onDblClickCapture={() =>
-						processScheduler.spawnMagicWindow(
-							programName,
-							normalize(`/home/romera/desktop/${name}`)
-						)
-					}
-				>
-					<Icon style={{ backgroundImage: `url("${icon}")` }} />
-					<NameDisplay focused={focused} value={name} />
-				</ContentContainer>
-			</motion.div>
-		</>
+				<Icon style={{ backgroundImage: `url("${icon}")` }} />
+				<NameDisplay focused={focused} value={name} />
+			</ContentContainer>
+		</Wrapper>
 	);
 }
 
-const ContentContainer = styled.div<{ focused: boolean }>((props) => ({
+const Wrapper = styled.div<{ $gridX: number; $gridY: number }>((props) => ({
+	cursor: "initial !important",
+	width: desktop.grid.width,
+	height: desktop.grid.height,
+	userSelect: "none",
+	gridColumnStart: props.$gridX,
+	gridRowStart: props.$gridY
+}));
+
+const ContentContainer = styled.div<{ $focused: boolean }>((props) => ({
 	width: "100%",
 	height: "100%",
 	display: "flex",
@@ -85,8 +107,10 @@ const ContentContainer = styled.div<{ focused: boolean }>((props) => ({
 	alignItems: "center",
 	justifyContent: "center",
 	borderRadius: 4,
-	backgroundColor: props.focused ? `${props.theme.colors.blue[500]}33` : "none",
-	border: props.focused ? `1px dotted ${props.theme.colors.blue[500]}` : "none"
+	backgroundColor: props.$focused
+		? `${props.theme.colors.blue[500]}33`
+		: "none",
+	border: props.$focused ? `1px dotted ${props.theme.colors.blue[500]}` : "none"
 }));
 
 const Icon = styled<"div">("div")({

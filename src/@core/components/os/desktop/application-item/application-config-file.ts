@@ -9,13 +9,30 @@ export class ApplicationConfig {
 	};
 
 	constructor(data: { x?: string; y?: string; defaultExecName?: string }) {
-		this.data.x = data.x ?? "";
-		this.data.y = data.y ?? "";
-		this.data.defaultExecName = data.defaultExecName ?? "";
+		this.data = {
+			x: data.x ?? "",
+			y: data.y ?? "",
+			defaultExecName: data.defaultExecName ?? ""
+		};
 	}
 
 	public static fromText(text: string) {
         return ApplicationConfig.parser(text);
+	}
+
+	public static fromFSApplication(name: string): ApplicationConfig {
+		const file = filesystem.readFile(
+			normalize(`/usr/applications/${name}`),
+			{ decode: true }
+		);
+	
+		if (file === null) {
+			return new ApplicationConfig({});
+		}
+	
+		const config = ApplicationConfig.fromText(file as string);
+	
+		return config;
 	}
 
 	private static parser(text: string) {
@@ -36,6 +53,13 @@ export class ApplicationConfig {
 		return instance;
 	}
 
+	public fsSync(name: string) {
+		filesystem.writeFile(
+			`/usr/applications/${name}`,
+			this.stringify()
+		);
+	}
+
     public stringify() {
         const content = ["[Desktop Entry];"];
         for (const [key, value] of Object.entries(this.data)) {
@@ -51,6 +75,14 @@ export class ApplicationConfig {
 
 	public get y() {
 		return +this.data.y;
+	}
+
+	public set x(x: string | number) {
+		this.data.x = x.toString();
+	}
+
+	public set y(y: string | number) {
+		this.data.y = y.toString();
 	}
 
 	public get defaultExecName() {
@@ -81,6 +113,9 @@ export class ApplicationConfig {
 			case ".pdf":
 				this.defaultExecName = "pdfviewer";
 				break;
+			case ".jsdos":
+				this.defaultExecName = "jsdos";
+				break;
 			default:
 				this.defaultExecName = "monaco";
 				break;
@@ -88,6 +123,9 @@ export class ApplicationConfig {
 	}
 }
 
+/**
+ * @deprecated
+ */
 export function getConfigFromApplication(applicationName: string) {
 	const file = filesystem.readFile(
 		normalize(`/usr/applications/${applicationName}`),
@@ -95,7 +133,7 @@ export function getConfigFromApplication(applicationName: string) {
 	);
 
     if (file === null) {
-        return new ApplicationConfig({});
+        return new ApplicationConfig({ });
     }
 
 	const config = ApplicationConfig.fromText(file as string);

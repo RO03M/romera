@@ -1,4 +1,4 @@
-import { styled } from "@mui/material";
+import styled from "styled-components";
 import type { Dirent } from "../../../@core/filesystem/dirent";
 
 interface ExplorerListItemProps {

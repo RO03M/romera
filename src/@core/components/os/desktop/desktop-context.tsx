@@ -42,9 +42,10 @@ export function DesktopContext() {
 			throw new Error("Failed to create json from current filesystem");
 		}
 
-		const file = new Blob([JSON.stringify(fsAsJSON, undefined, 4)], {
+		const file = new Blob([JSON.stringify(fsAsJSON)], {
 			type: "text/plain"
 		});
+
 		const a = document.createElement("a");
 		a.href = URL.createObjectURL(file);
 		a.download = "filesystem-romOS.json";
