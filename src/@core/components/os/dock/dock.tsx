@@ -14,8 +14,7 @@ const Wrapper = styled.div({
 	height: system.dockbar.height,
 	display: "flex",
 	justifyContent: "center",
-	position: "absolute",
-	bottom: 10
+	margin: 10
 });
 
 const Bar = styled.nav((props) => ({

@@ -18,7 +18,7 @@ export function WindowManager() {
 	}, []);
 
 	return (
-		<Wrapper id={"window-manager"}>
+		<>
 			{processes.map((process) => (
 				<Window
 					key={process.pid}
@@ -27,7 +27,7 @@ export function WindowManager() {
 					contentArgs={process.componentArgs}
 				/>
 			))}
-		</Wrapper>
+		</>
 	);
 }
 

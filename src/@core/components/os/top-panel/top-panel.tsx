@@ -15,7 +15,6 @@ export function TopPanel() {
 const Wrapper = styled.div((props) => ({
 	width: "100%",
 	height: system.topPanel.height,
-	position: "absolute",
 	display: "flex",
 	flexDirection: "row",
 	alignItems: "center",

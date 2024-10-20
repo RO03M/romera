@@ -1,144 +1,34 @@
-import { type PanInfo, useMotionValue } from "framer-motion";
-import { clamp } from "../../../../utils/math";
-import { useCallback, useState } from "preact/hooks";
-import { useWindowSize } from "../../../../hooks/use-window-size";
+import { type MutableRef, useCallback, useState } from "preact/hooks";
+import type { DraggableData, Rnd } from "react-rnd";
 
 type PreservedDataBeforeMaximization = {
 	x: number;
 	y: number;
 	width: number;
 	height: number;
-	top: number;
-	left: number;
 };
 
-export function useWindow() {
-	const windowSize = useWindowSize();
-
+export function useWindow(rndRef: MutableRef<Rnd | null>) {
 	const [maximized, setMaximized] = useState(false);
 	const [preservedDataBeforeMaximization, setPreservedDataBeforeMaximization] =
 		useState<PreservedDataBeforeMaximization | null>(null);
 
-	const height = useMotionValue(400);
-	const width = useMotionValue(400);
-	const top = useMotionValue(0);
-	const left = useMotionValue(0);
-	const x = useMotionValue(0);
-	const y = useMotionValue(0);
-	const resizeBarWidth = 10;
-	const resizeBarHeight = 10;
-
-	const handleTopDrag = (
-		event: MouseEvent | TouchEvent | PointerEvent,
-		info: PanInfo
-	) => {
-		event.stopPropagation();
-		const newHeight = clamp(height.get() - info.delta.y, 200);
-		if (newHeight !== height.get()) {
-			height.set(newHeight);
-			top.set(top.get() + info.delta.y);
-		}
-	};
-
-	const handleTopRightDrag = (
-		event: MouseEvent | TouchEvent | PointerEvent,
-		info: PanInfo
-	) => {
-		event.stopPropagation();
-		const newHeight = clamp(height.get() - info.delta.y, 200);
-		if (newHeight !== height.get()) {
-			height.set(newHeight);
-			top.set(top.get() + info.delta.y);
-		}
-
-		width.set(clamp(width.get() + info.delta.x, 200));
-	};
-
-	const handleRightDrag = (
-		event: MouseEvent | TouchEvent | PointerEvent,
-		info: PanInfo
-	) => {
-		event.stopPropagation();
-		width.set(clamp(width.get() + info.delta.x, 200));
-	};
-
-	const handleBottomRightDrag = (
-		event: MouseEvent | TouchEvent | PointerEvent,
-		info: PanInfo
-	) => {
-		event.stopPropagation();
-		width.set(clamp(width.get() + info.delta.x, 200));
-		height.set(clamp(height.get() + info.delta.y, 200));
-	};
-
-	const handleBottomDrag = (
-		event: MouseEvent | TouchEvent | PointerEvent,
-		info: PanInfo
-	) => {
-		event.stopPropagation();
-		height.set(clamp(height.get() + info.delta.y, 200));
-	};
-
-	const handleBottomLeftDrag = (
-		event: MouseEvent | TouchEvent | PointerEvent,
-		info: PanInfo
-	) => {
-		event.stopPropagation();
-		const newWidth = clamp(width.get() - info.delta.x, 200);
-		if (newWidth !== width.get()) {
-			width.set(newWidth);
-			left.set(left.get() + info.delta.x);
-		}
-		height.set(clamp(height.get() + info.delta.y, 200));
-	};
-
-	const handleLeftDrag = (
-		event: MouseEvent | TouchEvent | PointerEvent,
-		info: PanInfo
-	) => {
-		event.stopPropagation();
-		const newWidth = clamp(width.get() - info.delta.x, 200);
-		if (newWidth !== width.get()) {
-			width.set(newWidth);
-			left.set(left.get() + info.delta.x);
-		}
-	};
-
-	const handleTopLeftDrag = (
-		event: MouseEvent | TouchEvent | PointerEvent,
-		info: PanInfo
-	) => {
-		event.stopPropagation();
-		const newHeight = clamp(height.get() - info.delta.y, 200);
-		if (newHeight !== height.get()) {
-			height.set(newHeight);
-			top.set(top.get() + info.delta.y);
-		}
-
-		const newWidth = clamp(width.get() - info.delta.x, 200);
-		if (newWidth !== width.get()) {
-			width.set(newWidth);
-			left.set(left.get() + info.delta.x);
-		}
-	};
+	const [x, setX] = useState(0);
+	const [y, setY] = useState(0);
+	const [width, setWidth] = useState(400);
+	const [height, setHeight] = useState(400);
 
 	const maximize = useCallback(() => {
 		setPreservedDataBeforeMaximization({
-			x: x.get(),
-			y: y.get(),
-			top: top.get(),
-			left: left.get(),
-			width: width.get(),
-			height: height.get()
+			x,
+			y,
+			width,
+			height
 		});
-		x.set(0);
-		y.set(0);
-		top.set(0);
-		left.set(0);
-		width.set(windowSize.width);
-		height.set(windowSize.height);
+		setX(0);
+		setY(0);
 		setMaximized(true);
-	}, [x, y, top, left, width, height, windowSize]);
+	}, [x, y, width, height]);
 
 	const minimize = useCallback(() => {
 		setMaximized(false);
@@ -147,13 +37,9 @@ export function useWindow() {
 			return;
 		}
 
-		x.set(preservedDataBeforeMaximization.x);
-		y.set(preservedDataBeforeMaximization.y);
-		top.set(preservedDataBeforeMaximization.top);
-		left.set(preservedDataBeforeMaximization.left);
-		width.set(preservedDataBeforeMaximization.width);
-		height.set(preservedDataBeforeMaximization.height);
-	}, [x, y, top, left, width, height, preservedDataBeforeMaximization]);
+		setX(preservedDataBeforeMaximization.x);
+		setY(preservedDataBeforeMaximization.y);
+	}, [preservedDataBeforeMaximization]);
 
 	const toggleMaximization = useCallback(() => {
 		if (maximized) {
@@ -163,23 +49,49 @@ export function useWindow() {
 		}
 	}, [maximize, minimize, maximized]);
 
+	const onResizeStop = useCallback(
+		(
+			_event: MouseEvent | TouchEvent,
+			_direction: string,
+			elementRef: HTMLElement
+		) => {
+			const { offsetWidth, offsetHeight } = elementRef;
+
+			setWidth(offsetWidth);
+			setHeight(offsetHeight);
+		},
+		[]
+	);
+
+	const onDragStart = useCallback(
+		(_event: unknown, _data: DraggableData) => {
+			minimize();
+
+			// if (rndRef.current !== null) {
+			// 	rndRef.current.updatePosition({ x: _event.clientX, y: _event.clientY });
+			// }
+		},
+		[minimize]
+	);
+
+	const onDragStop = useCallback(
+		(_event: MouseEvent | TouchEvent, data: DraggableData) => {
+			console.log(data.node.getBoundingClientRect());
+			setX(data.x);
+			setY(data.y);
+		},
+		[]
+	);
+
 	return {
 		x,
 		y,
 		width,
 		height,
-		top,
-		left,
-		resizeBarWidth,
-		resizeBarHeight,
-		handleBottomDrag,
-		handleLeftDrag,
-		handleRightDrag,
-		handleTopDrag,
-		handleTopLeftDrag,
-		handleTopRightDrag,
-		handleBottomRightDrag,
-		handleBottomLeftDrag,
+		maximized,
+		onResizeStop,
+		onDragStart,
+		onDragStop,
 		toggleMaximization
 	};
 }

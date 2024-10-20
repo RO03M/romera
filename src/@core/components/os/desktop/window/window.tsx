@@ -1,10 +1,7 @@
 import { styled } from "@mui/material";
-import { motion, useDragControls } from "framer-motion";
 import { Topbar } from "./topbar";
-import { ResizeBar } from "./resize-bar";
 import { useWindow } from "./use-window";
-import { useCallback } from "preact/hooks";
-import { Suspense, type ComponentType } from "preact/compat";
+import { Suspense, useRef, type ComponentType } from "preact/compat";
 import type { ProcessComponentProps } from "../../../../processes/types";
 import { processScheduler } from "../../../../../app";
 import { Rnd } from "react-rnd";
@@ -18,7 +15,9 @@ interface WindowProps {
 export function Window(props: WindowProps) {
 	const { pid, contentArgs, Content } = props;
 	
-	const windowProps = useWindow();
+	const ref = useRef<Rnd | null>(null);
+	
+	const windowProps = useWindow(ref);
 
 	if (contentArgs === undefined) {
 		return null;
@@ -27,11 +26,18 @@ export function Window(props: WindowProps) {
 	return (
 		<Wrapper
 			aria-pid={pid}
+			ref={ref}
 			dragHandleClassName={"topbar"}
-			size={{
-				width: windowProps.width.get(),
-				height: windowProps.height.get()
+			default={{
+				width: 400,
+				height: 400,
+				x: window.innerWidth / 2 - 200,
+				y: window.innerHeight / 2 - 200
 			}}
+			onDragStart={windowProps.onDragStart}
+			position={windowProps.maximized ? { x: 0, y: 0 } : undefined}
+			size={windowProps.maximized ? { width: "100%", height: "100%" } : undefined}
+			enableUserSelectHack={false}
 			resizeHandleStyles={{
 				bottom: {
 					cursor: "n-resize"
@@ -58,10 +64,7 @@ export function Window(props: WindowProps) {
 }
 
 const Wrapper = styled(Rnd)({
-	position: "absolute",
-	top: 0,
-	left: 0,
-	display: "flex",
+	display: "flex !important",
 	userSelect: "none",
 	flexDirection: "column",
 	backgroundColor: "#0f0f0f",

@@ -15,7 +15,8 @@ interface TopbarProp {
 export const Topbar = (props: TopbarProp) => {
 	const { onPointerDown, onMaximizeClick, onClose } = props;
 	return (
-		<Wrapper onPointerDown={onPointerDown} as={"div"} className={"topbar"}>
+		<Wrapper onPointerDown={onPointerDown} as={"div"}>
+			<DragHandler className={"topbar"} />
 			<Row>
 				<TopbarButton>
 					<Icon icon={icons.horizontalLine} />
@@ -31,9 +32,12 @@ export const Topbar = (props: TopbarProp) => {
 	);
 };
 
+const DragHandler = styled.nav({
+	flex: 1
+})
+
 const Wrapper = styled.div(
 	{
-		width: "100%",
 		height: 40,
 		display: "flex",
 		justifyContent: "flex-end",

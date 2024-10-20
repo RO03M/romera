@@ -1,4 +1,4 @@
-import { ThemeProvider } from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
 import { Desktop } from "./@core/components/os/desktop";
 import { WindowManager } from "./@core/components/os/window-manager/window-manager";
 import { theme } from "./theme";
@@ -14,6 +14,7 @@ import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
 import { ProcessScheduler } from "./@core/processes/process-scheduler";
 import filesystemData from "./filesystem-data.json";
 import "./app.css";
+import { safe } from "./@core/utils/safe";
 
 export const filesystem = new Filesystem("rome-os-fs");
 filesystem.hydrate(filesystemData);
@@ -30,6 +31,28 @@ export function App() {
 
 		event.preventDefault();
 		if (event.dataTransfer === null) {
+			return;
+		}
+
+		const filedrag = event.dataTransfer.getData("filedrag");
+
+		if (filedrag !== "") {
+			const { error, data: parsedFiledrag } = safe(() => JSON.parse(filedrag));
+
+			if (error) {
+				console.error("Couldn't decode filedrag object", error, filedrag);
+				return;
+			}
+
+			if (!("name" in parsedFiledrag)) {
+				console.error("Name is not present in filedrag object", parsedFiledrag);
+				return;
+			}
+
+			const applicationConfig = ApplicationConfig.fromFSApplication(parsedFiledrag.name);
+			applicationConfig.x = x;
+			applicationConfig.y = y;
+			applicationConfig.fsSync(parsedFiledrag.name);
 			return;
 		}
 
@@ -50,17 +73,28 @@ export function App() {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<div
+			<Main
 				id={"main"}
 				onDrop={onFileDrop}
 				onDragOver={(event) => event.preventDefault()}
 			>
 				<TopPanel />
-				<WindowManager />
 				<Desktop />
 				<Dock />
 				<DesktopContext />
-			</div>
+				<WindowManager />
+			</Main>
 		</ThemeProvider>
 	);
 }
+
+const Main = styled.main({
+	display: "flex",
+	flexDirection: "column",
+	height: "100vh",
+	maxHeight: "100vh",
+	overflow: "hidden",
+	backgroundSize: "contain",
+	backgroundImage: `url("https://images.unsplash.com/photo-1473081556163-2a17de81fc97?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D")`,
+	position: "fixed"
+})
