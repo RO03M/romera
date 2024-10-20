@@ -1,6 +1,6 @@
-import { styled } from "@mui/material";
 import { ExplorerListItem } from "./item";
 import type { Dirent } from "../../../@core/filesystem/dirent";
+import styled from "styled-components";
 
 interface ExplorerListProps {
 	entries: Dirent[];
