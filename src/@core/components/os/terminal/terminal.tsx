@@ -9,8 +9,9 @@ import { useTTYStore } from "../../../system/tty";
 import { filesystem, processScheduler } from "../../../../app";
 import styled from "styled-components";
 import { useClickOutside } from "../../../hooks/use-click-outside";
+import { Bash } from "./bash";
 
-export function Terminal(props: ProcessComponentProps) {
+export function TerminalProgram(props: ProcessComponentProps) {
 	const { workingDirectory = "/" } = props;
 
 	const { ttys, addTTY } = useTTYStore();
@@ -104,21 +105,60 @@ export function Terminal(props: ProcessComponentProps) {
 
 	useClickOutside(wrapperRef, () => setFocused(false));
 
-	return (
-		<Wrapper
-			ref={wrapperRef}
-			onClick={() => setFocused(true)}
-		>
-			<TerminalOutputList outputs={outputs} />
-			<TerminalInput
-				focused={focused}
-				isPending={isPending}
-				username={"romera"}
-				nodePath={currentWorkingDirectory}
-				onSubmit={onSubmit}
-			/>
-		</Wrapper>
-	);
+	useEffect(() => {
+		if (wrapperRef.current === null) {
+			return;
+		}
+
+		const bash = new Bash(wrapperRef.current);
+		// terminal.open(wrapperRef.current);
+		// // terminal.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
+		// terminal.write("~$");
+		// terminal.write("\x1b[C");
+		// terminal.onKey(({ key, domEvent }) => {
+		// 	const code = key.charCodeAt(0);
+		// 	console.log(code, key.charAt(0), key, terminal.buffer.normal.cursorX);
+		// 	if (code === 13) {
+		// 		terminal.write("\r\n");
+		// 		terminal.write("~$");
+		// 		terminal.write("\x1b[C");
+		// 		return;
+		// 	}
+
+		// 	if (code === 127) {
+		// 		terminal.write("\x1b[D");
+		// 		terminal.write("\x1b[P");
+		// 		return;
+		// 	}
+		// 	terminal.write(key);
+		// });
+		// terminal.onKey(({ key, domEvent }) => {
+		// 	if (domEvent.key === 'Backspace') {
+		// 		terminal.write('\b \b');
+		// 		return;
+		// 	}
+		// 	terminal.write(key);
+		// 	// terminal.write('\x1b[D');
+		// })
+		return () => {
+			bash.dispose();
+		};
+	}, []);
+
+	return <div ref={wrapperRef} />;
+
+	// return (
+	// 	<Wrapper ref={wrapperRef} onClick={() => setFocused(true)}>
+	// 		<TerminalOutputList outputs={outputs} />
+	// 		<TerminalInput
+	// 			focused={focused}
+	// 			isPending={isPending}
+	// 			username={"romera"}
+	// 			nodePath={currentWorkingDirectory}
+	// 			onSubmit={onSubmit}
+	// 		/>
+	// 	</Wrapper>
+	// );
 }
 
 const Wrapper = styled.div({

@@ -14,6 +14,8 @@ import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
 import { ProcessScheduler } from "./@core/processes/process-scheduler";
 import { safe } from "./@core/utils/safe";
 import "./app.css";
+import "@xterm/xterm/css/xterm.css";
+import { TerminalProgram } from "./@core/components/os/terminal/terminal";
 
 export const filesystem = new Filesystem("rome-os-fs");
 
@@ -85,6 +87,9 @@ export function App() {
 			.catch(() => console.error("Failed to load filesystem data"));
 	}, []);
 
+	return <TerminalProgram pid={0} workingDirectory={"/"} />
+
+	// biome-ignore lint/correctness/noUnreachable: <explanation>
 	return (
 		<ThemeProvider theme={theme}>
 			<Main
