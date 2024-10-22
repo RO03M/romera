@@ -25,8 +25,15 @@ export function TerminalProgram(props: ProcessComponentProps) {
 	const [focused, setFocused] = useState(true);
 
 	const wrapperRef = useRef<HTMLDivElement | null>(null);
+	const bash = useRef<Bash | null>(null);
 
 	const echo = useCallback((message: string) => {
+		if (bash.current === null) {
+			return;
+		}
+
+		bash.current.write(message.join(""));
+		// bash.current.prompt();
 		const output: TerminalOutput = {
 			message
 		};
@@ -110,40 +117,14 @@ export function TerminalProgram(props: ProcessComponentProps) {
 			return;
 		}
 
-		const bash = new Bash(wrapperRef.current);
-		// terminal.open(wrapperRef.current);
-		// // terminal.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
-		// terminal.write("~$");
-		// terminal.write("\x1b[C");
-		// terminal.onKey(({ key, domEvent }) => {
-		// 	const code = key.charCodeAt(0);
-		// 	console.log(code, key.charAt(0), key, terminal.buffer.normal.cursorX);
-		// 	if (code === 13) {
-		// 		terminal.write("\r\n");
-		// 		terminal.write("~$");
-		// 		terminal.write("\x1b[C");
-		// 		return;
-		// 	}
+		bash.current = new Bash(wrapperRef.current);
 
-		// 	if (code === 127) {
-		// 		terminal.write("\x1b[D");
-		// 		terminal.write("\x1b[P");
-		// 		return;
-		// 	}
-		// 	terminal.write(key);
-		// });
-		// terminal.onKey(({ key, domEvent }) => {
-		// 	if (domEvent.key === 'Backspace') {
-		// 		terminal.write('\b \b');
-		// 		return;
-		// 	}
-		// 	terminal.write(key);
-		// 	// terminal.write('\x1b[D');
-		// })
 		return () => {
-			bash.dispose();
+			if (bash.current !== null) {
+				bash.current.dispose();
+			}
 		};
-	}, []);
+	}, [onSubmit]);
 
 	return <div ref={wrapperRef} />;
 

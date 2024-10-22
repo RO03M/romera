@@ -131,7 +131,6 @@ export class Process {
 							? ""
 							: JSON.parse(JSON.stringify(response.data));
 
-					console.log(method, treatedResponse);
 					this.worker?.postMessage({
 						type: "SYSCALL_RESPONSE",
 						id: responseId,
