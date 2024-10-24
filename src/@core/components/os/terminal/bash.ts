@@ -55,14 +55,10 @@ export class Bash extends Terminal {
 					this.write("\x1b[1;1H");
 					return;
 				case TerminalSequences.ARROW_LEFT:
-					if (this.buffer.normal.cursorX - 1 > this.promptMessageSize) {
-						this.moveCursorXBy(-1);
-					}
+					this.onArrowLeft();
 					return;
 				case TerminalSequences.ARROW_RIGHT:
-					if (this.buffer.normal.cursorX + 1 > this.promptMessageSize) {
-						this.moveCursorXBy(1);
-					}
+					this.onArrowRight();
 					return;
 			}
 			this.write(key);
@@ -99,6 +95,23 @@ export class Bash extends Terminal {
 		}
 
 		this.userInput = "";
+	}
+
+	private onArrowLeft() {
+		const notOutOfInput = this.buffer.normal.cursorX - 1 > this.promptMessageSize;
+		if (notOutOfInput) {
+			this.moveCursorXBy(-1);
+		}
+	}
+
+	private onArrowRight() {
+		const notOverflowingInput =
+			this.buffer.normal.cursorX <=
+			this.promptMessageSize + this.userInput.length;
+
+		if (notOverflowingInput) {
+			this.moveCursorXBy(1);
+		}
 	}
 
 	public dispose(): void {
@@ -142,7 +155,6 @@ export class Bash extends Terminal {
 	}
 
 	public prompt() {
-		console.trace();
 		this.echo(this.promptMessage);
 		this.moveCursorXBy(1);
 	}
