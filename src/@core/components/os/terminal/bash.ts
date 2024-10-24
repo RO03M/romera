@@ -3,6 +3,7 @@ import { normalize } from "../../../filesystem/utils/path";
 import { filesystem, processScheduler, terminalManager } from "../../../../app";
 import { formatInput } from "./utils/format-input";
 import { incrementalId } from "../../../utils/incremental-id";
+import { FitAddon } from "@xterm/addon-fit";
 
 enum TerminalSequences {
 	NULL = "\0",
@@ -26,11 +27,14 @@ export class Bash extends Terminal {
 			cursorBlink: true,
 			tabStopWidth: 4
 		});
+		const fitAddon = new FitAddon();
+		this.loadAddon(fitAddon);
 		this.id = incrementalId("tty");
 		this.open(anchor);
 		this.write(`tty: ${this.id.toString()}`);
 		this.prompt();
 		this.onKey(({ key, domEvent }) => {
+			console.log(this.buffer.normal.baseY);
 			const code = key.charCodeAt(0);
 			// console.log(key, code);
 
@@ -41,12 +45,7 @@ export class Bash extends Terminal {
 			}
 
 			if (code === 127) {
-				if (this.buffer.normal.cursorX <= this.promptMessageSize) {
-					return;
-				}
-
-				this.write("\x1b[D");
-				this.write("\x1b[P");
+				this.backspace();
 				return;
 			}
 
@@ -64,6 +63,8 @@ export class Bash extends Terminal {
 			this.write(key);
 			this.userInput += key;
 		});
+
+		fitAddon.fit(); //Should be called inside a resize event handler
 
 		terminalManager.terminals.set(this.id, this);
 	}
@@ -97,21 +98,36 @@ export class Bash extends Terminal {
 		this.userInput = "";
 	}
 
+	private backspace() {
+		// console.log(this.inputCursorX);
+		// console.log(this.userInput.slice())
+		const sliceInput = this.userInput.slice(0, this.inputCursorX);
+		const backwardsCount = sliceInput.match(/\s([\w]+)$/)?.index ?? this.inputCursorX;
+		console.log(backwardsCount, sliceInput.match(/\s([\w]+)$/));
+
+		if (this.inputCursorX <= 0) {
+			return;
+		}
+
+		this.write(`\x1b[${backwardsCount}D`);
+		this.write(`\x1b[${backwardsCount}P`);
+		this.userInput = this.userInput.slice(0, this.inputCursorX) + this.userInput.slice(this.inputCursorX + backwardsCount);
+	}
+
 	private onArrowLeft() {
-		const notOutOfInput = this.buffer.normal.cursorX - 1 > this.promptMessageSize;
-		if (notOutOfInput) {
+		if (this.inputCursorX > 0) {
 			this.moveCursorXBy(-1);
 		}
 	}
 
 	private onArrowRight() {
-		const notOverflowingInput =
-			this.buffer.normal.cursorX <=
-			this.promptMessageSize + this.userInput.length;
-
-		if (notOverflowingInput) {
+		if (this.inputCursorX < this.userInput.length) {
 			this.moveCursorXBy(1);
 		}
+	}
+
+	private get inputCursorX() {
+		return this.buffer.normal.cursorX - 1 - this.promptMessageSize;
 	}
 
 	public dispose(): void {
