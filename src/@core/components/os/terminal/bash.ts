@@ -34,7 +34,7 @@ export class Bash extends Terminal {
 		this.write(`tty: ${this.id.toString()}`);
 		this.prompt();
 		this.onKey(({ key, domEvent }) => {
-			console.log(this.buffer.normal.baseY);
+			console.log(this.lineSize, this.cols);
 			const code = key.charCodeAt(0);
 			// console.log(key, code);
 
@@ -64,6 +64,7 @@ export class Bash extends Terminal {
 			this.userInput += key;
 		});
 
+		// this.onLineFeed((a) => console.log("linefeed"));
 		fitAddon.fit(); //Should be called inside a resize event handler
 
 		terminalManager.terminals.set(this.id, this);
@@ -103,7 +104,7 @@ export class Bash extends Terminal {
 		// console.log(this.userInput.slice())
 		const sliceInput = this.userInput.slice(0, this.inputCursorX);
 		const backwardsCount = sliceInput.match(/\s([\w]+)$/)?.index ?? this.inputCursorX;
-		console.log(backwardsCount, sliceInput.match(/\s([\w]+)$/));
+		// console.log(backwardsCount, sliceInput.match(/\s([\w]+)$/));
 
 		if (this.inputCursorX <= 0) {
 			return;
@@ -128,6 +129,10 @@ export class Bash extends Terminal {
 
 	private get inputCursorX() {
 		return this.buffer.normal.cursorX - 1 - this.promptMessageSize;
+	}
+
+	private get lineSize() {
+		return this.inputCursorX + this.promptMessageSize;
 	}
 
 	public dispose(): void {
@@ -172,14 +177,14 @@ export class Bash extends Terminal {
 
 	public prompt() {
 		this.echo(this.promptMessage);
-		this.moveCursorXBy(1);
+		this.moveCursorXBy(0);
 	}
 
 	private get promptMessage() {
-		return `\x1b[32m${this.username}@${this.hostname}\x1b[m:\x1b[34m${this.workingDirectory}\x1b[m$`;
+		return `\x1b[32m${this.username}@${this.hostname}\x1b[m:\x1b[34m${this.workingDirectory}\x1b[m$ `;
 	}
 
 	private get promptMessageSize() {
-		return `${this.username}@${this.hostname}:${this.workingDirectory}$`.length;
+		return `${this.username}@${this.hostname}:${this.workingDirectory}$ `.length;
 	}
 }
