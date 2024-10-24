@@ -14,117 +14,115 @@ import { Bash } from "./bash";
 export function TerminalProgram(props: ProcessComponentProps) {
 	const { workingDirectory = "/" } = props;
 
-	const { ttys, addTTY } = useTTYStore();
+	// const { ttys, addTTY } = useTTYStore();
 
-	const [id] = useState(incrementalId("tty"));
-	const [currentWorkingDirectory, setCurrentWorkingDirectory] =
-		useState(workingDirectory);
-	const [isPending, setIsPending] = useState(false);
-	const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
+	// const [id] = useState(incrementalId("tty"));
+	// const [currentWorkingDirectory, setCurrentWorkingDirectory] =
+	// 	useState(workingDirectory);
+	// const [isPending, setIsPending] = useState(false);
+	// const [outputs, setOutputs] = useState<TerminalOutput[]>([]);
 
-	const [focused, setFocused] = useState(true);
+	// const [focused, setFocused] = useState(true);
 
 	const wrapperRef = useRef<HTMLDivElement | null>(null);
-	const bash = useRef<Bash | null>(null);
+	// const bash = useRef<Bash | null>(null);
 
-	const echo = useCallback((message: string) => {
-		if (bash.current === null) {
-			return;
-		}
+	// const echo = useCallback((message: string) => {
+	// 	if (bash.current === null) {
+	// 		return;
+	// 	}
 
-		bash.current.write(message.join(""));
-		// bash.current.prompt();
-		const output: TerminalOutput = {
-			message
-		};
+	// 	bash.current.echo(message);
+	// 	// bash.current.prompt();
+	// 	const output: TerminalOutput = {
+	// 		message
+	// 	};
 
-		setOutputs((prevOutputs) => [...prevOutputs, output]);
-	}, []);
+	// 	setOutputs((prevOutputs) => [...prevOutputs, output]);
+	// }, []);
 
-	const lock = useCallback(() => {
-		setIsPending(true);
-	}, []);
+	// const lock = useCallback(() => {
+	// 	setIsPending(true);
+	// }, []);
 
-	const free = useCallback(() => {
-		setIsPending(false);
-	}, []);
+	// const free = useCallback(() => {
+	// 	setIsPending(false);
+	// }, []);
 
-	const cd = useCallback(
-		(path: string) => {
-			let absolutePath = "";
-			// find from root of filesystem
-			if (path.startsWith("/")) {
-				absolutePath = normalize(path);
-			} else {
-				absolutePath = normalize(`${currentWorkingDirectory}/${path}`);
-			}
+	// const cd = useCallback(
+	// 	(path: string) => {
+	// 		let absolutePath = "";
+	// 		// find from root of filesystem
+	// 		if (path.startsWith("/")) {
+	// 			absolutePath = normalize(path);
+	// 		} else {
+	// 			absolutePath = normalize(`${currentWorkingDirectory}/${path}`);
+	// 		}
 
-			const stat = filesystem.stat(absolutePath);
+	// 		const stat = filesystem.stat(absolutePath);
 
-			if (stat) {
-				setCurrentWorkingDirectory(absolutePath);
+	// 		if (stat) {
+	// 			setCurrentWorkingDirectory(absolutePath);
 
-				return "";
-			}
+	// 			return "";
+	// 		}
 
-			return `Terminal: cd: ${path} no such directory`;
-		},
-		[currentWorkingDirectory]
-	);
+	// 		return `Terminal: cd: ${path} no such directory`;
+	// 	},
+	// 	[currentWorkingDirectory]
+	// );
 
-	const onSubmit = useCallback(
-		(input: string) => {
-			const { program, args } = formatInput(input);
+	// const onSubmit = useCallback(
+	// 	(input: string) => {
+	// 		const { program, args } = formatInput(input);
 
-			switch (program) {
-				case "cd": {
-					cd(args.join());
-					break;
-				}
-				case "broadcast": {
-					// biome-ignore lint/complexity/noForEach: <explanation>
-					ttys.forEach((tty) => tty.echo("teste"));
-					break;
-				}
-				default: {
-					lock();
-					processScheduler.exec(program, args, {
-						cwd: currentWorkingDirectory,
-						tty: id
-					});
-				}
-			}
+	// 		switch (program) {
+	// 			case "cd": {
+	// 				cd(args.join());
+	// 				break;
+	// 			}
+	// 			case "broadcast": {
+	// 				// biome-ignore lint/complexity/noForEach: <explanation>
+	// 				ttys.forEach((tty) => tty.echo("teste"));
+	// 				break;
+	// 			}
+	// 			default: {
+	// 				lock();
+	// 				processScheduler.exec(program, args, {
+	// 					cwd: currentWorkingDirectory,
+	// 					tty: id
+	// 				});
+	// 			}
+	// 		}
 
-			const output: TerminalOutput = {
-				command: input,
-				path: currentWorkingDirectory,
-				username: "romera"
-			};
+	// 		const output: TerminalOutput = {
+	// 			command: input,
+	// 			path: currentWorkingDirectory,
+	// 			username: "romera"
+	// 		};
 
-			setOutputs((prevOutputs) => [...prevOutputs, output]);
-		},
-		[id, currentWorkingDirectory, ttys, lock, cd]
-	);
+	// 		setOutputs((prevOutputs) => [...prevOutputs, output]);
+	// 	},
+	// 	[id, currentWorkingDirectory, ttys, lock, cd]
+	// );
 
-	useEffect(() => {
-		addTTY({ id, echo, free, lock });
-	}, [id, addTTY, echo, free, lock]);
+	// useEffect(() => {
+	// 	addTTY({ id, echo, free, lock });
+	// }, [id, addTTY, echo, free, lock]);
 
-	useClickOutside(wrapperRef, () => setFocused(false));
+	// useClickOutside(wrapperRef, () => setFocused(false));
 
 	useEffect(() => {
 		if (wrapperRef.current === null) {
 			return;
 		}
 
-		bash.current = new Bash(wrapperRef.current);
+		const bash = new Bash(wrapperRef.current);
 
 		return () => {
-			if (bash.current !== null) {
-				bash.current.dispose();
-			}
+			bash.dispose();
 		};
-	}, [onSubmit]);
+	}, []);
 
 	return <div ref={wrapperRef} />;
 

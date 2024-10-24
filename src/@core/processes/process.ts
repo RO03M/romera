@@ -1,8 +1,7 @@
 import type { ComponentType } from "preact";
-import { filesystem, processScheduler } from "../../app";
+import { filesystem, processScheduler, terminalManager } from "../../app";
 import type { ReadFileOptions } from "../filesystem/types";
 import { format, normalize } from "../filesystem/utils/path";
-import { useTTYStore } from "../system/tty";
 import { incrementalId } from "../utils/incremental-id";
 import { safe } from "../utils/safe";
 import { RScriptTranslator } from "./rscript-translator";
@@ -152,7 +151,7 @@ export class Process {
 		const ttyContext = this.getTTY();
 		this.options.onTerminate?.();
 		this.worker?.terminate();
-		ttyContext?.free();
+		// ttyContext?.free();
 		if (this.blobUrl !== undefined) {
 			URL.revokeObjectURL(this.blobUrl);
 		}
@@ -189,6 +188,7 @@ export class Process {
 	private syscallMethods(): Record<string, SyscallMethod> {
 		const ttyContext = this.getTTY();
 
+		console.log(ttyContext, this.tty);
 		return {
 			stat: (filepath: string) => filesystem.stat(filepath),
 			lstat: (filepath: string) => filesystem.lstat(filepath),
@@ -208,8 +208,8 @@ export class Process {
 				}),
 			pwd: () => this.options.cwd,
 			echo: (message: string) => ttyContext?.echo(message),
-			free: () => ttyContext?.free(),
-			lock: () => ttyContext?.lock(),
+			free: () => {},
+			lock: () => {},
 			mkdir: (filepath: string) => filesystem.mkdir(filepath),
 			writeFile: (filepath: string, content: string | Uint8Array) => filesystem.writeFile(filepath, content),
 			pathFormat: (root: string, base: string) => format({ root, base })
@@ -221,7 +221,7 @@ export class Process {
 			return this.tty;
 		}
 
-		return useTTYStore.getState().getTTY(this.tty);
+		return terminalManager.terminals.get(this.tty);
 	}
 
 	private resolveCommandPath() {

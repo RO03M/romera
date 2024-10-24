@@ -21,6 +21,21 @@ export class Watcher<EventType, Target = string> {
 		this.events.set(target, targetList);
 	}
 
+	public unwatch(target: Target, event: EventType, callback: WatchCallback<EventType>) {
+		const targetList = this.events.get(target);
+		if (targetList === undefined) {
+			return;
+		}
+
+		
+		const callbacks = targetList.get(event);
+		if (callbacks === undefined) {
+			return;
+		}
+	
+		targetList.set(event, callbacks.filter((fn) => fn !== callback));
+	}
+
 	public emit(target: Target, event: EventType) {
 		const targetCallbacks = this.events.get(target);
 		if (targetCallbacks === undefined) {
@@ -31,5 +46,9 @@ export class Watcher<EventType, Target = string> {
 		for (const callback of callbackList) {
 			callback(event);
 		}
+	}
+
+	public clear() {
+		this.events = new Map();
 	}
 }
