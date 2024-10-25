@@ -22,6 +22,8 @@ export class Bash extends Terminal {
 
 	public userInput = "";
 
+	private cursor = 0;
+
 	constructor(anchor: HTMLElement) {
 		super({
 			cursorBlink: true,
@@ -34,7 +36,7 @@ export class Bash extends Terminal {
 		this.write(`tty: ${this.id.toString()}`);
 		this.prompt();
 		this.onKey(({ key, domEvent }) => {
-			console.log(this.lineSize, this.cols);
+			console.log(this.cursor);
 			const code = key.charCodeAt(0);
 			// console.log(key, code);
 
@@ -51,7 +53,8 @@ export class Bash extends Terminal {
 
 			switch (key) {
 				case TerminalSequences.ESC:
-					this.write("\x1b[1;1H");
+					// this.write("\x1b[1;1H");
+					this.setCursorPosition(5, 5);
 					return;
 				case TerminalSequences.ARROW_LEFT:
 					this.onArrowLeft();
@@ -60,8 +63,11 @@ export class Bash extends Terminal {
 					this.onArrowRight();
 					return;
 			}
-			this.write(key);
-			this.userInput += key;
+			if (code > 32) {
+				this.write(key);
+				this.userInput += key;
+				this.cursor += 1;
+			}
 		});
 
 		// this.onLineFeed((a) => console.log("linefeed"));
@@ -71,8 +77,10 @@ export class Bash extends Terminal {
 	}
 
 	private submit() {
+		console.log(this.userInput);
 		// TODO move format input to bash class
 		const { program, args } = formatInput(this.userInput);
+		this.cursor = 0;
 
 		switch (program) {
 			case "cd":
@@ -103,7 +111,8 @@ export class Bash extends Terminal {
 		// console.log(this.inputCursorX);
 		// console.log(this.userInput.slice())
 		const sliceInput = this.userInput.slice(0, this.inputCursorX);
-		const backwardsCount = sliceInput.match(/\s([\w]+)$/)?.index ?? this.inputCursorX;
+		// const backwardsCount = sliceInput.match(/\s([\w]+)$/)?.index ?? this.inputCursorX;]
+		const backwardsCount = 1;
 		// console.log(backwardsCount, sliceInput.match(/\s([\w]+)$/));
 
 		if (this.inputCursorX <= 0) {
@@ -112,32 +121,48 @@ export class Bash extends Terminal {
 
 		this.write(`\x1b[${backwardsCount}D`);
 		this.write(`\x1b[${backwardsCount}P`);
-		this.userInput = this.userInput.slice(0, this.inputCursorX) + this.userInput.slice(this.inputCursorX + backwardsCount);
+		// console.log(this.userInput.slice(0, this.inputCursorX));
+		this.cursor -= backwardsCount;
+		this.userInput = this.userInput.slice(0, this.inputCursorX - backwardsCount) + this.userInput.slice(this.inputCursorX);
 	}
 
 	private onArrowLeft() {
-		if (this.inputCursorX > 0) {
-			this.moveCursorXBy(-1);
+		if (this.cursor > 0) {
+			if (this.buffer.normal.cursorX === 0 && this.buffer.normal.cursorY > 0) {
+				this.setCursorPosition(this.cols, this.buffer.normal.cursorY);
+			} else {
+				this.moveCursorXBy(-1);
+			}
+			this.cursor -= 1;
 		}
 	}
 
 	private onArrowRight() {
-		if (this.inputCursorX < this.userInput.length) {
-			this.moveCursorXBy(1);
+		if (this.cursor < this.userInput.length) {
+			if (this.buffer.normal.cursorX + 1 === this.cols) {
+				this.setCursorPosition(0, this.buffer.normal.cursorY + 2);
+			} else {
+				this.moveCursorXBy(1);
+			}
+			this.cursor += 1;
 		}
 	}
 
 	private get inputCursorX() {
-		return this.buffer.normal.cursorX - 1 - this.promptMessageSize;
+		return this.buffer.normal.cursorX + 1 - this.promptMessageSize;
 	}
 
 	private get lineSize() {
-		return this.inputCursorX + this.promptMessageSize;
+		return this.userInput.length + this.promptMessageSize;
 	}
 
 	public dispose(): void {
 		super.dispose();
 		terminalManager.terminals.delete(this.id);
+	}
+
+	private setCursorPosition(x: number, y: number) {
+		this.write(`\x1b[${y};${x}H`);
 	}
 
 	public moveCursorXBy(value: number) {
