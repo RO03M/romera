@@ -82,7 +82,6 @@ export function App() {
 				data
 					.json()
 					.then((json) => {
-						console.log(json);
 						filesystem.hydrate(json);
 					})
 					.catch(() => console.error("Failed to parse filesystem json"));

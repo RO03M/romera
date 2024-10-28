@@ -4,6 +4,12 @@ import { filesystem, processScheduler, terminalManager } from "../../../../app";
 import { formatInput } from "./utils/format-input";
 import { incrementalId } from "../../../utils/incremental-id";
 import { FitAddon } from "@xterm/addon-fit";
+import {
+	getRowColIndexFromCursor,
+	rowCountFromText,
+	rowCountFromTextSize
+} from "./utils/get-row-col-from-text";
+import { clamp } from "../../../utils/math";
 
 enum TerminalSequences {
 	NULL = "\0",
@@ -11,7 +17,15 @@ enum TerminalSequences {
 	ARROW_UP = "\x1b[A",
 	ARROW_DOWN = "\x1b[B",
 	ARROW_RIGHT = "\x1b[C",
-	ARROW_LEFT = "\x1b[D"
+	ARROW_LEFT = "\x1b[D",
+	END = "\x1b[F",
+	HOME = "\x1b[H"
+}
+
+enum KeyCodes {
+	BACKSPACE = 127,
+	SPACE = 32,
+	ENTER = 13
 }
 
 export class Bash extends Terminal {
@@ -20,8 +34,7 @@ export class Bash extends Terminal {
 	public hostname = "app";
 	public workingDirectory = "/home/romera";
 
-	public userInput = "";
-
+	private userInput = "";
 	private cursor = 0;
 
 	constructor(anchor: HTMLElement) {
@@ -35,52 +48,155 @@ export class Bash extends Terminal {
 		this.open(anchor);
 		this.write(`tty: ${this.id.toString()}`);
 		this.prompt();
-		this.onKey(({ key, domEvent }) => {
-			console.log(this.cursor);
-			const code = key.charCodeAt(0);
-			// console.log(key, code);
+		this.onData((data) => {
+			const code = data.charCodeAt(0);
+			console.log(code);
+			if (code < 32) {
+				switch (data) {
+					case TerminalSequences.HOME:
+						this.setCursor(0);
+						break;
+					case TerminalSequences.END:
+						this.setCursor(this.userInput.length);
+						break;
+					case TerminalSequences.ESC:
+						// this.setCursor(this.cursor + 2);
+						break;
+					case TerminalSequences.ARROW_LEFT:
+						this.setCursor(this.cursor - 1);
+						return;
+					case TerminalSequences.ARROW_RIGHT:
+						this.setCursor(this.cursor + 1);
+						return;
+				}
 
-			if (code === 13) {
-				console.log("enter");
-				this.submit();
+				switch (code) {
+					case KeyCodes.ENTER:
+						this.submit();
+						break;
+				}
+
 				return;
 			}
 
-			if (code === 127) {
-				this.backspace();
-				return;
-			}
-
-			switch (key) {
-				case TerminalSequences.ESC:
-					// this.write("\x1b[1;1H");
-					this.setCursorPosition(5, 5);
-					return;
-				case TerminalSequences.ARROW_LEFT:
-					this.onArrowLeft();
-					return;
-				case TerminalSequences.ARROW_RIGHT:
-					this.onArrowRight();
-					return;
-			}
-			if (code > 32) {
-				this.write(key);
-				this.userInput += key;
-				this.cursor += 1;
+			switch (code) {
+				case KeyCodes.BACKSPACE:
+					this.eraseAtCursor();
+					break;
+				default:
+					this.insertStringAtCursor(data);
+					break;
 			}
 		});
 
-		// this.onLineFeed((a) => console.log("linefeed"));
 		fitAddon.fit(); //Should be called inside a resize event handler
-
 		terminalManager.terminals.set(this.id, this);
+	}
+
+	public dispose(): void {
+		super.dispose();
+		terminalManager.terminals.delete(this.id);
+	}
+
+	private insertStringAtCursor(data: string) {
+		const input =
+			this.userInput.substring(0, this.cursor) +
+			data +
+			this.userInput.substring(this.cursor);
+		this.cursor += data.length;
+		this.setInput(input);
+	}
+
+	private eraseAtCursor() {
+		const input =
+			this.userInput.substring(0, this.cursor - 1) +
+			this.userInput.substring(this.cursor);
+		if (this.cursor > 0) {
+			this.cursor -= 1;
+		}
+		this.setInput(input);
+	}
+
+	private setInput(input: string) {
+		this.userInput = input;
+		this.clearInput();
+		this.write(this.withPrompt(input));
+
+		const totalRows = rowCountFromTextSize(this.promptLength + this.userInput.length, this.cols);
+		const { row, column } = getRowColIndexFromCursor(
+			this.promptLength + this.cursor,
+			this.cols
+		);
+
+		this.write("\r");
+		for (let i = 0; i < totalRows - row - 1; i++) {
+			this.write("\x1b[F");
+		}
+		for (let i = 0; i < column + 1; i++) {
+			this.write("\x1b[C");
+		}
+	}
+
+	/**
+	 * Clears the current input buffer from the screen
+	 */
+	private clearInput() {
+		const totalRows = rowCountFromTextSize(
+			this.promptLength + this.userInput.length,
+			this.cols
+		);
+		const { row: currentRow, column } = getRowColIndexFromCursor(
+			this.promptLength + this.cursor,
+			this.cols
+		);
+
+		for (let i = currentRow; i < totalRows - 1; i++) {
+			this.write("\x1b[E");
+		}
+
+		this.write("\r\n\x1b[K");
+		for (let currRow = totalRows; currRow > 0; currRow--) {
+			this.write("\x1b[M\x1b[F");
+		}
+	}
+
+	private withPrompt(string: string) {
+		return `\x1b[32m${this.username}@${this.hostname}\x1b[m:\x1b[34m${this.workingDirectory}\x1b[m$ ${string}`;
+	}
+
+	private setCursor(newCursor: number) {
+		const clamppedCursor = clamp(newCursor, 0, this.userInput.length);
+
+		const { row: currentRow, column: currentColumn } = getRowColIndexFromCursor(
+			this.promptLength + this.cursor,
+			this.cols
+		);
+		const { row: newRow, column: newColumn } = getRowColIndexFromCursor(
+			this.promptLength + clamppedCursor,
+			this.cols
+		);
+
+		const verticalKey = currentRow > newRow ? "\x1b[A" : "\x1b[B";
+		const horizontalKey = currentColumn > newColumn ? "\x1b[D" : "\x1b[C";
+
+		for (let i = 0; i < Math.abs(currentRow - newRow); i++) {
+			console.log("vmove");
+			this.write(verticalKey);
+		}
+
+		for (let i = 0; i < Math.abs(currentColumn - newColumn); i++) {
+			console.log("hmove");
+			this.write(horizontalKey);
+		}
+
+		this.cursor = clamppedCursor;
+		console.log(this.cursor);
 	}
 
 	private submit() {
 		console.log(this.userInput);
 		// TODO move format input to bash class
 		const { program, args } = formatInput(this.userInput);
-		this.cursor = 0;
 
 		switch (program) {
 			case "cd":
@@ -104,75 +220,8 @@ export class Bash extends Terminal {
 			}
 		}
 
+		this.cursor = 0;
 		this.userInput = "";
-	}
-
-	private backspace() {
-		// console.log(this.inputCursorX);
-		// console.log(this.userInput.slice())
-		const sliceInput = this.userInput.slice(0, this.inputCursorX);
-		// const backwardsCount = sliceInput.match(/\s([\w]+)$/)?.index ?? this.inputCursorX;]
-		const backwardsCount = 1;
-		// console.log(backwardsCount, sliceInput.match(/\s([\w]+)$/));
-
-		if (this.inputCursorX <= 0) {
-			return;
-		}
-
-		this.write(`\x1b[${backwardsCount}D`);
-		this.write(`\x1b[${backwardsCount}P`);
-		// console.log(this.userInput.slice(0, this.inputCursorX));
-		this.cursor -= backwardsCount;
-		this.userInput = this.userInput.slice(0, this.inputCursorX - backwardsCount) + this.userInput.slice(this.inputCursorX);
-	}
-
-	private onArrowLeft() {
-		if (this.cursor > 0) {
-			if (this.buffer.normal.cursorX === 0 && this.buffer.normal.cursorY > 0) {
-				this.setCursorPosition(this.cols, this.buffer.normal.cursorY);
-			} else {
-				this.moveCursorXBy(-1);
-			}
-			this.cursor -= 1;
-		}
-	}
-
-	private onArrowRight() {
-		if (this.cursor < this.userInput.length) {
-			if (this.buffer.normal.cursorX + 1 === this.cols) {
-				this.setCursorPosition(0, this.buffer.normal.cursorY + 2);
-			} else {
-				this.moveCursorXBy(1);
-			}
-			this.cursor += 1;
-		}
-	}
-
-	private get inputCursorX() {
-		return this.buffer.normal.cursorX + 1 - this.promptMessageSize;
-	}
-
-	private get lineSize() {
-		return this.userInput.length + this.promptMessageSize;
-	}
-
-	public dispose(): void {
-		super.dispose();
-		terminalManager.terminals.delete(this.id);
-	}
-
-	private setCursorPosition(x: number, y: number) {
-		this.write(`\x1b[${y};${x}H`);
-	}
-
-	public moveCursorXBy(value: number) {
-		if (value === 0) {
-			return;
-		}
-
-		const sequence = value > 0 ? `\x1b[${value}C` : `\x1b[${value * -1}D`;
-
-		this.write(sequence);
 	}
 
 	public echo(...args: string[]) {
@@ -202,14 +251,13 @@ export class Bash extends Terminal {
 
 	public prompt() {
 		this.echo(this.promptMessage);
-		this.moveCursorXBy(0);
 	}
 
 	private get promptMessage() {
 		return `\x1b[32m${this.username}@${this.hostname}\x1b[m:\x1b[34m${this.workingDirectory}\x1b[m$ `;
 	}
 
-	private get promptMessageSize() {
-		return `${this.username}@${this.hostname}:${this.workingDirectory}$ `.length;
+	private get promptLength() {
+		return `${this.username}@${this.hostname}:${this.workingDirectory}$`.length;
 	}
 }
