@@ -61,6 +61,7 @@ export class Bash extends Terminal {
 						break;
 					case TerminalSequences.ESC:
 						// this.setCursor(this.cursor + 2);
+						this.clearInput();
 						break;
 					case TerminalSequences.ARROW_LEFT:
 						this.setCursor(this.cursor - 1);
@@ -154,8 +155,8 @@ export class Bash extends Terminal {
 			this.write("\x1b[E");
 		}
 
-		this.write("\r\n\x1b[K");
-		for (let currRow = totalRows; currRow > 0; currRow--) {
+		this.write("\r\x1b[K");
+		for (let currRow = 1; currRow < totalRows; currRow++) {
 			this.write("\x1b[M\x1b[F");
 		}
 	}
