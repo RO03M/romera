@@ -203,10 +203,29 @@ export class Bash extends Terminal {
 		console.log(this.cursor);
 	}
 
+	private goToBufferLastLine() {
+		const totalRows = rowCountFromTextSize(
+			this.promptLength + this.userInput.length,
+			this.cols
+		);
+
+		const { row: currentRow } = getRowColIndexFromCursor(
+			this.promptLength + this.cursor,
+			this.cols
+		);
+
+		// Go all the way down, to the last row of the current input buffer
+		for (let i = currentRow; i < totalRows - 1; i++) {
+			this.write("\x1b[E");
+		}
+	}
+
 	private submit() {
 		console.log(this.userInput);
 		// TODO move format input to bash class
 		const { program, args } = formatInput(this.userInput);
+
+		this.goToBufferLastLine();
 
 		switch (program) {
 			case "cd":
