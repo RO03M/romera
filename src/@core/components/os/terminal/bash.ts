@@ -50,7 +50,6 @@ export class Bash extends Terminal {
 		this.prompt();
 		this.onData((data) => {
 			const code = data.charCodeAt(0);
-			console.log(code);
 			if (code < 32) {
 				switch (data) {
 					case TerminalSequences.HOME:
@@ -104,8 +103,8 @@ export class Bash extends Terminal {
 			this.userInput.substring(0, this.cursor) +
 			data +
 			this.userInput.substring(this.cursor);
-		this.cursor += data.length;
 		this.setInput(input);
+		this.cursor += data.length;
 	}
 
 	private eraseAtCursor() {
@@ -119,8 +118,10 @@ export class Bash extends Terminal {
 	}
 
 	private setInput(input: string) {
-		this.userInput = input;
+		// Clearing the old input, must call it before assigning a new value to the userInput field
 		this.clearInput();
+		
+		this.userInput = input;
 		this.write(this.withPrompt(input));
 
 		const totalRows = rowCountFromTextSize(this.promptLength + this.userInput.length, this.cols);
@@ -151,14 +152,22 @@ export class Bash extends Terminal {
 			this.cols
 		);
 
+		// Go all the way down, to the last row of the current input buffer
 		for (let i = currentRow; i < totalRows - 1; i++) {
 			this.write("\x1b[E");
 		}
 
-		this.write("\r\x1b[K");
-		for (let currRow = 1; currRow < totalRows; currRow++) {
+		// this.write("\x1b[M\x1b[F");
+		// this.write("\x1b[M\x1b[F");
+		// this.write("\x1b[M\x1b[F");
+		// this.write("\x1b[E");
+		// this.write(this.withPrompt("peanuts"))
+
+		// Delete the entire row [M and move up and to the home [F
+		for (let currRow = 0; currRow < totalRows; currRow++) {
 			this.write("\x1b[M\x1b[F");
 		}
+		this.write("\x1b[E");
 	}
 
 	private withPrompt(string: string) {
@@ -259,6 +268,6 @@ export class Bash extends Terminal {
 	}
 
 	private get promptLength() {
-		return `${this.username}@${this.hostname}:${this.workingDirectory}$`.length;
+		return `${this.username}@${this.hostname}:${this.workingDirectory}$ `.length;
 	}
 }
