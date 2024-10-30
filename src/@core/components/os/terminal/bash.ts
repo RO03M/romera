@@ -6,7 +6,6 @@ import { incrementalId } from "../../../utils/incremental-id";
 import { FitAddon } from "@xterm/addon-fit";
 import {
 	getRowColIndexFromCursor,
-	rowCountFromText,
 	rowCountFromTextSize
 } from "./utils/get-row-col-from-text";
 import { clamp } from "../../../utils/math";
@@ -36,14 +35,14 @@ export class Bash extends Terminal {
 
 	private userInput = "";
 	private cursor = 0;
+	private fitAddon = new FitAddon();
 
 	constructor(anchor: HTMLElement) {
 		super({
 			cursorBlink: true,
 			tabStopWidth: 4
 		});
-		const fitAddon = new FitAddon();
-		this.loadAddon(fitAddon);
+		this.loadAddon(this.fitAddon);
 		this.id = incrementalId("tty");
 		this.open(anchor);
 		this.write(`tty: ${this.id.toString()}`);
@@ -89,13 +88,18 @@ export class Bash extends Terminal {
 			}
 		});
 
-		fitAddon.fit(); //Should be called inside a resize event handler
+		// fitAddon.fit(); //Should be called inside a resize event handler
 		terminalManager.terminals.set(this.id, this);
 	}
 
 	public dispose(): void {
 		super.dispose();
 		terminalManager.terminals.delete(this.id);
+	}
+
+	public fit() {
+		this.fitAddon.fit();
+		this.setInput(this.userInput)
 	}
 
 	private insertStringAtCursor(data: string) {
@@ -125,11 +129,14 @@ export class Bash extends Terminal {
 			// Clearing the old input, must call it before assigning a new value to the userInput field
 			this.clearInput();
 		}
-		
+
 		this.userInput = input;
 		this.write(this.withPrompt(input));
 
-		const totalRows = rowCountFromTextSize(this.promptLength + this.userInput.length, this.cols);
+		const totalRows = rowCountFromTextSize(
+			this.promptLength + this.userInput.length,
+			this.cols
+		);
 		const { row, column } = getRowColIndexFromCursor(
 			this.promptLength + this.cursor,
 			this.cols
@@ -139,7 +146,7 @@ export class Bash extends Terminal {
 		for (let i = 0; i < totalRows - row - 1; i++) {
 			this.write("\x1b[F");
 		}
-		
+
 		for (let i = 0; i < column + moveXOffset; i++) {
 			this.write("\x1b[C");
 		}
@@ -238,7 +245,7 @@ export class Bash extends Terminal {
 					tty: this.id
 				});
 
-				processScheduler.waitpid(process.pid).then((pid) => {
+				processScheduler.waitpid(process.pid).then(() => {
 					this.prompt();
 				});
 				break;
@@ -283,6 +290,7 @@ export class Bash extends Terminal {
 	}
 
 	private get promptLength() {
-		return `${this.username}@${this.hostname}:${this.workingDirectory}$ `.length;
+		return `${this.username}@${this.hostname}:${this.workingDirectory}$ `
+			.length;
 	}
 }
