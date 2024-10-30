@@ -103,23 +103,28 @@ export class Bash extends Terminal {
 			this.userInput.substring(0, this.cursor) +
 			data +
 			this.userInput.substring(this.cursor);
-		this.setInput(input);
+		this.setInput(input, true, 1);
 		this.cursor += data.length;
 	}
 
 	private eraseAtCursor() {
+		if (this.cursor <= 0) {
+			return;
+		}
+
 		const input =
 			this.userInput.substring(0, this.cursor - 1) +
 			this.userInput.substring(this.cursor);
-		if (this.cursor > 0) {
-			this.cursor -= 1;
-		}
-		this.setInput(input);
+		this.clearInput();
+		this.cursor -= 1;
+		this.setInput(input, false);
 	}
 
-	private setInput(input: string) {
-		// Clearing the old input, must call it before assigning a new value to the userInput field
-		this.clearInput();
+	private setInput(input: string, clearInput = true, moveXOffset = 0) {
+		if (clearInput) {
+			// Clearing the old input, must call it before assigning a new value to the userInput field
+			this.clearInput();
+		}
 		
 		this.userInput = input;
 		this.write(this.withPrompt(input));
@@ -134,7 +139,8 @@ export class Bash extends Terminal {
 		for (let i = 0; i < totalRows - row - 1; i++) {
 			this.write("\x1b[F");
 		}
-		for (let i = 0; i < column + 1; i++) {
+		
+		for (let i = 0; i < column + moveXOffset; i++) {
 			this.write("\x1b[C");
 		}
 	}
@@ -147,7 +153,7 @@ export class Bash extends Terminal {
 			this.promptLength + this.userInput.length,
 			this.cols
 		);
-		const { row: currentRow, column } = getRowColIndexFromCursor(
+		const { row: currentRow } = getRowColIndexFromCursor(
 			this.promptLength + this.cursor,
 			this.cols
 		);
@@ -156,12 +162,6 @@ export class Bash extends Terminal {
 		for (let i = currentRow; i < totalRows - 1; i++) {
 			this.write("\x1b[E");
 		}
-
-		// this.write("\x1b[M\x1b[F");
-		// this.write("\x1b[M\x1b[F");
-		// this.write("\x1b[M\x1b[F");
-		// this.write("\x1b[E");
-		// this.write(this.withPrompt("peanuts"))
 
 		// Delete the entire row [M and move up and to the home [F
 		for (let currRow = 0; currRow < totalRows; currRow++) {
@@ -190,17 +190,14 @@ export class Bash extends Terminal {
 		const horizontalKey = currentColumn > newColumn ? "\x1b[D" : "\x1b[C";
 
 		for (let i = 0; i < Math.abs(currentRow - newRow); i++) {
-			console.log("vmove");
 			this.write(verticalKey);
 		}
 
 		for (let i = 0; i < Math.abs(currentColumn - newColumn); i++) {
-			console.log("hmove");
 			this.write(horizontalKey);
 		}
 
 		this.cursor = clamppedCursor;
-		console.log(this.cursor);
 	}
 
 	private goToBufferLastLine() {
@@ -221,7 +218,6 @@ export class Bash extends Terminal {
 	}
 
 	private submit() {
-		console.log(this.userInput);
 		// TODO move format input to bash class
 		const { program, args } = formatInput(this.userInput);
 
