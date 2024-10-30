@@ -89,9 +89,6 @@ export function App() {
 			.catch(() => console.error("Failed to load filesystem data"));
 	}, []);
 
-	return <TerminalProgram pid={0} workingDirectory={"/"} />
-
-	// biome-ignore lint/correctness/noUnreachable: <explanation>
 	return (
 		<ThemeProvider theme={theme}>
 			<Main

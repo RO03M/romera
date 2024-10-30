@@ -35,17 +35,10 @@ export function TerminalProgram(props: ProcessComponentProps) {
 		};
 	}, []);
 
-	return <div ref={wrapperRef} />;
+	return <Wrapper ref={wrapperRef} />;
 }
 
 const Wrapper = styled.div({
-	backgroundColor: "#000",
-	fontWeight: 700,
-	color: "#fff",
-	width: "100%",
 	height: "100%",
-	overflowY: "scroll",
-	textRendering: "optimizeLegibility",
-	whiteSpace: "pre",
-	letterSpacing: 0.7
+	backgroundColor: "#000"
 });
