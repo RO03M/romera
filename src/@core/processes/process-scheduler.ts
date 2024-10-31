@@ -31,6 +31,7 @@ export class ProcessScheduler {
 		this.running.delete(pid);
 		this.watcher.emit("all", "killed");
 		this.watcher.emit(pid, "killed");
+		this.watcher.events.delete(pid); // Should I do this?
 	}
 
 	public spawnMagicWindow(
@@ -71,6 +72,14 @@ export class ProcessScheduler {
 		for (const event of events) {
 			this.watcher.watch(key, event, callback);
 		}
+	}
+
+	public async waitpid(pid: number) {
+		return new Promise((resolve) => {
+			this.watcher.watch(pid, "killed", () => {
+				resolve(pid);
+			});
+		});
 	}
 
 	public get processes() {

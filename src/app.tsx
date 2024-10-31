@@ -14,10 +14,15 @@ import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
 import { ProcessScheduler } from "./@core/processes/process-scheduler";
 import { safe } from "./@core/utils/safe";
 import "./app.css";
+import "@xterm/xterm/css/xterm.css";
+import { TerminalProgram } from "./@core/components/os/terminal/terminal";
+import { TTYManager } from "./@core/components/os/terminal/tty";
 
 export const filesystem = new Filesystem("rome-os-fs");
 
 export const processScheduler = new ProcessScheduler();
+
+export const terminalManager = new TTYManager();
 
 setInterval(() => {
 	processScheduler.tick().next();
@@ -77,7 +82,6 @@ export function App() {
 				data
 					.json()
 					.then((json) => {
-						console.log(json);
 						filesystem.hydrate(json);
 					})
 					.catch(() => console.error("Failed to parse filesystem json"));

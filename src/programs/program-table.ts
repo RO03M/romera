@@ -1,5 +1,5 @@
 
-import { Terminal } from "../@core/components/os/terminal/terminal";
+import { TerminalProgram } from "../@core/components/os/terminal/terminal";
 import { Explorer } from "./explorer/explorer";
 import { CodeEditor } from "./code-editor";
 import { ImageViewer } from "./image-viewer";
@@ -8,7 +8,7 @@ import { VideoViewer } from "./video-viewer";
 import DosPlayer from "./emulators/dos-player";
 
 export const programTable = {
-	terminal: Terminal,
+	terminal: TerminalProgram,
 	explorer: Explorer,
 	monaco: CodeEditor,
 	imageviewer: ImageViewer,
