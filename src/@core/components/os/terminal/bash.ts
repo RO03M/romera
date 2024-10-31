@@ -9,6 +9,7 @@ import {
 	rowCountFromTextSize
 } from "./utils/get-row-col-from-text";
 import { clamp } from "../../../utils/math";
+import { HistoryController } from "./history-controller";
 
 enum TerminalSequences {
 	NULL = "\0",
@@ -36,6 +37,7 @@ export class Bash extends Terminal {
 	private userInput = "";
 	private cursor = 0;
 	private fitAddon = new FitAddon();
+	private historyController = new HistoryController();
 
 	constructor(anchor: HTMLElement) {
 		super({
@@ -66,6 +68,15 @@ export class Bash extends Terminal {
 						return;
 					case TerminalSequences.ARROW_RIGHT:
 						this.setCursor(this.cursor + 1);
+						return;
+					case TerminalSequences.ARROW_UP:
+
+						this.setInput(this.historyController.current());
+						this.historyController.next()
+						return;
+					case TerminalSequences.ARROW_DOWN:
+						this.setInput(this.historyController.current());
+						this.historyController.previous()
 						return;
 				}
 
@@ -225,6 +236,8 @@ export class Bash extends Terminal {
 	}
 
 	private submit() {
+		this.historyController.add(this.userInput);
+		this.historyController.resetIndex();
 		// TODO move format input to bash class
 		const { program, args } = formatInput(this.userInput);
 
