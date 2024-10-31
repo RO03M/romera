@@ -148,7 +148,6 @@ export class Process {
 	}
 
 	public terminate() {
-		const ttyContext = this.getTTY();
 		this.options.onTerminate?.();
 		this.worker?.terminate();
 		// ttyContext?.free();

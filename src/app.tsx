@@ -15,7 +15,6 @@ import { ProcessScheduler } from "./@core/processes/process-scheduler";
 import { safe } from "./@core/utils/safe";
 import "./app.css";
 import "@xterm/xterm/css/xterm.css";
-import { TerminalProgram } from "./@core/components/os/terminal/terminal";
 import { TTYManager } from "./@core/components/os/terminal/tty";
 
 export const filesystem = new Filesystem("rome-os-fs");

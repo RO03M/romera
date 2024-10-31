@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
 import { getRowColIndexFromCursor, rowCountFromText, rowCountFromTextSize } from "./get-row-col-from-text";
 
 it("Get row and column based on cursor index and row length", () => {

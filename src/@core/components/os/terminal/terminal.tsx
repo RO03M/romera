@@ -1,11 +1,8 @@
 import { useEffect, useRef } from "preact/hooks";
-import type { ProcessComponentProps } from "../../../processes/types";
 import styled from "styled-components";
 import { Bash } from "./bash";
 
-export function TerminalProgram(props: ProcessComponentProps) {
-	const { workingDirectory = "/" } = props;
-
+export function TerminalProgram() {
 	const wrapperRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
