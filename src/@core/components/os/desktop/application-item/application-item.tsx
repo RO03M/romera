@@ -63,6 +63,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 	return (
 		<Wrapper
 			ref={ref}
+			className={"application-item"}
 			draggable={true}
 			$gridX={x}
 			$gridY={y}

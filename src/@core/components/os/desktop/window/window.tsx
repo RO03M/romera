@@ -26,6 +26,7 @@ export function Window(props: WindowProps) {
 	return (
 		<Wrapper
 			aria-pid={pid}
+			className={"window"}
 			ref={ref}
 			dragHandleClassName={"topbar"}
 			default={{

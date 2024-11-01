@@ -18,13 +18,13 @@ export const Topbar = (props: TopbarProp) => {
 		<Wrapper onPointerDown={onPointerDown} as={"div"}>
 			<DragHandler className={"topbar"} />
 			<Row>
-				<TopbarButton>
+				<TopbarButton className={"minimize-button"}>
 					<Icon icon={icons.horizontalLine} />
 				</TopbarButton>
-				<TopbarButton onClick={onMaximizeClick}>
+				<TopbarButton className={"maximize-button"} onClick={onMaximizeClick}>
 					<Icon icon={icons.square} />
 				</TopbarButton>
-				<TopbarButton closeButton onClick={onClose}>
+				<TopbarButton className={"close-button"} closeButton onClick={onClose}>
 					<Icon icon={icons.close} />
 				</TopbarButton>
 			</Row>
