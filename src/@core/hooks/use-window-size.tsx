@@ -8,7 +8,7 @@ export function useWindowSize() {
 	const [windowWidth, windowHeight] = windowSize;
 
 	useEffect(() => {
-		let resizeTimeoutId: number;
+		let resizeTimeoutId: NodeJS.Timeout;
 		function onResize() {
 			clearTimeout(resizeTimeoutId);
 			resizeTimeoutId = setTimeout(() => {
