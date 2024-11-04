@@ -16,6 +16,7 @@ import { safe } from "./@core/utils/safe";
 import "./app.css";
 import "@xterm/xterm/css/xterm.css";
 import { TTYManager } from "./@core/components/os/terminal/tty";
+import { IDB } from "./@core/filesystem";
 
 export const filesystem = new Filesystem("rome-os-fs");
 
@@ -26,6 +27,8 @@ export const terminalManager = new TTYManager();
 setInterval(() => {
 	processScheduler.tick().next();
 }, 0);
+
+// const idb = new IDB();
 
 export function App() {
 	const onFileDrop = useCallback(async (event: DragEvent) => {

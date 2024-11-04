@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { Filesystem } from "./filesystem";
+import indexeddb from "fake-indexeddb";
+
+globalThis.indexedDB = indexeddb;
 
 const filesystem = new Filesystem("fs-unit-tests");
 

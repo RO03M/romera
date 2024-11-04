@@ -1,6 +1,7 @@
 import { EEXIST, ENOENT } from "../../errors";
 import { btc } from "../utils/better-try-catch";
 import { incrementalId } from "../utils/incremental-id";
+import { FSBackend } from "./backend/backend";
 import { Dirent } from "./dirent";
 import { FilesystemWatcher } from "./filesystem-watcher";
 import { Stat } from "./stat";
@@ -21,10 +22,11 @@ import {
 
 const STAT_KEY = 0;
 
-type FSMap = Map<string | 0, Stat | FSMap>;
+export type FSMap = Map<string | 0, Stat | FSMap>;
 
 export class Filesystem {
 	private watcher: FilesystemWatcher = new FilesystemWatcher();
+	private backend: FSBackend;
 	public fsName: string;
 	public inodeTable: Map<Stat["inode"], Uint8Array> = new Map();
 	public root: FSMap = new Map([
@@ -33,6 +35,7 @@ export class Filesystem {
 
 	constructor(fsName: string) {
 		this.fsName = fsName;
+		this.backend = new FSBackend();
 	}
 
 	public hydrate(data: HydrationData, inheritPath = "/") {
@@ -218,6 +221,7 @@ export class Filesystem {
 		dir!.set(basename, entry);
 		this.watcher.emit(dirname, "change");
 		this.watcher.emit(filepath, "created");
+		this.backend.saveSuperblock(this.root);
 
 		return stat;
 	}
