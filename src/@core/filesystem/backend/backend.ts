@@ -1,5 +1,3 @@
-import Dexie, { type EntityTable } from "dexie";
-import { safe } from "../../utils/safe";
 import type { FSMap } from "../filesystem";
 import { IDB } from "./idb";
 
@@ -10,9 +8,23 @@ export class FSBackend {
 		this.idb = new IDB();
 	}
 
-	public writeFile(inode: number, data: Uint8Array) {}
+	public async writeFile(inode: number, data: Uint8Array) {
+		return await this.idb.writeFile(inode, data);
+	}
 
-	public saveSuperblock(data: FSMap) {
-		this.idb.saveSuperblock(data);
+	public async readFile(inode: number) {
+		const file = await this.idb.readFile(inode);
+
+		return file?.data;
+	}
+
+	public async saveSuperblock(data: FSMap) {
+		await this.idb.saveSuperblock(data);
+	}
+
+	public async loadSuperblock() {
+		const superblock = await this.idb.getSuperblock();
+
+		return superblock?.data;
 	}
 }

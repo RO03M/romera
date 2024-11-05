@@ -17,21 +17,20 @@ export class IDB {
 		});
 	}
 
-	public writeFile(inode: number, data: Uint8Array) {}
+	public async writeFile(inode: number, data: Uint8Array) {
+        return await this.db.inodetable.put({ inode, data }, inode);
+    }
 
-    private superblockTable() {
-        const table = this.db.tables.find((table) => table.name === "superblock");
-
-        return table;
+    public async readFile(inode: number) {
+        return await this.db.inodetable.where("inode").equals(inode).first();
     }
 
     public async saveSuperblock(data: FSMap) {
-        console.log(data);
-        await this.superblockTable()?.put({ id: "root", data }, "root");
+        return await this.db.superblock?.put({ id: "root", data }, "root");
     }
 
     public async getSuperblock() {
-        const superblock = await this.superblockTable()?.get("root");
+        const superblock = await this.db.superblock?.get("root");
 
         return superblock;
     }

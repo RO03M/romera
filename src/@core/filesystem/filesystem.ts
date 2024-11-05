@@ -28,7 +28,7 @@ export class Filesystem {
 	private watcher: FilesystemWatcher = new FilesystemWatcher();
 	private backend: FSBackend;
 	public fsName: string;
-	public inodeTable: Map<Stat["inode"], Uint8Array> = new Map();
+	// public inodeTable: Map<Stat["inode"], Uint8Array> = new Map();
 	public root: FSMap = new Map([
 		["/", new Map([[STAT_KEY, new Stat("dir", 0, 0)]])]
 	]);
@@ -66,15 +66,15 @@ export class Filesystem {
 		}
 	}
 
-	public getJSON() {
-		const rootJSON = this.buildJSONTree(this.root);
+	public async getJSON() {
+		const rootJSON = await this.buildJSONTree(this.root);
 		if (rootJSON === undefined) {
 			return;
 		}
 		return rootJSON[0];
 	}
 
-	private buildJSONTree(data: FSMap | Stat, inheritPath = "") {
+	private async buildJSONTree(data: FSMap | Stat, inheritPath = "") {
 		if (data instanceof Stat) {
 			return;
 		}
@@ -92,14 +92,15 @@ export class Filesystem {
 				const entry: HydrationData = {
 					name: key.toString(),
 					type: stat.type,
-					nodes: this.buildJSONTree(value, currentPath)
+					nodes: await this.buildJSONTree(value, currentPath)
 				};
 				if (stat.target) {
 					entry.target = stat.target;
 				}
 
 				if (stat.isFile()) {
-					const content = this.inodeTable.get(stat.inode);
+					// const content = this.inodeTable.get(stat.inode);
+					const content = await this.backend.readFile(stat.inode);
 					if (content !== undefined) {
 						entry.content = Array.from(content);
 					}
@@ -245,7 +246,7 @@ export class Filesystem {
 		dir.delete(basename);
 	}
 
-	public writeFile(filepath: string, _data: string | Uint8Array) {
+	public async writeFile(filepath: string, _data: string | Uint8Array) {
 		const [dirname, basename] = splitParentPathAndNodeName(filepath);
 
 		const dir = this.lookup(dirname);
@@ -268,7 +269,8 @@ export class Filesystem {
 			entry.set(STAT_KEY, stat);
 
 			dir.set(basename, entry);
-			this.inodeTable.set(stat.inode, data);
+			// this.inodeTable.set(stat.inode, data);
+			await this.backend.writeFile(stat.inode, data);
 			this.watcher.emit(dirname, "change");
 			this.watcher.emit(filepath, oldExists ? "change" : "created");
 		} else {
@@ -315,7 +317,7 @@ export class Filesystem {
 		this.watcher.emit(dirname, "change");
 	}
 
-	public readFile(filepath: string, options: ReadFileOptions = {}) {
+	public async readFile(filepath: string, options: ReadFileOptions = {}) {
 		const { decode = false } = options;
 
 		const stat = this.stat(filepath);
@@ -328,7 +330,8 @@ export class Filesystem {
 			return null;
 		}
 
-		const data = this.inodeTable.get(stat.inode);
+		// const data = this.inodeTable.get(stat.inode);
+		const data = await this.backend.readFile(stat.inode);
 
 		if (data === undefined) {
 			return null;
