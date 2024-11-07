@@ -16,9 +16,9 @@ import { safe } from "./@core/utils/safe";
 import "./app.css";
 import "@xterm/xterm/css/xterm.css";
 import { TTYManager } from "./@core/components/os/terminal/tty";
-import { IDB } from "./@core/filesystem";
 
 export const filesystem = new Filesystem("rome-os-fs");
+filesystem.init();
 
 export const processScheduler = new ProcessScheduler();
 
@@ -27,8 +27,6 @@ export const terminalManager = new TTYManager();
 setInterval(() => {
 	processScheduler.tick().next();
 }, 0);
-
-// const idb = new IDB();
 
 export function App() {
 	const onFileDrop = useCallback(async (event: DragEvent) => {
@@ -54,7 +52,7 @@ export function App() {
 				return;
 			}
 
-			const applicationConfig = ApplicationConfig.fromFSApplication(
+			const applicationConfig = await ApplicationConfig.fromFSApplication(
 				parsedFiledrag.name
 			);
 			applicationConfig.x = x;
@@ -78,18 +76,18 @@ export function App() {
 		}
 	}, []);
 
-	useEffect(() => {
-		fetch("/filesystem/default.json")
-			.then((data) => {
-				data
-					.json()
-					.then((json) => {
-						filesystem.hydrate(json);
-					})
-					.catch(() => console.error("Failed to parse filesystem json"));
-			})
-			.catch(() => console.error("Failed to load filesystem data"));
-	}, []);
+	// useEffect(() => {
+	// 	fetch("/filesystem/default.json")
+	// 		.then((data) => {
+	// 			data
+	// 				.json()
+	// 				.then((json) => {
+	// 					filesystem.hydrate(json);
+	// 				})
+	// 				.catch(() => console.error("Failed to parse filesystem json"));
+	// 		})
+	// 		.catch(() => console.error("Failed to load filesystem data"));
+	// }, []);
 
 	return (
 		<ThemeProvider theme={theme}>

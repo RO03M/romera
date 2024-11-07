@@ -1,6 +1,7 @@
 import { EEXIST, ENOENT } from "../../errors";
 import { btc } from "../utils/better-try-catch";
 import { incrementalId } from "../utils/incremental-id";
+import { safe } from "../utils/safe";
 import { FSBackend } from "./backend/backend";
 import { Dirent } from "./dirent";
 import { FilesystemWatcher } from "./filesystem-watcher";
@@ -36,6 +37,40 @@ export class Filesystem {
 	constructor(fsName: string) {
 		this.fsName = fsName;
 		this.backend = new FSBackend();
+	}
+
+	public async init() {
+		const superblock = await this.backend.loadSuperblock();
+		if (superblock !== undefined) {
+			this.root = superblock;
+			console.log(superblock);
+		} else {
+			const defaultSuperblockJson = await safe(fetch("/filesystem/default.json"));
+
+			if (defaultSuperblockJson.error) {
+				console.error("Failed to load default filesystem", defaultSuperblockJson.error);
+				return;
+			}
+
+
+			const defaultSuperblock = await safe(defaultSuperblockJson.data.json());
+			if (defaultSuperblock.error) {
+				console.error("Failed to parse filesystem json ", defaultSuperblock.error);
+				return;
+			}
+
+			this.hydrate(defaultSuperblock.data);
+			// filesystem
+			// .then((data) => {
+			// 	data
+			// 		.json()
+			// 		.then((json) => {
+			// 			filesystem.hydrate(json);
+			// 		})
+			// 		.catch(() => console.error("Failed to parse filesystem json"));
+			// })
+			// .catch(() => console.error("Failed to load filesystem data"));
+		}
 	}
 
 	public hydrate(data: HydrationData, inheritPath = "/") {
@@ -317,6 +352,9 @@ export class Filesystem {
 		this.watcher.emit(dirname, "change");
 	}
 
+	public async readFile(filepath: string, options: ReadFileOptions & { decode: false }): Promise<Uint8Array | null>
+	public async readFile(filepath: string, options: ReadFileOptions & { decode: true }): Promise<string | null>
+	public async readFile(filepath: string, options: ReadFileOptions): Promise<string | Uint8Array | null>
 	public async readFile(filepath: string, options: ReadFileOptions = {}) {
 		const { decode = false } = options;
 

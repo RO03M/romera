@@ -1,13 +1,7 @@
 import { normalize } from "../../../../filesystem/utils/path";
 import styled from "styled-components";
 import type { Stat } from "../../../../filesystem/stat";
-import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState
-} from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { getExecutableFromApplication } from "./get-executable-from-application";
 import { useClickOutside } from "../../../../hooks/use-click-outside";
 import { NameDisplay } from "./name-display";
@@ -15,6 +9,7 @@ import { filesystem, processScheduler } from "../../../../../app";
 import { desktop } from "../../../../../constants";
 import { ApplicationConfig } from "./application-config-file";
 import { useDoubleTap } from "../../../../hooks/use-double-tap";
+import { useAsyncMemo } from "../../../../hooks/use-async-memo";
 
 interface ApplicationItemProps {
 	name: string;
@@ -31,17 +26,24 @@ export function ApplicationItem(props: ApplicationItemProps) {
 
 	const ref = useRef<HTMLDivElement | null>(null);
 
-	const programName = useMemo(() => getExecutableFromApplication(name), [name]);
+	const programName = useAsyncMemo(
+		() => getExecutableFromApplication(name),
+		[name]
+	);
 
 	useClickOutside(ref, () => setFocused(false));
 
-	const syncPosition = useCallback(() => {
-		const config = ApplicationConfig.fromFSApplication(name);
+	const syncPosition = useCallback(async () => {
+		const config = await ApplicationConfig.fromFSApplication(name);
 		setX(+config.x + 1);
 		setY(+config.y + 1);
 	}, [name]);
 
 	const openProgram = useCallback(() => {
+		if (programName === undefined) {
+			return;
+		}
+
 		processScheduler.spawnMagicWindow(
 			programName,
 			normalize(`/home/romera/desktop/${name}`)
