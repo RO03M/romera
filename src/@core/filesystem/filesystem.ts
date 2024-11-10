@@ -43,7 +43,7 @@ export class Filesystem {
 		const superblock = await this.backend.loadSuperblock();
 		if (superblock !== undefined) {
 			this.root = superblock;
-			console.log(superblock);
+            this.watcher.emit("/home/romera/desktop", "change"); // Perhaps I should use a cascate approach? Too lazy now, fuck it!
 		} else {
 			const defaultSuperblockJson = await safe(fetch("/filesystem/default.json"));
 
@@ -52,7 +52,6 @@ export class Filesystem {
 				return;
 			}
 
-
 			const defaultSuperblock = await safe(defaultSuperblockJson.data.json());
 			if (defaultSuperblock.error) {
 				console.error("Failed to parse filesystem json ", defaultSuperblock.error);
@@ -60,16 +59,6 @@ export class Filesystem {
 			}
 
 			this.hydrate(defaultSuperblock.data);
-			// filesystem
-			// .then((data) => {
-			// 	data
-			// 		.json()
-			// 		.then((json) => {
-			// 			filesystem.hydrate(json);
-			// 		})
-			// 		.catch(() => console.error("Failed to parse filesystem json"));
-			// })
-			// .catch(() => console.error("Failed to load filesystem data"));
 		}
 	}
 

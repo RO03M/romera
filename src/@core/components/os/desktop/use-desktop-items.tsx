@@ -16,10 +16,12 @@ export function useDesktopItems() {
 
 	const fetchItems = useCallback(async () => {
 		const files = await safe(() =>
-			filesystem
+		      filesystem
 				.readdir("/home/romera/desktop", { withFileTypes: true })
 				.filter((dirent) => typeof dirent !== "string")
 		);
+
+        console.log(files);
 
 		if (files.error) {
 			return;
@@ -27,7 +29,7 @@ export function useDesktopItems() {
 
 		const tempItems: DesktopItem[] = [];
 		for (const file of files.data) {
-			const config = await getConfigFromApplication(file.name);
+		    const config = await getConfigFromApplication(file.name);
 			tempItems.push({
 				...file,
 				x: +config.x,
@@ -42,7 +44,6 @@ export function useDesktopItems() {
 	useEffect(() => {
 		fetchItems();
 		filesystem.watch("/home/romera/desktop", (event) => {
-			console.log(event);
 			if (event !== "change") {
 				return;
 			}

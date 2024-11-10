@@ -1,4 +1,5 @@
 import type { FSMap } from "../filesystem";
+import { Stat } from "../stat";
 import { IDB } from "./idb";
 
 export class FSBackend {
@@ -18,6 +19,22 @@ export class FSBackend {
 		return file?.data;
 	}
 
+	/**
+	   @description when saved to the indexeddb, the classes are transformed into an object, so I have to fucking transform those fuckers
+	*/
+	private formatSuperblock(data: FSMap) {
+        const blockmap: FSMap = new Map();
+        for (const [key, value] of data.entries()) {
+            if (key === 0) {
+                blockmap.set(key, Stat.fromObject(value as Stat));
+            } else {
+                blockmap.set(key, this.formatSuperblock(value as FSMap));
+            }
+        }
+
+        return blockmap
+	}
+
 	public async saveSuperblock(data: FSMap) {
 		await this.idb.saveSuperblock(data);
 	}
@@ -25,6 +42,10 @@ export class FSBackend {
 	public async loadSuperblock() {
 		const superblock = await this.idb.getSuperblock();
 
-		return superblock?.data;
+		if (superblock !== undefined) {
+            return this.formatSuperblock(superblock.data)
+		}
+
+		return superblock;
 	}
 }
