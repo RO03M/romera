@@ -12,7 +12,8 @@ import type {
 	MakeDirectoryOptions,
 	ReadDirOptions,
 	ReadFileOptions,
-	WatchCallback
+	WatchCallback,
+	WatchEvent
 } from "./types";
 import {
 	format,
@@ -44,6 +45,7 @@ export class Filesystem {
 		if (superblock !== undefined) {
 			this.root = superblock;
             this.watcher.emit("/home/romera/desktop", "change"); // Perhaps I should use a cascate approach? Too lazy now, fuck it!
+			this.readdir("/usr/applications");
 		} else {
 			const defaultSuperblockJson = await safe(fetch("/filesystem/default.json"));
 
@@ -295,6 +297,7 @@ export class Filesystem {
 			dir.set(basename, entry);
 			// this.inodeTable.set(stat.inode, data);
 			await this.backend.writeFile(stat.inode, data);
+			this.backend.saveSuperblock(this.root);
 			this.watcher.emit(dirname, "change");
 			this.watcher.emit(filepath, oldExists ? "change" : "created");
 		} else {
@@ -320,6 +323,7 @@ export class Filesystem {
 		const stat = new Stat("symlink", incrementalId(), target.length, target);
 		entry.set(STAT_KEY, stat);
 		dir.set(basename, entry);
+		this.backend.saveSuperblock(this.root);
 	}
 
 	public rename(filepath: string, newName: string) {
@@ -339,6 +343,7 @@ export class Filesystem {
 		dir.set(normalize(newName), dir.get(basename)!);
 		dir.delete(basename);
 		this.watcher.emit(dirname, "change");
+		this.backend.saveSuperblock(this.root);
 	}
 
 	public async readFile(filepath: string, options: ReadFileOptions & { decode: false }): Promise<Uint8Array | null>
