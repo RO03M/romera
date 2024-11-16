@@ -6,11 +6,11 @@ import {
 import { normalize } from "../../../../filesystem/utils/path";
 import { getConfigFromApplication } from "./application-config-file";
 
-export function getExecutableFromApplication(
+export async function getExecutableFromApplication(
 	name: string
-): keyof typeof programTable {
+): Promise<keyof typeof programTable> {
 	const stat = filesystem.stat(`/home/romera/desktop/${normalize(name)}`);
-	const configuration = getConfigFromApplication(name);
+	const configuration = await getConfigFromApplication(name);
 
 	if (isMagicProgram(configuration.defaultExecName)) {
 		return configuration.defaultExecName;

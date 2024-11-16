@@ -14,9 +14,9 @@ interface DesktopItem extends Dirent {
 export function useDesktopItems() {
 	const [items, setItems] = useState<DesktopItem[]>([]);
 
-	const fetchItems = useCallback(() => {
-		const files = safe(() =>
-			filesystem
+	const fetchItems = useCallback(async () => {
+		const files = await safe(() =>
+		      filesystem
 				.readdir("/home/romera/desktop", { withFileTypes: true })
 				.filter((dirent) => typeof dirent !== "string")
 		);
@@ -27,7 +27,7 @@ export function useDesktopItems() {
 
 		const tempItems: DesktopItem[] = [];
 		for (const file of files.data) {
-			const config = getConfigFromApplication(file.name);
+		    const config = await getConfigFromApplication(file.name);
 			tempItems.push({
 				...file,
 				x: +config.x,

@@ -36,8 +36,8 @@ function mimeTypeFromFile(filepath: string) {
 	}
 }
 
-export function blobFromFile(filepath: string) {
-    const buffer = filesystem.readFile(filepath);
+export async function blobFromFile(filepath: string) {
+    const buffer = await filesystem.readFile(filepath);
     
 	if (buffer === null || typeof buffer === "string") {
 		return null;

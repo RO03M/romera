@@ -2,6 +2,7 @@ import type { DosPlayer as Instance, DosPlayerFactoryType } from "js-dos";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { ProcessComponentProps } from "../../@core/processes/types";
 import { filesystem } from "../../app";
+import { useAsyncMemo } from "../../@core/hooks/use-async-memo";
 
 declare const Dos: DosPlayerFactoryType;
 
@@ -11,22 +12,32 @@ export default function DosPlayer(props: ProcessComponentProps) {
 
 	const [dos, setDos] = useState<Instance | null>(null);
 
-	const file = useMemo(() => {
+	const file = useAsyncMemo(async () => {
 		if (!workingDirectory) {
 			return null;
 		}
 
-		const file = filesystem.readFile(workingDirectory, { decode: false });
+		const file = await filesystem.readFile(workingDirectory, { decode: false });
 
 		return file;
-	}, [workingDirectory]);
+	}, [workingDirectory], null);
+
+	// const file = useMemo(() => {
+	// 	if (!workingDirectory) {
+	// 		return null;
+	// 	}
+
+	// 	const file = filesystem.readFile(workingDirectory, { decode: false });
+
+	// 	return file;
+	// }, [workingDirectory]);
 
 	const bundleUrl = useMemo(() => {
 		if (file === null) {
 			return null;
 		}
 
-		return URL.createObjectURL(new Blob([file], { type: "application" }));
+		return URL.createObjectURL(new Blob([file!], { type: "application" }));
 	}, [file]);
 
 	useEffect(() => {

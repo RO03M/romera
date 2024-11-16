@@ -1,6 +1,13 @@
 import type { StatType } from "./types";
 
-export class Stat {
+interface IStat {
+    type: StatType;
+	inode: number;
+	size: number;
+	target?: string;
+}
+
+export class Stat implements IStat {
 	public type: StatType;
 	public inode: number;
 	public size: number;
@@ -25,5 +32,9 @@ export class Stat {
 
 	public isSymlink() {
 		return this.type === "symlink";
+	}
+
+	public static fromObject(stat: IStat) {
+        return new Stat(stat.type, stat.inode, stat.size, stat.target);
 	}
 }

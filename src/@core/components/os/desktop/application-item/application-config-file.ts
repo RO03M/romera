@@ -20,8 +20,8 @@ export class ApplicationConfig {
         return ApplicationConfig.parser(text);
 	}
 
-	public static fromFSApplication(name: string): ApplicationConfig {
-		const file = filesystem.readFile(
+	public static async fromFSApplication(name: string): Promise<ApplicationConfig> {
+		const file = await filesystem.readFile(
 			normalize(`/usr/applications/${name}`),
 			{ decode: true }
 		);
@@ -126,8 +126,8 @@ export class ApplicationConfig {
 /**
  * @deprecated
  */
-export function getConfigFromApplication(applicationName: string) {
-	const file = filesystem.readFile(
+export async function getConfigFromApplication(applicationName: string) {
+	const file = await filesystem.readFile(
 		normalize(`/usr/applications/${applicationName}`),
 		{ decode: true }
 	);

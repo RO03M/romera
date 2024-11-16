@@ -1,6 +1,7 @@
 import { EEXIST, ENOENT } from "../../errors";
 import { btc } from "../utils/better-try-catch";
-import { incrementalId } from "../utils/incremental-id";
+import { safe } from "../utils/safe";
+import { FSBackend } from "./backend/backend";
 import { Dirent } from "./dirent";
 import { FilesystemWatcher } from "./filesystem-watcher";
 import { Stat } from "./stat";
@@ -21,18 +22,70 @@ import {
 
 const STAT_KEY = 0;
 
-type FSMap = Map<string | 0, Stat | FSMap>;
+export type FSMap = Map<string | 0, Stat | FSMap>;
 
 export class Filesystem {
 	private watcher: FilesystemWatcher = new FilesystemWatcher();
+	private backend: FSBackend;
+	private iused = 0;
 	public fsName: string;
-	public inodeTable: Map<Stat["inode"], Uint8Array> = new Map();
+	// public inodeTable: Map<Stat["inode"], Uint8Array> = new Map();
 	public root: FSMap = new Map([
 		["/", new Map([[STAT_KEY, new Stat("dir", 0, 0)]])]
 	]);
 
 	constructor(fsName: string) {
 		this.fsName = fsName;
+		this.backend = new FSBackend();
+	}
+
+	public async init() {
+		const superblock = await this.backend.loadSuperblock();
+		if (superblock !== undefined) {
+			this.root = superblock;
+			this.watcher.emit("/home/romera/desktop", "change"); // Perhaps I should use a cascate approach? Too lazy now, fuck it!
+			this.readdir("/usr/applications");
+		} else {
+			const defaultSuperblockJson = await safe(
+				fetch("/filesystem/default.json")
+			);
+
+			if (defaultSuperblockJson.error) {
+				console.error(
+					"Failed to load default filesystem",
+					defaultSuperblockJson.error
+				);
+				return;
+			}
+
+			const defaultSuperblock = await safe(defaultSuperblockJson.data.json());
+			if (defaultSuperblock.error) {
+				console.error(
+					"Failed to parse filesystem json ",
+					defaultSuperblock.error
+				);
+				return;
+			}
+
+			this.hydrate(defaultSuperblock.data);
+		}
+
+		this.iused = this.getMaxINode(this.root);
+	}
+
+	private getMaxINode(fsmap: FSMap) {
+		const stat = fsmap.get(0);
+		let maxInode = stat instanceof Stat ? stat.inode : 0;
+
+		for (const [_, value] of fsmap.entries()) {
+			if (!(value instanceof Stat)) {
+				const inode = this.getMaxINode(value);
+
+				maxInode = Math.max(maxInode, inode);
+			}
+		}
+
+		return maxInode;
 	}
 
 	public hydrate(data: HydrationData, inheritPath = "/") {
@@ -63,15 +116,15 @@ export class Filesystem {
 		}
 	}
 
-	public getJSON() {
-		const rootJSON = this.buildJSONTree(this.root);
+	public async getJSON() {
+		const rootJSON = await this.buildJSONTree(this.root);
 		if (rootJSON === undefined) {
 			return;
 		}
 		return rootJSON[0];
 	}
 
-	private buildJSONTree(data: FSMap | Stat, inheritPath = "") {
+	private async buildJSONTree(data: FSMap | Stat, inheritPath = "") {
 		if (data instanceof Stat) {
 			return;
 		}
@@ -89,14 +142,15 @@ export class Filesystem {
 				const entry: HydrationData = {
 					name: key.toString(),
 					type: stat.type,
-					nodes: this.buildJSONTree(value, currentPath)
+					nodes: await this.buildJSONTree(value, currentPath)
 				};
 				if (stat.target) {
 					entry.target = stat.target;
 				}
 
 				if (stat.isFile()) {
-					const content = this.inodeTable.get(stat.inode);
+					// const content = this.inodeTable.get(stat.inode);
+					const content = await this.backend.readFile(stat.inode);
 					if (content !== undefined) {
 						entry.content = Array.from(content);
 					}
@@ -212,12 +266,14 @@ export class Filesystem {
 
 		const dir = this.lookup(dirname);
 
+		this.iused++;
 		const entry: FSMap = new Map();
-		const stat = new Stat("dir", incrementalId(), 0);
+		const stat = new Stat("dir", this.iused, 0);
 		entry.set(STAT_KEY, stat);
 		dir!.set(basename, entry);
 		this.watcher.emit(dirname, "change");
 		this.watcher.emit(filepath, "created");
+		this.backend.saveSuperblock(this.root);
 
 		return stat;
 	}
@@ -241,7 +297,7 @@ export class Filesystem {
 		dir.delete(basename);
 	}
 
-	public writeFile(filepath: string, _data: string | Uint8Array) {
+	public async writeFile(filepath: string, _data: string | Uint8Array) {
 		const [dirname, basename] = splitParentPathAndNodeName(filepath);
 
 		const dir = this.lookup(dirname);
@@ -255,16 +311,19 @@ export class Filesystem {
 			const oldStat = this.stat(filepath);
 			const oldExists = oldStat instanceof Stat;
 
+			this.iused++;
 			const entry: FSMap = new Map();
 			const stat = oldExists
 				? oldStat
-				: new Stat("file", incrementalId(), data.byteLength);
+				: new Stat("file", this.iused, data.byteLength);
 			stat.size = data.byteLength;
 
 			entry.set(STAT_KEY, stat);
 
 			dir.set(basename, entry);
-			this.inodeTable.set(stat.inode, data);
+			// this.inodeTable.set(stat.inode, data);
+			await this.backend.writeFile(stat.inode, data);
+			this.backend.saveSuperblock(this.root);
 			this.watcher.emit(dirname, "change");
 			this.watcher.emit(filepath, oldExists ? "change" : "created");
 		} else {
@@ -286,10 +345,12 @@ export class Filesystem {
 			throw new Error("Cannot create symlink, file exists");
 		}
 
+		this.iused++;
 		const entry: FSMap = new Map();
-		const stat = new Stat("symlink", incrementalId(), target.length, target);
+		const stat = new Stat("symlink", this.iused, target.length, target);
 		entry.set(STAT_KEY, stat);
 		dir.set(basename, entry);
+		this.backend.saveSuperblock(this.root);
 	}
 
 	public rename(filepath: string, newName: string) {
@@ -309,9 +370,22 @@ export class Filesystem {
 		dir.set(normalize(newName), dir.get(basename)!);
 		dir.delete(basename);
 		this.watcher.emit(dirname, "change");
+		this.backend.saveSuperblock(this.root);
 	}
 
-	public readFile(filepath: string, options: ReadFileOptions = {}) {
+	public async readFile(
+		filepath: string,
+		options: ReadFileOptions & { decode: false }
+	): Promise<Uint8Array | null>;
+	public async readFile(
+		filepath: string,
+		options: ReadFileOptions & { decode: true }
+	): Promise<string | null>;
+	public async readFile(
+		filepath: string,
+		options?: ReadFileOptions
+	): Promise<string | Uint8Array | null>;
+	public async readFile(filepath: string, options: ReadFileOptions = {}) {
 		const { decode = false } = options;
 
 		const stat = this.stat(filepath);
@@ -324,7 +398,8 @@ export class Filesystem {
 			return null;
 		}
 
-		const data = this.inodeTable.get(stat.inode);
+		// const data = this.inodeTable.get(stat.inode);
+		const data = await this.backend.readFile(stat.inode);
 
 		if (data === undefined) {
 			return null;

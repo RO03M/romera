@@ -1,23 +1,24 @@
+import "@xterm/xterm/css/xterm.css";
+import { useCallback } from "preact/hooks";
 import styled, { ThemeProvider } from "styled-components";
 import { Desktop } from "./@core/components/os/desktop";
-import { WindowManager } from "./@core/components/os/window-manager/window-manager";
-import { theme } from "./theme";
+import { ApplicationConfig } from "./@core/components/os/desktop/application-item/application-config-file";
+import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
 import { Dock } from "./@core/components/os/dock/dock";
+import { TTYManager } from "./@core/components/os/terminal/tty";
 import { TopPanel } from "./@core/components/os/top-panel/top-panel";
+import { WindowManager } from "./@core/components/os/window-manager/window-manager";
 import { Filesystem } from "./@core/filesystem/filesystem";
-import { useCallback, useEffect } from "preact/hooks";
+import { extname } from "./@core/filesystem/utils/path";
+import { ProcessScheduler } from "./@core/processes/process-scheduler";
 import { getFilesFromDataTransferItems } from "./@core/utils/datatransfer-to-files";
 import { positionToGridPosition } from "./@core/utils/grid";
-import { ApplicationConfig } from "./@core/components/os/desktop/application-item/application-config-file";
-import { extname } from "./@core/filesystem/utils/path";
-import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
-import { ProcessScheduler } from "./@core/processes/process-scheduler";
 import { safe } from "./@core/utils/safe";
 import "./app.css";
-import "@xterm/xterm/css/xterm.css";
-import { TTYManager } from "./@core/components/os/terminal/tty";
+import { theme } from "./theme";
 
 export const filesystem = new Filesystem("rome-os-fs");
+filesystem.init();
 
 export const processScheduler = new ProcessScheduler();
 
@@ -51,7 +52,7 @@ export function App() {
 				return;
 			}
 
-			const applicationConfig = ApplicationConfig.fromFSApplication(
+			const applicationConfig = await ApplicationConfig.fromFSApplication(
 				parsedFiledrag.name
 			);
 			applicationConfig.x = x;
@@ -73,19 +74,6 @@ export function App() {
 				config.stringify()
 			);
 		}
-	}, []);
-
-	useEffect(() => {
-		fetch("/filesystem/default.json")
-			.then((data) => {
-				data
-					.json()
-					.then((json) => {
-						filesystem.hydrate(json);
-					})
-					.catch(() => console.error("Failed to parse filesystem json"));
-			})
-			.catch(() => console.error("Failed to load filesystem data"));
 	}, []);
 
 	return (

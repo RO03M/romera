@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test("window buttons", async ({ page }) => {
   await page.goto("http://localhost:5173/");
-  await page.locator(".application-item").first().dblclick();
+  await page.locator(".application-item").nth(1).dblclick();
   const window = await page.locator(".window").first();
 
   expect(window).not.toBeUndefined();

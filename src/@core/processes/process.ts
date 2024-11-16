@@ -46,14 +46,14 @@ export class Process {
 	/**
 	 * @description creates and attaches a worker to the current process
 	 */
-	public start() {
+	public async start() {
 		if (this.isMagicSpawn()) {
 			this.invokeComponent();
 			return;
 		}
 		const path = this.resolveCommandPath();
 
-		const content = filesystem.readFile(path, { decode: true });
+		const content = await filesystem.readFile(path, { decode: true });
 
 		if (content === null || typeof content !== "string") {
 			// Should I throw an error here?

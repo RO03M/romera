@@ -1,3 +1,4 @@
+import "fake-indexeddb/auto";
 import { describe, expect, it, vi } from "vitest";
 import { Filesystem } from "./filesystem";
 
@@ -43,22 +44,22 @@ describe("Filesystem general node operations", () => {
 	});
 
 	describe("file", () => {
-		it("Should be able to read file as a buffer", () => {
-			const file = filesystem.readFile("/bin/test");
+		it("Should be able to read file as a buffer", async () => {
+			const file = await filesystem.readFile("/bin/test");
 			expect(file).toBeDefined();
 			expect(file instanceof Uint8Array).toBeTruthy();
 		});
 	
-		it("Should be able to read file and return the content decoded", () => {
-			const file = filesystem.readFile("/bin/test", { decode: true });
+		it("Should be able to read file and return the content decoded", async () => {
+			const file = await filesystem.readFile("/bin/test", { decode: true });
 			expect(file).toBeDefined();
 			expect(typeof file).toBe("string");
 		});
 	});
 	describe("Rename", () => {
-		it("Should be able to rename a file", () => {
+		it("Should be able to rename a file", async () => {
 			filesystem.mkdir("/renamefile");
-			filesystem.writeFile("/renamefile/oldName.sh", "content");
+			await filesystem.writeFile("/renamefile/oldName.sh", "content");
 			const oldStat = filesystem.stat("/renamefile/oldName.sh");
 
 			filesystem.rename("/renamefile/oldName.sh", "newName.foo");
@@ -69,7 +70,7 @@ describe("Filesystem general node operations", () => {
 
 			expect(filesystem.stat("/renamefile/oldName.sh")).toBeNull();
 
-			expect(filesystem.readFile("/renamefile/newName.foo", { decode: true })).toBe("content");
+			expect(await filesystem.readFile("/renamefile/newName.foo", { decode: true })).toBe("content");
 		});
 	});
 
@@ -92,14 +93,14 @@ describe("Filesystem general node operations", () => {
 			expect(filesystem.stat("/teste/teste")).toEqual(filesystem.stat("/bin/ttlink"));
 		});
 
-		it("Should work with files", () => {
+		it("Should work with files", async () => {
 			filesystem.mkdir("/swwf-test");
 			const swwftxt = "Hello from symlink";
 			filesystem.writeFile("/swwf-test/swwf.txt", swwftxt);
 			filesystem.symlink("/swwf-test/swwf.txt", "/swwf-test/filelink");
 
 			expect(filesystem.lstat("/swwf-test/filelink")).not.toBeNull();
-			const content = filesystem.readFile("/swwf-test/filelink", { decode: true });
+			const content = await filesystem.readFile("/swwf-test/filelink", { decode: true });
 
 			expect(content).toBe(swwftxt);
 		});
@@ -115,12 +116,12 @@ describe("Filesystem general node operations", () => {
 	});
 
 	describe("watch events", () => {
-		it("Should be able to subscribe to events", () => {
+		it("Should be able to subscribe to events", async () => {
 			const callback = vi.fn(() => {});
 
 			filesystem.watch("/home/romera/desktop", callback);
 			filesystem.mkdir("/home/romera/desktop", { parents: true });
-			filesystem.writeFile("/home/romera/desktop/watch1", "watch 1");
+			await filesystem.writeFile("/home/romera/desktop/watch1", "watch 1");
 
 			expect(callback).toBeCalledTimes(2); // created and changed when created the watch1 file
 			expect(callback).toHaveBeenCalledWith("created")
