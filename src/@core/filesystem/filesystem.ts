@@ -1,6 +1,5 @@
 import { EEXIST, ENOENT } from "../../errors";
 import { btc } from "../utils/better-try-catch";
-import { incrementalId } from "../utils/incremental-id";
 import { safe } from "../utils/safe";
 import { FSBackend } from "./backend/backend";
 import { Dirent } from "./dirent";
@@ -12,8 +11,7 @@ import type {
 	MakeDirectoryOptions,
 	ReadDirOptions,
 	ReadFileOptions,
-	WatchCallback,
-	WatchEvent
+	WatchCallback
 } from "./types";
 import {
 	format,
@@ -29,6 +27,7 @@ export type FSMap = Map<string | 0, Stat | FSMap>;
 export class Filesystem {
 	private watcher: FilesystemWatcher = new FilesystemWatcher();
 	private backend: FSBackend;
+	private iused = 0;
 	public fsName: string;
 	// public inodeTable: Map<Stat["inode"], Uint8Array> = new Map();
 	public root: FSMap = new Map([
@@ -44,24 +43,49 @@ export class Filesystem {
 		const superblock = await this.backend.loadSuperblock();
 		if (superblock !== undefined) {
 			this.root = superblock;
-            this.watcher.emit("/home/romera/desktop", "change"); // Perhaps I should use a cascate approach? Too lazy now, fuck it!
+			this.watcher.emit("/home/romera/desktop", "change"); // Perhaps I should use a cascate approach? Too lazy now, fuck it!
 			this.readdir("/usr/applications");
 		} else {
-			const defaultSuperblockJson = await safe(fetch("/filesystem/default.json"));
+			const defaultSuperblockJson = await safe(
+				fetch("/filesystem/default.json")
+			);
 
 			if (defaultSuperblockJson.error) {
-				console.error("Failed to load default filesystem", defaultSuperblockJson.error);
+				console.error(
+					"Failed to load default filesystem",
+					defaultSuperblockJson.error
+				);
 				return;
 			}
 
 			const defaultSuperblock = await safe(defaultSuperblockJson.data.json());
 			if (defaultSuperblock.error) {
-				console.error("Failed to parse filesystem json ", defaultSuperblock.error);
+				console.error(
+					"Failed to parse filesystem json ",
+					defaultSuperblock.error
+				);
 				return;
 			}
 
 			this.hydrate(defaultSuperblock.data);
 		}
+
+		this.iused = this.getMaxINode(this.root);
+	}
+
+	private getMaxINode(fsmap: FSMap) {
+		const stat = fsmap.get(0);
+		let maxInode = stat instanceof Stat ? stat.inode : 0;
+
+		for (const [_, value] of fsmap.entries()) {
+			if (!(value instanceof Stat)) {
+				const inode = this.getMaxINode(value);
+
+				maxInode = Math.max(maxInode, inode);
+			}
+		}
+
+		return maxInode;
 	}
 
 	public hydrate(data: HydrationData, inheritPath = "/") {
@@ -242,8 +266,9 @@ export class Filesystem {
 
 		const dir = this.lookup(dirname);
 
+		this.iused++;
 		const entry: FSMap = new Map();
-		const stat = new Stat("dir", incrementalId(), 0);
+		const stat = new Stat("dir", this.iused, 0);
 		entry.set(STAT_KEY, stat);
 		dir!.set(basename, entry);
 		this.watcher.emit(dirname, "change");
@@ -286,10 +311,11 @@ export class Filesystem {
 			const oldStat = this.stat(filepath);
 			const oldExists = oldStat instanceof Stat;
 
+			this.iused++;
 			const entry: FSMap = new Map();
 			const stat = oldExists
 				? oldStat
-				: new Stat("file", incrementalId(), data.byteLength);
+				: new Stat("file", this.iused, data.byteLength);
 			stat.size = data.byteLength;
 
 			entry.set(STAT_KEY, stat);
@@ -319,8 +345,9 @@ export class Filesystem {
 			throw new Error("Cannot create symlink, file exists");
 		}
 
+		this.iused++;
 		const entry: FSMap = new Map();
-		const stat = new Stat("symlink", incrementalId(), target.length, target);
+		const stat = new Stat("symlink", this.iused, target.length, target);
 		entry.set(STAT_KEY, stat);
 		dir.set(basename, entry);
 		this.backend.saveSuperblock(this.root);
@@ -346,9 +373,18 @@ export class Filesystem {
 		this.backend.saveSuperblock(this.root);
 	}
 
-	public async readFile(filepath: string, options: ReadFileOptions & { decode: false }): Promise<Uint8Array | null>
-	public async readFile(filepath: string, options: ReadFileOptions & { decode: true }): Promise<string | null>
-	public async readFile(filepath: string, options: ReadFileOptions): Promise<string | Uint8Array | null>
+	public async readFile(
+		filepath: string,
+		options: ReadFileOptions & { decode: false }
+	): Promise<Uint8Array | null>;
+	public async readFile(
+		filepath: string,
+		options: ReadFileOptions & { decode: true }
+	): Promise<string | null>;
+	public async readFile(
+		filepath: string,
+		options?: ReadFileOptions
+	): Promise<string | Uint8Array | null>;
 	public async readFile(filepath: string, options: ReadFileOptions = {}) {
 		const { decode = false } = options;
 

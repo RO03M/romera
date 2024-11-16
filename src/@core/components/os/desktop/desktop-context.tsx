@@ -1,7 +1,7 @@
 import { useCallback } from "preact/compat";
-import { ContextMenu } from "../context-menu/context-menu";
 import { filesystem, processScheduler } from "../../../../app";
 import { safe } from "../../../utils/safe";
+import { ContextMenu } from "../context-menu/context-menu";
 
 export function DesktopContext() {
 	const onShortcut = useCallback((event: KeyboardEvent) => {
@@ -18,14 +18,19 @@ export function DesktopContext() {
 		}
 	}, []);
 
-	const newFile = useCallback((index = 0) => {
-		const response = safe(() =>
-			filesystem.writeFile(`/home/romera/desktop/new file(${index})`, "")
+	const newFile = useCallback(async (index = 0) => {
+		const file = await safe(
+			filesystem.readFile(`/home/romera/desktop/new file(${index})`)
 		);
 
-		if (response.error !== null) {
-			newFile(index + 1);
+		if (file.data !== null) {
+			await newFile(index + 1);
+			return;
 		}
+
+		await safe(
+			filesystem.writeFile(`/home/romera/desktop/new file(${index})`, "")
+		);
 	}, []);
 
 	const openTerminal = useCallback(() => {

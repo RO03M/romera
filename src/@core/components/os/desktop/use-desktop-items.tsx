@@ -21,8 +21,6 @@ export function useDesktopItems() {
 				.filter((dirent) => typeof dirent !== "string")
 		);
 
-        console.log(files);
-
 		if (files.error) {
 			return;
 		}
