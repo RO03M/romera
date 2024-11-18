@@ -1,43 +1,61 @@
-import { useEffect, useRef, useState, type ReactNode } from "preact/compat";
+import {
+	type ReactNode,
+	createPortal,
+	forwardRef,
+	useCallback,
+	useImperativeHandle,
+	useState
+} from "preact/compat";
 import styled from "styled-components";
 
 interface ContextMenuProps {
 	children: ReactNode;
 }
 
-export function ContextMenu(props: ContextMenuProps) {
-	const { children } = props;
+export type ContextMenuRef = {
+	show: (event: MouseEvent) => void;
+	close: () => void;
+};
 
-	const [x, setX] = useState(0);
-	const [y, setY] = useState(0);
-	const [open, setOpen] = useState(false);
-	const ref = useRef<HTMLElement | null>(null);
+export const ContextMenu = forwardRef<ContextMenuRef, ContextMenuProps>(
+	function ContextMenu(props, ref) {
+		const { children } = props;
 
-	useEffect(() => {
-		document.addEventListener("contextmenu", (event) => {
+		const [x, setX] = useState(0);
+		const [y, setY] = useState(0);
+		const [open, setOpen] = useState(false);
+
+		const show = useCallback((event: MouseEvent) => {
 			event.preventDefault();
-			event.stopPropagation();
 
-			setX(event.clientX);
-			setY(event.clientY);
+			setX(event.pageX);
+			setY(event.pageY);
 			setOpen(true);
+		}, []);
+
+		useImperativeHandle(ref, () => {
+			return {
+				show,
+				close: () => setOpen(false)
+			};
 		});
 
-		document.addEventListener("click", () => {
-			setOpen(false);
-		});
-	}, []);
+		if (!open) {
+			return null;
+		}
 
-	if (!open) {
-		return null;
+		return (
+			<>
+				{createPortal(
+					<Wrapper $x={x} $y={y}>
+						{children}
+					</Wrapper>,
+					document.body
+				)}
+			</>
+		);
 	}
-
-	return (
-		<Wrapper ref={ref} $x={x} $y={y}>
-			{children}
-		</Wrapper>
-	);
-}
+);
 
 const Wrapper = styled.nav<{ $x: number; $y: number }>((props) => ({
 	position: "absolute",
@@ -50,6 +68,7 @@ const Wrapper = styled.nav<{ $x: number; $y: number }>((props) => ({
 	backdropFilter: "blur(4px)",
 	userSelect: "none",
 	minWidth: 100,
+	zIndex: 1000,
 	"& li": {
 		position: "relative",
 		borderRadius: 6,
@@ -69,7 +88,7 @@ const Wrapper = styled.nav<{ $x: number; $y: number }>((props) => ({
 		},
 		"&:has(ul)": {
 			"&:after": {
-				content: "'>'",
+				content: "'>'"
 				// position: "absolute",
 				// right: 10
 			}

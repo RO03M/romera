@@ -1,14 +1,23 @@
-import { useCallback, useMemo, useState } from "preact/hooks";
-import { normalize } from "../../@core/filesystem/utils/path";
-import { ExplorerList } from "./explorer-list/list";
-import type { ProcessComponentProps } from "../../@core/processes/types";
-import { filesystem } from "../../app";
+import { useCallback, useMemo, useRef, useState } from "preact/hooks";
+import styled from "styled-components";
+import {
+	ContextMenu,
+	type ContextMenuRef
+} from "../../@core/components/os/context-menu/context-menu";
 import type { Dirent } from "../../@core/filesystem/dirent";
+import { normalize } from "../../@core/filesystem/utils/path";
+import { useClickOutside } from "../../@core/hooks/use-click-outside";
+import type { ProcessComponentProps } from "../../@core/processes/types";
+import { safe } from "../../@core/utils/safe";
+import { filesystem } from "../../app";
+import { ExplorerList } from "./explorer-list/list";
 
 export function Explorer(props: ProcessComponentProps) {
 	const { workingDirectory } = props;
 
 	const [path, setPath] = useState(workingDirectory);
+	const contextRef = useRef<ContextMenuRef | null>(null);
+	const wrapperRef = useRef<HTMLDivElement | null>(null);
 
 	const children = useMemo(() => {
 		if (path === undefined) {
@@ -42,10 +51,39 @@ export function Explorer(props: ProcessComponentProps) {
 		[path]
 	);
 
+	const newDirectory = useCallback(() => {
+		const dirname = prompt("Directory name");
+		const response = safe(() =>
+			filesystem.mkdir(normalize(`${workingDirectory}/${dirname}`))
+		);
+
+		if (response.error !== null) {
+			alert("Já existe");
+		}
+	}, [workingDirectory]);
+
+	useClickOutside(wrapperRef, () => contextRef.current?.close());
+
 	return (
-		<div>
+		<Wrapper
+			ref={wrapperRef}
+			onClick={() => contextRef.current?.close()}
+			onContextMenu={(event) => {
+				event.stopPropagation();
+				contextRef.current?.show(event);
+			}}
+		>
 			<span>{path}</span>
 			<ExplorerList entries={entries} onOpen={goToNode} />
-		</div>
+			<ContextMenu ref={contextRef}>
+				<li>
+					<span onClick={() => newDirectory()}>New Folder</span>
+				</li>
+			</ContextMenu>
+		</Wrapper>
 	);
 }
+
+const Wrapper = styled.div({
+	height: "100%"
+});

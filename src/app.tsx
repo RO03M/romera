@@ -1,6 +1,7 @@
 import "@xterm/xterm/css/xterm.css";
-import { useCallback } from "preact/hooks";
+import { useCallback, useRef } from "preact/hooks";
 import styled, { ThemeProvider } from "styled-components";
+import type { ContextMenuRef } from "./@core/components/os/context-menu/context-menu";
 import { Desktop } from "./@core/components/os/desktop";
 import { ApplicationConfig } from "./@core/components/os/desktop/application-item/application-config-file";
 import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
@@ -29,6 +30,8 @@ setInterval(() => {
 }, 0);
 
 export function App() {
+	const contextRef = useRef<ContextMenuRef | null>(null);
+
 	const onFileDrop = useCallback(async (event: DragEvent) => {
 		const { x, y } = positionToGridPosition([event.clientX, event.clientY]);
 
@@ -82,11 +85,13 @@ export function App() {
 				id={"main"}
 				onDrop={onFileDrop}
 				onDragOver={(event) => event.preventDefault()}
+				onContextMenu={(event) => contextRef.current?.show(event)}
+				onClick={() => contextRef.current?.close()}
 			>
 				<TopPanel />
 				<Desktop />
 				<Dock />
-				<DesktopContext />
+				<DesktopContext ref={contextRef} />
 				<WindowManager />
 			</Main>
 		</ThemeProvider>
