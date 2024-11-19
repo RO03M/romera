@@ -220,6 +220,15 @@ export class Filesystem {
 		return this.stat(filepath, true);
 	}
 
+	public readdir(
+		path: string,
+		options: ReadDirOptions & { withFileTypes: true }
+	): Dirent[];
+	public readdir(
+		path: string,
+		options: ReadDirOptions & { withFileTypes: false }
+	): string[];
+	public readdir(path: string, options?: ReadDirOptions): string[] | Dirent[];
 	public readdir(path: string, options: ReadDirOptions = {}) {
 		const { withFileTypes = false } = options;
 		const dir = this.lookup(path);

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "preact/hooks";
+import { useCallback, useRef, useState } from "preact/hooks";
 import styled from "styled-components";
 import {
 	ContextMenu,
@@ -11,6 +11,7 @@ import type { ProcessComponentProps } from "../../@core/processes/types";
 import { safe } from "../../@core/utils/safe";
 import { filesystem } from "../../app";
 import { ExplorerList } from "./explorer-list/list";
+import { useEntries } from "./use-entries";
 
 export function Explorer(props: ProcessComponentProps) {
 	const { workingDirectory } = props;
@@ -18,26 +19,7 @@ export function Explorer(props: ProcessComponentProps) {
 	const [path, setPath] = useState(workingDirectory);
 	const contextRef = useRef<ContextMenuRef | null>(null);
 	const wrapperRef = useRef<HTMLDivElement | null>(null);
-
-	const children = useMemo(() => {
-		if (path === undefined) {
-			return [];
-		}
-
-		return filesystem.readdir(path, {
-			withFileTypes: true
-		}) as Dirent[];
-	}, [path]);
-
-	const entries = useMemo(() => {
-		const parentNode: Dirent = {
-			inode: -1,
-			name: "/..",
-			type: "dir"
-		};
-
-		return [parentNode, ...children];
-	}, [children]);
+	const entries = useEntries(path);
 
 	const goToNode = useCallback(
 		(entry: Dirent) => {
@@ -54,13 +36,13 @@ export function Explorer(props: ProcessComponentProps) {
 	const newDirectory = useCallback(() => {
 		const dirname = prompt("Directory name");
 		const response = safe(() =>
-			filesystem.mkdir(normalize(`${workingDirectory}/${dirname}`))
+			filesystem.mkdir(normalize(`${path}/${dirname}`))
 		);
 
 		if (response.error !== null) {
 			alert("Já existe");
 		}
-	}, [workingDirectory]);
+	}, [path]);
 
 	useClickOutside(wrapperRef, () => contextRef.current?.close());
 
