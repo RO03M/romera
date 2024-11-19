@@ -7,7 +7,9 @@ import { Stat } from "../stat";
 const backend = new FSBackend();
 
 it("Should be able to save and load a superblock", async () => {
-	const data: FSMap = new Map([["root", new Stat("dir", 1, 1)]]);
+	const data: FSMap = new Map([
+		["/", new Map([[0, new Stat("dir", 0, 0)]])]
+	]);
 
 	await backend.saveSuperblock(data);
     expect(await backend.loadSuperblock()).toEqual(data);

@@ -139,5 +139,17 @@ describe("Filesystem general node operations", () => {
 			expect(callback1).toHaveBeenCalledWith("created");
 			expect(callback2).toHaveBeenCalledWith("created");
 		});
+
+		it("Should be able to unsubscribe from any event", () => {
+			const callback1 = vi.fn(() => {});
+			const callback2 = vi.fn(() => {});
+
+			filesystem.watch("/unsub", callback1);
+			filesystem.watch("/unsub", callback2);
+			filesystem.watcher.unwatch("/unsub", callback1);
+			filesystem.mkdir("/unsub");
+			expect(callback1).not.toHaveBeenCalled();
+			expect(callback2).toHaveBeenCalled();
+		});
 	});
 });

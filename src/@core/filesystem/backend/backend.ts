@@ -23,16 +23,16 @@ export class FSBackend {
 	   @description when saved to the indexeddb, the classes are transformed into an object, so I have to fucking transform those fuckers
 	*/
 	private formatSuperblock(data: FSMap) {
-        const blockmap: FSMap = new Map();
-        for (const [key, value] of data.entries()) {
-            if (key === 0) {
-                blockmap.set(key, Stat.fromObject(value as Stat));
-            } else {
-                blockmap.set(key, this.formatSuperblock(value as FSMap));
-            }
-        }
+		const blockmap: FSMap = new Map();
+		for (const [key, value] of data.entries()) {
+			if (key === 0) {
+				blockmap.set(key, Stat.fromObject(value as Stat));
+			} else {
+				blockmap.set(key, this.formatSuperblock(value as FSMap));
+			}
+		}
 
-        return blockmap
+		return blockmap;
 	}
 
 	public async saveSuperblock(data: FSMap) {
@@ -43,7 +43,7 @@ export class FSBackend {
 		const superblock = await this.idb.getSuperblock();
 
 		if (superblock !== undefined) {
-            return this.formatSuperblock(superblock.data)
+			return this.formatSuperblock(superblock.data);
 		}
 
 		return superblock;

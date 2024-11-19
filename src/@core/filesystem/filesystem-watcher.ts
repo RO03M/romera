@@ -15,5 +15,9 @@ export class FilesystemWatcher {
 		}
 	}
 
-	// public unwatch(id) {}
+	public unwatch(filepath: string, callback: WatchCallback) {
+		const callbackList = this.events.get(filepath) ?? [];
+
+		this.events.set(filepath, callbackList.filter((callbackItem) => callbackItem !== callback));
+	}
 }

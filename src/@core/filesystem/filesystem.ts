@@ -25,7 +25,7 @@ const STAT_KEY = 0;
 export type FSMap = Map<string | 0, Stat | FSMap>;
 
 export class Filesystem {
-	private watcher: FilesystemWatcher = new FilesystemWatcher();
+	public watcher: FilesystemWatcher = new FilesystemWatcher();
 	private backend: FSBackend;
 	private iused = 0;
 	public fsName: string;
