@@ -77,6 +77,7 @@ export function Explorer(props: ProcessComponentProps) {
 			<ExplorerList entries={entries} onOpen={goToNode} />
 			<ContextMenu ref={contextRef}>
 				<li>
+					{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 					<span onClick={() => newDirectory()}>New Folder</span>
 				</li>
 			</ContextMenu>
