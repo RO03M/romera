@@ -54,4 +54,4 @@ export function isSyscallStream(data: unknown): data is SyscallStream {
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export type SyscallMethod = (...args: any[]) => unknown;
+export type SyscallMethod = (...args: any[]) => unknown | Promise<unknown>;

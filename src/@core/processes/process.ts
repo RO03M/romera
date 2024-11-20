@@ -1,17 +1,17 @@
 import type { ComponentType } from "preact";
 import { filesystem, processScheduler, terminalManager } from "../../app";
+import { isMagicProgram, programTable } from "../../programs/program-table";
 import type { ReadFileOptions } from "../filesystem/types";
 import { format, normalize } from "../filesystem/utils/path";
 import { incrementalId } from "../utils/incremental-id";
 import { safe } from "../utils/safe";
 import { RScriptTranslator } from "./rscript-translator";
 import {
-	isSyscallStream,
-	type SyscallMethod,
+	type ProcessComponentProps,
 	type ProcessOptions,
-	type ProcessComponentProps
+	type SyscallMethod,
+	isSyscallStream
 } from "./types";
-import { isMagicProgram, programTable } from "../../programs/program-table";
 
 export const MAGIC_SPAWN_CMD = "magic-spawn";
 
@@ -31,7 +31,12 @@ export class Process {
 	private blobUrl: string | undefined;
 	private _stdout: unknown;
 
-	constructor(command: string, args?: string[], options?: ProcessOptions, ppid: number | null = null) {
+	constructor(
+		command: string,
+		args?: string[],
+		options?: ProcessOptions,
+		ppid: number | null = null
+	) {
 		this.pid = incrementalId("process");
 		this.ppid = ppid;
 		this.command = command;
@@ -111,6 +116,7 @@ export class Process {
 						response: "SYSCALL_METHOD_NOT_READY"
 					});
 				} else {
+					const foo = methods[methodTyped];
 					const response = safe(() =>
 						methods[methodTyped].bind(null, ...args)()
 					);
@@ -125,17 +131,33 @@ export class Process {
 						return;
 					}
 
-					const treatedResponse =
-						response.data === undefined
-							? ""
-							: JSON.parse(JSON.stringify(response.data));
+					// Código pedaço de carniça, jogar todo esse lixo fora e fazer de uma forma melhor, de preferência com uma lib separada para o "kernel" dessa desgraça
+					if (response.data instanceof Promise) {
+						response.data.then((res) => {
+							const treatedResponse =
+								res === undefined
+									? ""
+									: JSON.parse(JSON.stringify(res));
+							this.worker?.postMessage({
+								type: "SYSCALL_RESPONSE",
+								id: responseId,
+								response: treatedResponse,
+								status: 1
+							});
+						});
+					} else {
+						const treatedResponse =
+							response.data === undefined
+								? ""
+								: JSON.parse(JSON.stringify(response.data));
 
-					this.worker?.postMessage({
-						type: "SYSCALL_RESPONSE",
-						id: responseId,
-						response: treatedResponse,
-						status: 1
-					});
+						this.worker?.postMessage({
+							type: "SYSCALL_RESPONSE",
+							id: responseId,
+							response: treatedResponse,
+							status: 1
+						});
+					}
 				}
 
 				return;
@@ -187,13 +209,12 @@ export class Process {
 	private syscallMethods(): Record<string, SyscallMethod> {
 		const ttyContext = this.getTTY();
 
-		console.log(ttyContext, this.tty);
 		return {
 			stat: (filepath: string) => filesystem.stat(filepath),
 			lstat: (filepath: string) => filesystem.lstat(filepath),
 			readdir: (filepath: string) => filesystem.readdir(filepath),
-			readFile: (filepath: string, options?: ReadFileOptions) =>
-				filesystem.readFile(filepath, options),
+			readFile: async (filepath: string, options?: ReadFileOptions) =>
+				await filesystem.readFile(filepath, options),
 			normalize: (filepath: string) => normalize(filepath),
 			createProcess: (command: string, args: string[] = []) =>
 				processScheduler.exec(command, args, {
@@ -210,7 +231,8 @@ export class Process {
 			free: () => {},
 			lock: () => {},
 			mkdir: (filepath: string) => filesystem.mkdir(filepath),
-			writeFile: (filepath: string, content: string | Uint8Array) => filesystem.writeFile(filepath, content),
+			writeFile: (filepath: string, content: string | Uint8Array) =>
+				filesystem.writeFile(filepath, content),
 			pathFormat: (root: string, base: string) => format({ root, base })
 		};
 	}
