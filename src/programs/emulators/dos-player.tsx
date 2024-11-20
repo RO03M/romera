@@ -22,15 +22,6 @@ export default function DosPlayer(props: ProcessComponentProps) {
 		return file;
 	}, [workingDirectory], null);
 
-	// const file = useMemo(() => {
-	// 	if (!workingDirectory) {
-	// 		return null;
-	// 	}
-
-	// 	const file = filesystem.readFile(workingDirectory, { decode: false });
-
-	// 	return file;
-	// }, [workingDirectory]);
 
 	const bundleUrl = useMemo(() => {
 		if (file === null) {
@@ -47,7 +38,8 @@ export default function DosPlayer(props: ProcessComponentProps) {
 
 		const root = rootRef.current as HTMLDivElement;
 		const instance = Dos(root, {
-			noSideBar: true
+			noSideBar: true,
+			style: "none"
 		});
 
 		setDos(instance);
@@ -59,6 +51,7 @@ export default function DosPlayer(props: ProcessComponentProps) {
 
 	useEffect(() => {
 		if (dos !== null && bundleUrl !== null && typeof bundleUrl === "string") {
+			console.log("running bundle", bundleUrl);
 			dos.run(bundleUrl); // ci is returned
 		}
 	}, [dos, bundleUrl]);

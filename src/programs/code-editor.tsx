@@ -45,7 +45,7 @@ export function CodeEditor(props: CodeEditorProps) {
 		<Editor
 			height={"100%"}
 			defaultLanguage={"javascript"}
-			defaultValue={value}
+			value={value}
 			onChange={setValue}
 			theme={"vs-dark"}
 		/>
