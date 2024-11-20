@@ -65,6 +65,7 @@ export function Window(props: WindowProps) {
 }
 
 const Wrapper = styled(Rnd)({
+	borderRadius: 10,
 	display: "flex !important",
 	userSelect: "none",
 	flexDirection: "column",

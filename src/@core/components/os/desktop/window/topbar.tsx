@@ -1,8 +1,8 @@
 import { Icon } from "@iconify/react";
-import { icons } from "../../../icons";
-import { Row } from "../../../ui/row";
 import type { HTMLAttributes } from "preact/compat";
 import styled from "styled-components";
+import { icons } from "../../../icons";
+import { Row } from "../../../ui/row";
 
 interface TopbarProp {
 	onMaximizeClick?: () => void;
@@ -15,7 +15,12 @@ interface TopbarProp {
 export const Topbar = (props: TopbarProp) => {
 	const { onPointerDown, onMaximizeClick, onClose } = props;
 	return (
-		<Wrapper onPointerDown={onPointerDown} as={"div"}>
+		<Wrapper
+			onPointerDown={onPointerDown}
+			as={"div"}
+			aria-description={"window-topbar"}
+			aria-testid={"window-topbar"}
+		>
 			<DragHandler className={"topbar"} />
 			<Row>
 				<TopbarButton className={"minimize-button"}>
@@ -24,7 +29,12 @@ export const Topbar = (props: TopbarProp) => {
 				<TopbarButton className={"maximize-button"} onClick={onMaximizeClick}>
 					<Icon icon={icons.square} />
 				</TopbarButton>
-				<TopbarButton className={"close-button"} closeButton onClick={onClose}>
+				<TopbarButton
+					style={{ borderStartEndRadius: 10 }}
+					className={"close-button"}
+					closeButton
+					onClick={onClose}
+				>
 					<Icon icon={icons.close} />
 				</TopbarButton>
 			</Row>
@@ -34,21 +44,21 @@ export const Topbar = (props: TopbarProp) => {
 
 const DragHandler = styled.nav({
 	flex: 1
-})
+});
 
 const Wrapper = styled.div(
-	{
-		height: 40,
+	(props) => ({
+		height: 30,
 		display: "flex",
 		justifyContent: "flex-end",
 		alignItems: "center",
-		borderRadius: "4px 4px 0 0",
-		backgroundColor: "black",
+		borderRadius: "10px 10px 0 0",
+		backgroundColor: props.theme.colors.grey[700],
 		touchAction: "none",
 		"& > *": {
 			height: "100%"
 		}
-	},
+	}),
 	{
 		name: "window-topbar"
 	}
@@ -59,6 +69,7 @@ const TopbarButton = styled.div<{ closeButton?: boolean }>((props) => ({
 	alignItems: "center",
 	justifyContent: "center",
 	paddingInline: 10,
+	transition: "240ms",
 	"&:hover": {
 		backgroundColor: props.closeButton
 			? props.theme.colors.red[500]

@@ -68,5 +68,6 @@ export function Explorer(props: ProcessComponentProps) {
 }
 
 const Wrapper = styled.div({
-	height: "100%"
+	height: "100%",
+	overflowY: "scroll"
 });
