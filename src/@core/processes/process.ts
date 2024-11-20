@@ -116,7 +116,6 @@ export class Process {
 						response: "SYSCALL_METHOD_NOT_READY"
 					});
 				} else {
-					const foo = methods[methodTyped];
 					const response = safe(() =>
 						methods[methodTyped].bind(null, ...args)()
 					);

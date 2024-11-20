@@ -10,6 +10,7 @@ import { useClickOutside } from "../../@core/hooks/use-click-outside";
 import type { ProcessComponentProps } from "../../@core/processes/types";
 import { safe } from "../../@core/utils/safe";
 import { filesystem } from "../../app";
+import { addFilesFromDragToDir } from "./drag-to-dir";
 import { ExplorerList } from "./explorer-list/list";
 import { useEntries } from "./use-entries";
 
@@ -50,6 +51,13 @@ export function Explorer(props: ProcessComponentProps) {
 		<Wrapper
 			ref={wrapperRef}
 			onClick={() => contextRef.current?.close()}
+			onDrop={(event) => {
+				if (path === undefined) {
+					return;
+				}
+				addFilesFromDragToDir(event, path);
+			}}
+			onDragOver={(event) => event.preventDefault()}
 			onContextMenu={(event) => {
 				event.stopPropagation();
 				contextRef.current?.show(event);
