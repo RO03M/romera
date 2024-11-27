@@ -1,0 +1,20 @@
+{
+  "name": "@romos/kernel",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "compile": "tsc && ts-node index.ts",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@romos/fs": "1.0.0",
+    "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "nodemon": "^3.1.7"
+  }
+}
