@@ -9,12 +9,15 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build:watch": "tsc --watch"
+    "build:watch": "tsc --watch",
+    "test": "vitest"
   },
   "dependencies": {
+    "@romos/utils": "1.0.0",
     "typescript": "^5.7.2"
   },
   "devDependencies": {
-    "@types/node": "^22.10.0"
+    "@types/node": "^22.10.0",
+    "vitest": "^2.1.6"
   }
 }

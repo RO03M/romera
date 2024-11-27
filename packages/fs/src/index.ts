@@ -1,5 +1,2 @@
-export { seraqueexportta } from "./teste";
-
-export function buceta() {
-    return false;
-}
+export { Filesystem } from "./filesystem";
+export { IDB } from "./backend/idb";

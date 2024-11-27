@@ -1,5 +1,8 @@
-import { render } from 'preact'
-import './index.css'
-import { App } from './app.tsx'
+import { render } from "preact";
+import { App } from "./app";
+import "./index.css";
 
-render(<App />, document.getElementById('app')!)
+const app = document.getElementById("app");
+if (app !== null) {
+    render(<App />, app);
+}
