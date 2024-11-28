@@ -7,9 +7,10 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:gui": "vite packages/gui",
+    "gui:dev": "vite packages/gui",
+    "gui:build": "tsc -b packages/gui && vite build packages/gui",
+    "gui:preview": "vite preview packages/gui",
     "test": "vitest",
-    "build": "tsc -b && vite build",
     "deploy": "vercel deploy",
     "preview": "vite preview"
   },
