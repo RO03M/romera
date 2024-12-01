@@ -2,6 +2,13 @@ import styled from "styled-components";
 import { ApplicationItem } from "./application-item";
 import { useDesktopItems } from "./use-desktop-items";
 import { desktop } from "../../../../constants";
+// import { safe } from "@romos/utils";
+import { Filesystem } from "@romos/fs";
+
+// const asd = safe(() => console.log(10));
+const filesystm = new Filesystem("asd");
+
+console.log(filesystm);
 
 export function Desktop() {
 	const { items } = useDesktopItems();

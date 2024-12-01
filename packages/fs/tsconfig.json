@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "CommonJS",
+    "target": "ESNext",
+    "module": "ESNext",
     "esModuleInterop": true,
     "outDir": "dist",
     "declaration": true,
@@ -14,3 +14,14 @@
     "src"
   ]
 }
+
+// {
+//   "compilerOptions": {
+//       "module": "ESNext",
+//       "target": "ESNext",
+//       "lib": ["ESNext"],
+//       "moduleResolution": "bundler",
+//       "outDir": "dist",
+//       "declaration": true
+//   }
+// }
