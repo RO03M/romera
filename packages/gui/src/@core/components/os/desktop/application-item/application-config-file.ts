@@ -1,5 +1,5 @@
 import { filesystem } from "../../../../../app";
-import { normalize } from "../../../../filesystem/utils/path";
+import { normalize } from "@romos/fs";
 
 export class ApplicationConfig {
 	private data = {

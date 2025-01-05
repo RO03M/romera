@@ -1,8 +1,8 @@
 import type { ComponentType } from "preact";
 import { filesystem, processScheduler, terminalManager } from "../../app";
 import { isMagicProgram, programTable } from "../../programs/program-table";
-import type { ReadFileOptions } from "../filesystem/types";
-import { format, normalize } from "../filesystem/utils/path";
+import type { ReadFileOptions } from "@romos/fs";
+import { format, normalize } from "@romos/fs";
 import { incrementalId } from "../utils/incremental-id";
 import { safe } from "../utils/safe";
 import { RScriptTranslator } from "./rscript-translator";

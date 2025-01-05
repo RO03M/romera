@@ -3,7 +3,7 @@ import {
 	isMagicProgram,
 	type programTable
 } from "../../../../../programs/program-table";
-import { normalize } from "../../../../filesystem/utils/path";
+import { normalize } from "@romos/fs";
 import { getConfigFromApplication } from "./application-config-file";
 
 export async function getExecutableFromApplication(

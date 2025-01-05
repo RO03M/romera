@@ -1,5 +1,5 @@
 import { filesystem } from "../../app";
-import { extname } from "../filesystem/utils/path";
+import { extname } from "@romos/fs";
 
 export async function fileToBuffer(file: File) {
 	const buffer = await file

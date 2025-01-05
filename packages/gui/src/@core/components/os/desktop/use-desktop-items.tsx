@@ -1,9 +1,9 @@
+import type { Dirent } from "@romos/fs";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { filesystem } from "../../../../app";
-import type { Dirent } from "../../../filesystem/dirent";
+import { safe } from "../../../utils/safe";
 import { getConfigFromApplication } from "./application-item/application-config-file";
 import { getIconFromApplication } from "./application-item/get-icon-from-application";
-import { safe } from "../../../utils/safe";
 
 interface DesktopItem extends Dirent {
 	x: number;
@@ -16,7 +16,7 @@ export function useDesktopItems() {
 
 	const fetchItems = useCallback(async () => {
 		const files = await safe(() =>
-		      filesystem
+			filesystem
 				.readdir("/home/romera/desktop", { withFileTypes: true })
 				.filter((dirent) => typeof dirent !== "string")
 		);
@@ -27,7 +27,7 @@ export function useDesktopItems() {
 
 		const tempItems: DesktopItem[] = [];
 		for (const file of files.data) {
-		    const config = await getConfigFromApplication(file.name);
+			const config = await getConfigFromApplication(file.name);
 			tempItems.push({
 				...file,
 				x: +config.x,

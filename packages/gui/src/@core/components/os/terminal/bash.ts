@@ -1,5 +1,5 @@
 import { Terminal } from "@xterm/xterm";
-import { normalize } from "../../../filesystem/utils/path";
+import { normalize } from "@romos/fs";
 import { filesystem, processScheduler, terminalManager } from "../../../../app";
 import { formatInput } from "./utils/format-input";
 import { incrementalId } from "../../../utils/incremental-id";

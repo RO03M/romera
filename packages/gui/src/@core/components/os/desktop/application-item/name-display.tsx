@@ -6,7 +6,7 @@ import {
 } from "preact/hooks";
 import { useHotkeys } from "react-hotkeys-hook";
 import styled from "styled-components";
-import { filename, normalize } from "../../../../filesystem/utils/path";
+import { filename, normalize } from "@romos/fs";
 import { filesystem } from "../../../../../app";
 
 interface NameDisplayProps {

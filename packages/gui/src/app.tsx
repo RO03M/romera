@@ -9,14 +9,13 @@ import { Dock } from "./@core/components/os/dock/dock";
 import { TTYManager } from "./@core/components/os/terminal/tty";
 import { TopPanel } from "./@core/components/os/top-panel/top-panel";
 import { WindowManager } from "./@core/components/os/window-manager/window-manager";
-import { Filesystem } from "./@core/filesystem/filesystem";
-import { extname } from "./@core/filesystem/utils/path";
 import { ProcessScheduler } from "./@core/processes/process-scheduler";
 import { getFilesFromDataTransferItems } from "./@core/utils/datatransfer-to-files";
 import { positionToGridPosition } from "./@core/utils/grid";
 import { safe } from "./@core/utils/safe";
 import "./app.css";
 import { theme } from "./theme";
+import { extname, Filesystem } from "@romos/fs";
 
 export const filesystem = new Filesystem("rome-os-fs");
 filesystem.init();

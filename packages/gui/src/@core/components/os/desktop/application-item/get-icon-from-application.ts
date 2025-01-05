@@ -1,5 +1,5 @@
 import { filesystem } from "../../../../../app";
-import { normalize } from "../../../../filesystem/utils/path";
+import { normalize } from "@romos/fs";
 
 export function getIconFromApplication(name: string) {
 	const stat = filesystem.stat(`/home/romera/desktop/${normalize(name)}`);

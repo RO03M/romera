@@ -4,8 +4,8 @@ import {
 	ContextMenu,
 	type ContextMenuRef
 } from "../../@core/components/os/context-menu/context-menu";
-import type { Dirent } from "../../@core/filesystem/dirent";
-import { normalize } from "../../@core/filesystem/utils/path";
+import type { Dirent } from "@romos/fs";
+import { normalize } from "@romos/fs";
 import { useClickOutside } from "../../@core/hooks/use-click-outside";
 import type { ProcessComponentProps } from "../../@core/processes/types";
 import { safe } from "../../@core/utils/safe";

@@ -1,6 +1,6 @@
-import { normalize } from "../../../../filesystem/utils/path";
+import { normalize } from "@romos/fs";
 import styled from "styled-components";
-import type { Stat } from "../../../../filesystem/stat";
+import type { Stat } from "@romos/fs";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { getExecutableFromApplication } from "./get-executable-from-application";
 import { useClickOutside } from "../../../../hooks/use-click-outside";
