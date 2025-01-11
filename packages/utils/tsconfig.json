@@ -5,6 +5,7 @@
         "lib": ["ESNext"],
         "moduleResolution": "bundler",
         "outDir": "dist",
-        "declaration": true
+        "declaration": true,
+        "skipLibCheck": true
     }
 }
