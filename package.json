@@ -13,6 +13,7 @@
     "gui:dev": "vite packages/gui",
     "gui:build": "tsc -b packages/gui && vite build packages/gui",
     "gui:preview": "vite preview packages/gui",
+    "kernel:build": "yarn workspace @romos/kernel build",
     "test": "vitest",
     "deploy": "vercel deploy",
     "preview": "vite preview"

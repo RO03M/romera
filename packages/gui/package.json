@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@romos/fs": "1.0.0",
+    "@romos/kernel": "1.0.0",
     "@monaco-editor/react": "^4.6.0",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",

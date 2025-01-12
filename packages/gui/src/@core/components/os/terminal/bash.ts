@@ -1,6 +1,6 @@
 import { Terminal } from "@xterm/xterm";
 import { normalize } from "@romos/fs";
-import { filesystem, processScheduler, terminalManager } from "../../../../app";
+import { filesystem, processScheduler } from "../../../../app";
 import { formatInput } from "./utils/format-input";
 import { incrementalId } from "../../../utils/incremental-id";
 import { FitAddon } from "@xterm/addon-fit";
@@ -10,6 +10,7 @@ import {
 } from "./utils/get-row-col-from-text";
 import { clamp } from "../../../utils/math";
 import { HistoryController } from "./history-controller";
+import { Kernel } from "@romos/kernel";
 
 enum TerminalSequences {
 	NULL = "\0",
@@ -100,12 +101,12 @@ export class Bash extends Terminal {
 		});
 
 		// fitAddon.fit(); //Should be called inside a resize event handler
-		terminalManager.terminals.set(this.id, this);
+		Kernel.instance().ttyManager.terminals.set(this.id, this);
 	}
 
 	public dispose(): void {
 		super.dispose();
-		terminalManager.terminals.delete(this.id);
+		Kernel.instance().ttyManager.terminals.delete(this.id);
 	}
 
 	public fit() {

@@ -1,9 +1,17 @@
 {
   "name": "@romos/process",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "echo 0"
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@romos/fs": "1.0.0",
+    "@romos/utils": "1.0.0"
   }
 }

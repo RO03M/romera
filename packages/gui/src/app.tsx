@@ -16,9 +16,12 @@ import { safe } from "./@core/utils/safe";
 import "./app.css";
 import { theme } from "./theme";
 import { extname, Filesystem } from "@romos/fs";
+import { Kernel } from "@romos/kernel";
 
 export const filesystem = new Filesystem("rome-os-fs");
 filesystem.init();
+
+const kernel = Kernel.instance();
 
 export const processScheduler = new ProcessScheduler();
 

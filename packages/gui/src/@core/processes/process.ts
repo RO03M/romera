@@ -1,5 +1,5 @@
 import type { ComponentType } from "preact";
-import { filesystem, processScheduler, terminalManager } from "../../app";
+import { filesystem, processScheduler } from "../../app";
 import { isMagicProgram, programTable } from "../../programs/program-table";
 import type { ReadFileOptions } from "@romos/fs";
 import { format, normalize } from "@romos/fs";
@@ -12,6 +12,7 @@ import {
 	type SyscallMethod,
 	isSyscallStream
 } from "./types";
+import { Kernel } from "@romos/kernel";
 
 export const MAGIC_SPAWN_CMD = "magic-spawn";
 
@@ -241,7 +242,7 @@ export class Process {
 			return this.tty;
 		}
 
-		return terminalManager.terminals.get(this.tty);
+		return Kernel.instance().ttyManager.terminals.get(this.tty);
 	}
 
 	private resolveCommandPath() {
