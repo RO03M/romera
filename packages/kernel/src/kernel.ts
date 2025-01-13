@@ -31,4 +31,10 @@ export class Kernel {
         
         return Kernel._instance
     }
+
+    /**
+     * TODO
+     * Implementar as syscalls no kernel, já que aqui é onde eu faria a interface com o resto
+     * Para executar a syscall lá do processo, posso usar um callback e boas?
+     */
 }
