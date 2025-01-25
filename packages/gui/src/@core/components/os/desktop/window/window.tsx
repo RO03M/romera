@@ -2,9 +2,9 @@ import { Topbar } from "./topbar";
 import { useWindow } from "./use-window";
 import { Suspense, useRef, type ComponentType } from "preact/compat";
 import type { ProcessComponentProps } from "../../../../processes/types";
-import { processScheduler } from "../../../../../app";
 import { Rnd } from "react-rnd";
 import styled from "styled-components";
+import { Kernel } from "@romos/kernel";
 
 interface WindowProps {
 	pid: number;
@@ -54,7 +54,7 @@ export function Window(props: WindowProps) {
 				}
 			}}
 		>
-			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => processScheduler.kill(pid)} onPointerDown={() => {}} />
+			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => Kernel.instance().scheduler.kill(pid)} onPointerDown={() => {}} />
 			<ContentWrapper className={"romos-window-content-container"}>
 				<Suspense fallback={"..."}>
 					{Content !== undefined && <Content {...contentArgs} />}

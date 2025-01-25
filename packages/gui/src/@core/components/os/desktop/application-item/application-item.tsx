@@ -5,11 +5,12 @@ import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { getExecutableFromApplication } from "./get-executable-from-application";
 import { useClickOutside } from "../../../../hooks/use-click-outside";
 import { NameDisplay } from "./name-display";
-import { filesystem, processScheduler } from "../../../../../app";
+import { filesystem } from "../../../../../app";
 import { desktop } from "../../../../../constants";
 import { ApplicationConfig } from "./application-config-file";
 import { useDoubleTap } from "../../../../hooks/use-double-tap";
 import { useAsyncMemo } from "../../../../hooks/use-async-memo";
+import { Kernel } from "@romos/kernel";
 
 interface ApplicationItemProps {
 	name: string;
@@ -44,10 +45,11 @@ export function ApplicationItem(props: ApplicationItemProps) {
 			return;
 		}
 
-		processScheduler.spawnMagicWindow(
-			programName,
-			normalize(`/home/romera/desktop/${name}`)
-		);
+		Kernel.instance().scheduler.exec("component", [programName], { cwd: normalize(`/home/romera/desktop/${name}`) });
+		// processScheduler.spawnMagicWindow(
+		// 	programName,
+		// 	normalize(`/home/romera/desktop/${name}`)
+		// );
 	}, [name, programName]);
 
 	useEffect(() => {

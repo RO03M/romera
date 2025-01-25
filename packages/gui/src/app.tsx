@@ -20,6 +20,9 @@ import { extname, Filesystem } from "@romos/fs";
 export const filesystem = new Filesystem("rome-os-fs");
 filesystem.init();
 
+/**
+ * @deprecated
+ */
 export const processScheduler = new ProcessScheduler();
 
 export const terminalManager = new TTYManager();

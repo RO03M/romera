@@ -1,18 +1,19 @@
 import { useEffect, useState } from "preact/hooks";
 import { Window } from "../desktop/window/window";
-import { processScheduler } from "../../../../app";
 import type { Process } from "../../../processes/process";
+import { Kernel } from "@romos/kernel";
 
 export function WindowManager() {
 	const [processes, setProcesses] = useState<Process[]>([]);
 
 	useEffect(() => {
-		processScheduler.watch("all", ["ran", "killed"], () => {
-			setProcesses(
-				processScheduler.processes.filter(
-					(processes) => processes.Component !== undefined
-				)
-			);
+		Kernel.instance().scheduler.watch("all", ["ran", "killed"], () => {
+			// TODO buscar componente de acordo com o 1º argumento do comando "component"
+			// setProcesses(
+			// 	Kernel.instance().scheduler.processes.filter(
+			// 		(processes) => processes.Component !== undefined
+			// 	)
+			// );
 		});
 	}, []);
 

@@ -19,11 +19,10 @@ export class Scheduler {
     }
 
 
-    public exec(command: string, args: string[], tty: string | null, options?: Omit<ProcessOptions, "command" | "args">) {
+    public exec(command: string, args: string[], options?: Omit<ProcessOptions, "command" | "args">) {
 		const process = new Process({
             command,
             args,
-            tty,
 			...options,
 			onTerminate: () => {
 				this.kill(process.pid);

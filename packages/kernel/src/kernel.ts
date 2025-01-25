@@ -1,6 +1,6 @@
 import { Filesystem } from "@romos/fs";
-import { Scheduler } from "@romos/process";
 import { TTYManager } from "./tty-manager";
+import { Scheduler } from "./process/scheduler";
 
 export class Kernel {
     public filesystem: Filesystem;

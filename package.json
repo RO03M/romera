@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "yarn gui:dev",
-    "build:libs": "yarn workspace @romos/utils build && yarn workspace @romos/fs build && yarn workspace @romos/process build && yarn workspace @romos/kernel build",
+    "build:libs": "yarn workspace @romos/utils build && yarn workspace @romos/fs build && yarn workspace @romos/kernel build",
     "build": "yarn build:libs && yarn workspace @romos/gui build",
     "gui:dev": "vite packages/gui",
     "gui:build": "tsc -b packages/gui && vite build packages/gui",

@@ -1,6 +1,6 @@
 import { Terminal } from "@xterm/xterm";
 import { normalize } from "@romos/fs";
-import { filesystem, processScheduler } from "../../../../app";
+import { filesystem } from "../../../../app";
 import { formatInput } from "./utils/format-input";
 import { incrementalId } from "../../../utils/incremental-id";
 import { FitAddon } from "@xterm/addon-fit";
@@ -254,12 +254,12 @@ export class Bash extends Terminal {
 				this.prompt();
 				break;
 			default: {
-				const process = processScheduler.exec(program, args, {
+				const process = Kernel.instance().scheduler.exec(program, args, {
 					cwd: this.workingDirectory,
-					tty: this.id
+					tty: this.id.toString()
 				});
 
-				processScheduler.waitpid(process.pid).then(() => {
+				Kernel.instance().scheduler.waitpid(process.pid).then(() => {
 					this.prompt();
 				});
 				break;

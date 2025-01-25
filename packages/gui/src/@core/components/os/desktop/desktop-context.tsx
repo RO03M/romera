@@ -1,7 +1,8 @@
 import { forwardRef, useCallback } from "preact/compat";
-import { filesystem, processScheduler } from "../../../../app";
+import { filesystem } from "../../../../app";
 import { safe } from "../../../utils/safe";
 import { ContextMenu, type ContextMenuRef } from "../context-menu/context-menu";
+import { Kernel } from "@romos/kernel";
 
 export const DesktopContext = forwardRef<ContextMenuRef>(
 	function DesktopContext(_, ref) {
@@ -35,11 +36,11 @@ export const DesktopContext = forwardRef<ContextMenuRef>(
 		}, []);
 
 		const openTerminal = useCallback(() => {
-			processScheduler.spawnMagicWindow("terminal", "/home/romera/desktop");
+			Kernel.instance().scheduler.exec("component", ["terminal"], { cwd: "/home/romera/desktop" });
 		}, []);
 
 		const openFileExplorer = useCallback(() => {
-			processScheduler.spawnMagicWindow("explorer", "/home/romera/desktop");
+			Kernel.instance().scheduler.exec("component", ["explorer"], { cwd:"/home/romera/desktop" });
 		}, []);
 
 		const downloadFilesystem = useCallback(() => {
