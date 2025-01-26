@@ -15,10 +15,10 @@ import { positionToGridPosition } from "./@core/utils/grid";
 import { safe } from "./@core/utils/safe";
 import "./app.css";
 import { theme } from "./theme";
-import { extname, Filesystem } from "@romos/fs";
+import { extname } from "@romos/fs";
+import { Kernel } from "@romos/kernel";
 
-export const filesystem = new Filesystem("rome-os-fs");
-filesystem.init();
+export const filesystem = Kernel.instance().filesystem;
 
 /**
  * @deprecated

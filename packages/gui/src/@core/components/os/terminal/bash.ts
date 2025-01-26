@@ -256,7 +256,7 @@ export class Bash extends Terminal {
 			default: {
 				const process = Kernel.instance().scheduler.exec(program, args, {
 					cwd: this.workingDirectory,
-					tty: this.id.toString()
+					tty: this.id
 				});
 
 				Kernel.instance().scheduler.waitpid(process.pid).then(() => {
@@ -284,6 +284,7 @@ export class Bash extends Terminal {
 			absolutePath = normalize(`${this.workingDirectory}/${path}`);
 		}
 
+		console.log(absolutePath);
 		const stat = filesystem.stat(absolutePath);
 
 		if (stat) {
@@ -292,7 +293,7 @@ export class Bash extends Terminal {
 			return;
 		}
 
-		this.echo(`Terminal: cd: ${path} no such directory`);
+		this.echo(`bash: cd: ${path} no such directory`);
 	}
 
 	public prompt() {

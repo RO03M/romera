@@ -20,9 +20,10 @@ export class Scheduler {
 
 
     public exec(command: string, args: string[], options?: Omit<ProcessOptions, "command" | "args">) {
-		const process = new Process({
+		const process = new Process(this.generatePid(), {
             command,
             args,
+			tty: options?.tty ?? -1,
 			...options,
 			onTerminate: () => {
 				this.kill(process.pid);
@@ -88,4 +89,13 @@ export class Scheduler {
 	public get processes() {
 		return [...this.running.values(), ...this.sleeping.values()];
 	}
+
+	private generatePid() {
+        let pid: number;
+        do {
+            pid = Math.floor(Math.random() * 65535)
+        } while (this.running.has(pid) || this.sleeping.has(pid));
+
+		return pid;
+    }
 }

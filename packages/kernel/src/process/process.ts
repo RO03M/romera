@@ -1,10 +1,12 @@
 import { Filesystem, format } from "@romos/fs";
+import { Kernel } from "../kernel";
+import { WorkerProcessManager } from "./worker-process-manager";
 
 type TerminateCallback = (process: Process) => void;
 
 export interface ProcessOptions {
     command: string;
-    tty?: string;
+    tty: number;
     args?: string[];
     ppid?: number; 
     cwd?: string;
@@ -15,17 +17,16 @@ export interface ProcessOptions {
 export class Process {
     public readonly pid: number;
     public readonly ppid: number | null;
-    public readonly tty: string | undefined;
+    public readonly tty: number;
     public readonly command: string;
     public readonly cwd: string;
     public readonly args: string[];
 
-    private worker?: Worker;
-    private blobURL?: string;
+    private workerProcessManager?: WorkerProcessManager;
     private onTerminate?: TerminateCallback;
 
-    constructor(options: ProcessOptions) {
-        this.pid = -1;
+    constructor(pid: number, options: ProcessOptions) {
+        this.pid = pid;
         this.command = options.command;
         this.ppid = options.ppid ?? null;
         this.tty = options.tty;
@@ -36,18 +37,25 @@ export class Process {
 
     public terminate() {
 		this.onTerminate?.(this);
-		this.worker?.terminate();
-
-		if (this.blobURL !== undefined && URL) {
-			URL.revokeObjectURL(this.blobURL);
-		}
+		this.workerProcessManager?.terminate();
 	}
 
     public async start() {
-        console.log("process started");
-        // const programPath = 
-        // na hora de pegar o comando (ver se é do bin ou sla caralho) acho que posso verificar se é um comando especial para executar um componente
-        // melhor do que fazer uma bananagem toda para ver se é "método mágico"
+        if (this.command === "component") {
+            return;
+        }
+
+        const path = this.resolveCommandPath();
+
+        const content = await Kernel.instance().filesystem.readFile(path, { decode: true });
+
+        if (content === null || typeof content !== "string") {
+			// Should I throw an error here?
+			this.terminate();
+			return;
+		}
+
+        this.workerProcessManager = new WorkerProcessManager(this, content);
     }
 
     private resolveCommandPath() {
