@@ -32,7 +32,11 @@ export function WindowManager() {
 					key={process.pid}
 					pid={process.pid}
 					Content={Program}
-					contentArgs={process.args}
+					contentArgs={{
+						pid: process.pid,
+						title: process.pid.toString(),
+						workingDirectory: process.cwd
+					}}
 				/>)
 			}
 
