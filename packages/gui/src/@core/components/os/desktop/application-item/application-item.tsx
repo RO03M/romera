@@ -45,7 +45,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 			return;
 		}
 
-		Kernel.instance().scheduler.exec("component", [programName], { cwd: normalize(`/home/romera/desktop/${name}`), tty: -1 });
+		Kernel.instance().scheduler.exec("component", [programName, programName, normalize(`/home/romera/desktop/${name}`)], { cwd: normalize(`/home/romera/desktop/${name}`), tty: -1 });
 	}, [name, programName]);
 
 	useEffect(() => {

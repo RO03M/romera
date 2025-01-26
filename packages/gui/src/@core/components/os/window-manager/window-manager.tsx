@@ -21,7 +21,7 @@ export function WindowManager() {
 	return (
 		<>
 			{processes.map((process) => {
-				const [programName] = process.args;
+				const [programName, title, workingDirectory] = process.args;
 				if (!programName || !programTable[programName]) {
 					return null;
 				}
@@ -34,8 +34,8 @@ export function WindowManager() {
 					Content={Program}
 					contentArgs={{
 						pid: process.pid,
-						title: process.pid.toString(),
-						workingDirectory: process.cwd
+						title,
+						workingDirectory
 					}}
 				/>)
 			}
