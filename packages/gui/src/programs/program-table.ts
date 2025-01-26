@@ -8,6 +8,7 @@ import { VideoViewer } from "./video-viewer";
 import DosPlayer from "./emulators/dos-player";
 import type { ProcessComponentProps } from "../@core/processes/types";
 import type { ReactNode } from "preact/compat";
+import { Canvas } from "./canvas";
 
 export const programTable: Record<string, (props: ProcessComponentProps) => ReactNode> = {
 	terminal: TerminalProgram,
@@ -16,7 +17,8 @@ export const programTable: Record<string, (props: ProcessComponentProps) => Reac
 	imageviewer: ImageViewer,
 	videoViewer: VideoViewer,
 	pdfviewer: PdfViewer,
-	jsdos: DosPlayer
+	jsdos: DosPlayer,
+	canvas: Canvas
 };
 
 export function isMagicProgram(programName: string): programName is keyof typeof programTable {

@@ -16,12 +16,12 @@ export function WindowManager() {
 		});
 	}, []);
 
-	console.log(processes, Kernel.instance().scheduler.processes);
+	console.log(processes);
 
 	return (
 		<>
 			{processes.map((process) => {
-				const [programName, title, workingDirectory] = process.args;
+				const [programName, title, workingDirectory, ...args] = process.args;
 				if (!programName || !programTable[programName]) {
 					return null;
 				}
@@ -35,7 +35,8 @@ export function WindowManager() {
 					contentArgs={{
 						pid: process.pid,
 						title,
-						workingDirectory
+						workingDirectory,
+						args: args
 					}}
 				/>)
 			}

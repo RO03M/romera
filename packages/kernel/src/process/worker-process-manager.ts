@@ -9,7 +9,7 @@ export class WorkerProcessManager {
 	public readonly url: string;
 
 	constructor(processRef: Process, content: string) {
-		const rscriptTranslator = new RScriptTranslator(content, processRef.args);
+		const rscriptTranslator = new RScriptTranslator(content, processRef.pid, processRef.args);
 		rscriptTranslator.cookScript();
 		this.url = rscriptTranslator.generateBlob();
 
@@ -86,6 +86,10 @@ export class WorkerProcessManager {
             }
 		};
 	}
+
+    public postMessage(message: unknown, options?: StructuredSerializeOptions) {
+        this.worker.postMessage(message, options);
+    }
 
 	public terminate() {
         this.worker.terminate();

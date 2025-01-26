@@ -43,6 +43,12 @@ export class Scheduler {
 		this.watcher.emit("all", "killed");
 		this.watcher.emit(pid, "killed");
 		this.watcher.events.delete(pid); // Should I do this?
+
+		const children = this.processes.filter((process) => process.ppid === pid);
+
+		for (const child of children) {
+			this.kill(child.pid);
+		}
 	}
 
     public *tick() {

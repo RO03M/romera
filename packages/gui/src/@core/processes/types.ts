@@ -4,6 +4,7 @@ export interface ProcessComponentProps {
 	pid: Process["pid"];
 	title?: string;
 	workingDirectory?: string;
+	args: string[];
 }
 
 export interface ProcessOptions {

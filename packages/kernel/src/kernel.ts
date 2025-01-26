@@ -43,10 +43,11 @@ export class Kernel {
 			readFile: async (filepath: string, options?: ReadFileOptions) =>
 				await this.filesystem.readFile(filepath, options),
 			normalize: (filepath: string) => normalize(filepath),
-			createProcess: (command: string, args: string[] = []) =>
+			createProcess: (command: string, args: string[] = [], ppid?: number) =>
 				this.scheduler.exec(command, args, {
 					cwd,
-					tty
+					tty,
+					ppid
 				}),
 			// create_proc_default_rgui: createWindowProcessFromProgramTable,
 			exec: (command: string, args: string[], tty: number) =>

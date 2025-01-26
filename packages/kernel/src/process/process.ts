@@ -58,6 +58,10 @@ export class Process {
         this.workerProcessManager = new WorkerProcessManager(this, content);
     }
 
+    public stdin(buffer: unknown, options?: StructuredSerializeOptions) {
+        this.workerProcessManager?.postMessage(buffer, options)
+    }
+
     private resolveCommandPath() {
 		const shouldSearchBin = !/^(\/|\.\/|\.\.\/)/.test(this.command);
 		if (shouldSearchBin) {
