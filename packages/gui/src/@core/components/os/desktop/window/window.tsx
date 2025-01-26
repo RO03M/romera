@@ -8,7 +8,7 @@ import { Kernel } from "@romos/kernel";
 
 interface WindowProps {
 	pid: number;
-	contentArgs?: ProcessComponentProps;
+	contentArgs?: string[];
 	Content?: ComponentType<ProcessComponentProps>;
 }
 
@@ -57,7 +57,7 @@ export function Window(props: WindowProps) {
 			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => Kernel.instance().scheduler.kill(pid)} onPointerDown={() => {}} />
 			<ContentWrapper className={"romos-window-content-container"}>
 				<Suspense fallback={"..."}>
-					{Content !== undefined && <Content {...contentArgs} />}
+					{Content !== undefined && <Content pid={pid} {...contentArgs} />}
 				</Suspense>
 			</ContentWrapper>
 		</Wrapper>

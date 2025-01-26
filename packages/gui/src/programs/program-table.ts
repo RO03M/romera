@@ -6,8 +6,10 @@ import { ImageViewer } from "./image-viewer";
 import { PdfViewer } from "./pdf-viewer";
 import { VideoViewer } from "./video-viewer";
 import DosPlayer from "./emulators/dos-player";
+import type { ProcessComponentProps } from "../@core/processes/types";
+import type { ReactNode } from "preact/compat";
 
-export const programTable = {
+export const programTable: Record<string, (props: ProcessComponentProps) => ReactNode> = {
 	terminal: TerminalProgram,
 	explorer: Explorer,
 	monaco: CodeEditor,

@@ -10,7 +10,8 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "test": "vitest"
+    "test": "vitest",
+    "postinstall": "yarn build"
   },
   "dependencies": {
     "@romos/utils": "1.0.0",

@@ -16,6 +16,9 @@ import { Kernel } from "@romos/kernel";
 
 export const MAGIC_SPAWN_CMD = "magic-spawn";
 
+/**
+ * @deprecated Use kernel processes
+ */
 export class Process {
 	public readonly pid: number;
 	public readonly ppid: number | null;

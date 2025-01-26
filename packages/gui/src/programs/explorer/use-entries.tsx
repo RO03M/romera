@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
-import type { Dirent } from "../../@core/filesystem/dirent";
 import { filesystem } from "../../app";
+import type { Dirent } from "@romos/fs";
 
 export function useEntries(path: string | undefined) {
 	const [entries, setEntries] = useState<Dirent[]>([]);
@@ -28,7 +28,7 @@ export function useEntries(path: string | undefined) {
 			setEntries(direntries);
 		}
 
-        onDirChange();
+		onDirChange();
 
 		filesystem.watcher.watch(path, onDirChange);
 

@@ -1,5 +1,5 @@
+import type { Dirent } from "@romos/fs";
 import { ExplorerListItem } from "./item";
-import type { Dirent } from "../../../@core/filesystem/dirent";
 import styled from "styled-components";
 
 interface ExplorerListProps {

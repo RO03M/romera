@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "build:watch": "tsc --watch"
+    "build:watch": "tsc --watch",
+    "postinstall": "yarn build"
   },
   "dependencies": {
     "typescript": "^5.7.2"

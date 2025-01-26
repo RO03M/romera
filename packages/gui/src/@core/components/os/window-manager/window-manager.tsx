@@ -20,14 +20,23 @@ export function WindowManager() {
 
 	return (
 		<>
-			{processes.map((process) => (
-				<Window
+			{processes.map((process) => {
+				const [programName] = process.args;
+				if (!programName || !programTable[programName]) {
+					return null;
+				}
+
+				const Program = programTable[programName]
+
+				return (<Window
 					key={process.pid}
 					pid={process.pid}
-					Content={programTable[process.args?.[0]]}
+					Content={Program}
 					contentArgs={process.args}
-				/>
-			))}
+				/>)
+			}
+
+			)}
 		</>
 	);
 }

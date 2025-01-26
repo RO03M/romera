@@ -36,11 +36,11 @@ export const DesktopContext = forwardRef<ContextMenuRef>(
 		}, []);
 
 		const openTerminal = useCallback(() => {
-			Kernel.instance().scheduler.exec("component", ["terminal"], { cwd: "/home/romera/desktop" });
+			Kernel.instance().scheduler.exec("component", ["terminal"], { cwd: "/home/romera/desktop", tty: -1 });
 		}, []);
 
 		const openFileExplorer = useCallback(() => {
-			Kernel.instance().scheduler.exec("component", ["explorer"], { cwd:"/home/romera/desktop" });
+			Kernel.instance().scheduler.exec("component", ["explorer"], { cwd:"/home/romera/desktop", tty: -1 });
 		}, []);
 
 		const downloadFilesystem = useCallback(() => {

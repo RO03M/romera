@@ -9,14 +9,14 @@
   "scripts": {
     "dev": "yarn gui:dev",
     "build:libs": "yarn workspace @romos/utils build && yarn workspace @romos/fs build && yarn workspace @romos/kernel build",
-    "build": "yarn build:libs && yarn workspace @romos/gui build",
+    "build": "yarn workspace @romos/gui build",
     "gui:dev": "vite packages/gui",
     "gui:build": "tsc -b packages/gui && vite build packages/gui",
     "gui:preview": "vite preview packages/gui",
     "kernel:build": "yarn workspace @romos/kernel build",
     "test": "vitest",
     "deploy": "vercel deploy",
-    "preview": "vite preview"
+    "preview": "yarn workspace @romos/gui preview"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",

@@ -1,4 +1,4 @@
-import type { HydrationData } from "../filesystem/types";
+import type { HydrationData } from "@romos/fs";
 import { fileToBuffer } from "./file";
 
 async function getFileFromFileEntry(entry: FileSystemFileEntry) {
@@ -58,14 +58,14 @@ async function getFilesFromEntry(
 		return dir;
 	}
 
-    return null;
+	return null;
 }
 
 export async function getFilesFromDataTransferItems(
 	items: DataTransferItemList
 ) {
 	const entries: FileSystemEntry[] = [];
-    const formattedData: HydrationData[] = [];
+	const formattedData: HydrationData[] = [];
 	for (const item of items) {
 		const entry = item.webkitGetAsEntry();
 		if (entry !== null) {
@@ -75,10 +75,10 @@ export async function getFilesFromDataTransferItems(
 
 	for (const entry of entries) {
 		const formattedEntries = await getFilesFromEntry(entry);
-        if (formattedEntries !== null) {
-            formattedData.push(formattedEntries);
-        }
+		if (formattedEntries !== null) {
+			formattedData.push(formattedEntries);
+		}
 	}
 
-    return formattedData;
+	return formattedData;
 }
