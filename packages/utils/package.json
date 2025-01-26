@@ -1,0 +1,15 @@
+{
+  "name": "@romos/utils",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "postinstall": "yarn build"
+  },
+  "dependencies": {
+    "typescript": "^5.7.2"
+  }
+}

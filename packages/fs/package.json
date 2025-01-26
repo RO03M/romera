@@ -1,0 +1,24 @@
+{
+  "name": "@romos/fs",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "postinstall": "yarn build"
+  },
+  "dependencies": {
+    "@romos/utils": "1.0.0",
+    "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "vitest": "^2.1.6"
+  }
+}
