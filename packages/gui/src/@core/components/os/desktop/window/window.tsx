@@ -1,7 +1,7 @@
 import { Topbar } from "./topbar";
 import { useWindow } from "./use-window";
-import { Suspense, useRef, type ComponentType } from "preact/compat";
-import type { ProcessComponentProps } from "../../../../processes/types";
+import { Suspense, useCallback, useRef, type ComponentType } from "preact/compat";
+import type { ProcessComponentProps, ProcessComponentRef } from "../../../../processes/types";
 import { Rnd } from "react-rnd";
 import styled from "styled-components";
 import { Kernel } from "@romos/kernel";
@@ -16,8 +16,16 @@ export function Window(props: WindowProps) {
 	const { pid, contentArgs, Content } = props;
 	
 	const ref = useRef<Rnd | null>(null);
+	const contentRef = useRef<ProcessComponentRef>(null);
 	
 	const windowProps = useWindow(ref);
+
+	const handleClose = useCallback(() => {
+		Kernel.instance().scheduler.kill(pid);
+		if (contentRef.current !== null && contentRef.current?.onClose !== undefined) {
+			contentRef.current.onClose();
+		}
+	}, [pid]);
 
 	if (contentArgs === undefined) {
 		return null;
@@ -57,10 +65,10 @@ export function Window(props: WindowProps) {
 				}
 			}}
 		>
-			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={() => Kernel.instance().scheduler.kill(pid)} onPointerDown={() => {}} />
+			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={handleClose} onPointerDown={() => {}} />
 			<ContentWrapper className={"romos-window-content-container"}>
 				<Suspense fallback={"..."}>
-					{Content !== undefined && <Content {...contentArgs} />}
+					{Content !== undefined && <Content ref={contentRef} {...contentArgs} />}
 				</Suspense>
 			</ContentWrapper>
 		</Wrapper>

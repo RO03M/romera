@@ -1,12 +1,38 @@
-import { useEffect, useRef } from "preact/hooks";
-import type { ProcessComponentProps } from "../@core/processes/types";
+import { useEffect, useImperativeHandle, useMemo, useRef } from "preact/hooks";
+import type { ProcessComponentProps, ProcessComponentRef } from "../@core/processes/types";
 import { Kernel } from "@romos/kernel";
+import { forwardRef } from "preact/compat";
+import { useResizeObserver } from "../@core/hooks/use-resize-observer";
 
 type CanvasProps = ProcessComponentProps;
 
-export function Canvas(props: CanvasProps) {
+export const Canvas = forwardRef<ProcessComponentRef, CanvasProps>(function Canvas(props, ref) {
 	const { args } = props;
-    const ref = useRef<HTMLCanvasElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    console.log(args);
+    const pid = useMemo(() => args?.[0], [args]);
+    const process = useMemo(() => {
+        return Kernel.instance().scheduler.processes.find((process) => process.pid === +pid);
+    }, [pid]);
+
+    useResizeObserver(canvasRef, (foo) => {
+        console.log("resize", foo);
+        for (const entry of foo) {
+            console.log(entry.contentRect.width, entry.contentRect.height)
+        }
+    })
+
+    useImperativeHandle(ref, () => ({
+        onClose() {
+            console.log(process);
+            if (process === undefined || process.ppid === null) {
+                return;
+            }
+
+            console.log("going to kill ", process.ppid);
+            Kernel.instance().scheduler.kill(process.ppid);
+        },
+    }), [process]);
 
     useEffect(() => {
         const [pid] = args;
@@ -20,7 +46,7 @@ export function Canvas(props: CanvasProps) {
             return;
         }
 
-        const offscreen = ref.current?.transferControlToOffscreen();
+        const offscreen = canvasRef.current?.transferControlToOffscreen();
 
         if (offscreen === undefined) {
             return;
@@ -31,5 +57,5 @@ export function Canvas(props: CanvasProps) {
         });
     }, [args]);
 
-	return <canvas id={"teste"} ref={ref} />;
-}
+	return <canvas style={{ width: "100%", height: "100%" }} id={"teste"} ref={canvasRef} />;
+})

@@ -48,6 +48,10 @@ function exit(code = 0, message = "") {
     self.postMessage({ code, message, kill: true });
 }
 
+// self.addEventListener("message", (data) => {
+//     console.log("event listener", data);
+// });
+
 async function makeWindow(pid) {
     await fork("component", ["canvas", "title", "/home", pid], pid)
 

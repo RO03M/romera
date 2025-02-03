@@ -43,6 +43,10 @@ export const DesktopContext = forwardRef<ContextMenuRef>(
 			Kernel.instance().scheduler.exec("component", ["explorer"], { cwd:"/home/romera/desktop", tty: -1 });
 		}, []);
 
+		const openProcessManager = useCallback(() => {
+			Kernel.instance().scheduler.exec("component", ["psman"]);
+		}, []);
+
 		const downloadFilesystem = useCallback(() => {
 			const fsAsJSON = filesystem.getJSON();
 			if (fsAsJSON === undefined) {
@@ -76,6 +80,8 @@ export const DesktopContext = forwardRef<ContextMenuRef>(
 				<li onClick={openTerminal}>Open terminal here</li>
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<li onClick={openFileExplorer}>Open file explorer</li>
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+				<li onClick={openProcessManager}>Open process manager</li>
 				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<li onClick={downloadFilesystem}>Download filesystem</li>
 			</ContextMenu>

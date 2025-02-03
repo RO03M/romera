@@ -7,6 +7,11 @@ export interface ProcessComponentProps {
 	args: string[];
 }
 
+export interface ProcessComponentRef {
+	onResize?: (width: number, height: number) => void;
+	onClose?: () => void;
+}
+
 export interface ProcessOptions {
 	/**
 	 * Callback that will be fired whenever the process is going to die
