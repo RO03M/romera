@@ -39,6 +39,9 @@ export function Window(props: WindowProps) {
 			position={windowProps.maximized ? { x: 0, y: 0 } : undefined}
 			size={windowProps.maximized ? { width: "100%", height: "100%" } : undefined}
 			enableUserSelectHack={false}
+			// onResize={(_, _, _, delta) => {
+			// 	console.log("teste", delta);
+			// }}
 			resizeHandleStyles={{
 				bottom: {
 					cursor: "n-resize"

@@ -11,6 +11,7 @@ import { ApplicationConfig } from "./application-config-file";
 import { useDoubleTap } from "../../../../hooks/use-double-tap";
 import { useAsyncMemo } from "../../../../hooks/use-async-memo";
 import { Kernel } from "@romos/kernel";
+import { ContextMenu, type ContextMenuRef } from "../../context-menu/context-menu";
 
 interface ApplicationItemProps {
 	name: string;
@@ -25,14 +26,13 @@ export function ApplicationItem(props: ApplicationItemProps) {
 	const [y, setY] = useState(0);
 	const [focused, setFocused] = useState(false);
 
+	const contextRef = useRef<ContextMenuRef | null>(null);
 	const ref = useRef<HTMLDivElement | null>(null);
 
 	const programName = useAsyncMemo(
 		() => getExecutableFromApplication(name),
 		[name]
 	);
-
-	useClickOutside(ref, () => setFocused(false));
 
 	const syncPosition = useCallback(async () => {
 		const config = await ApplicationConfig.fromFSApplication(name);
@@ -45,8 +45,24 @@ export function ApplicationItem(props: ApplicationItemProps) {
 			return;
 		}
 
-		Kernel.instance().scheduler.exec("component", [programName, programName, normalize(`/home/romera/desktop/${name}`)], { cwd: normalize(`/home/romera/desktop/${name}`), tty: -1 });
+		Kernel.instance().scheduler.exec(
+			"component",
+			[programName, programName, normalize(`/home/romera/desktop/${name}`)],
+			{ cwd: normalize(`/home/romera/desktop/${name}`), tty: -1 }
+		);
 	}, [name, programName]);
+
+	const exec = useCallback(() => {
+		if (name === undefined) {
+			return;
+		}
+
+		Kernel.instance().scheduler.exec(
+			`/home/romera/desktop/${name}`,
+			[],
+			{ cwd: normalize(`/home/romera/desktop/${name}`), tty: -1 }
+		);
+	}, [name]);
 
 	useEffect(() => {
 		filesystem.watch(`/usr/applications/${name}`, () => {
@@ -59,6 +75,11 @@ export function ApplicationItem(props: ApplicationItemProps) {
 	}, [syncPosition]);
 
 	useDoubleTap(ref, openProgram);
+
+	useClickOutside(ref, () => {
+		setFocused(false);
+		contextRef.current?.close();
+	});
 
 	return (
 		<Wrapper
@@ -77,7 +98,17 @@ export function ApplicationItem(props: ApplicationItemProps) {
 					})
 				);
 			}}
+			onContextMenu={(event) => {
+				event.stopPropagation();
+				contextRef.current?.show(event);
+			}}
 		>
+			<ContextMenu ref={contextRef}>
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+				<li onClick={exec}>
+					<span>Execute</span>
+				</li>
+			</ContextMenu>
 			<ContentContainer
 				$focused={focused}
 				aria-program-name={programName}

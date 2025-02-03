@@ -81,6 +81,8 @@ export function App() {
 		}
 	}, []);
 
+	// return <Teste />
+
 	return (
 		<ThemeProvider theme={theme}>
 			<Main

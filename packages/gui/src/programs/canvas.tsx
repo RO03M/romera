@@ -10,15 +10,12 @@ export function Canvas(props: CanvasProps) {
 
     useEffect(() => {
         const [pid] = args;
-        console.log(pid);
         if (pid === undefined) {
             return;
         }
 
         const process = Kernel.instance().scheduler.processes.find((process) => process.pid === +pid);
         
-        console.log(process, pid);
-
         if (process === undefined) {
             return;
         }
@@ -28,8 +25,6 @@ export function Canvas(props: CanvasProps) {
         if (offscreen === undefined) {
             return;
         }
-
-        console.log(process, offscreen);
 
         process.stdin({ canvas: offscreen }, {
             transfer: [offscreen]

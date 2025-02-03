@@ -16,8 +16,6 @@ export function WindowManager() {
 		});
 	}, []);
 
-	console.log(processes);
-
 	return (
 		<>
 			{processes.map((process) => {

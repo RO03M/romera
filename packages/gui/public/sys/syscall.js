@@ -12,7 +12,7 @@ self.onmessage = ({ data }) => {
 
     if (data.canvas) {
         canvas = data.canvas;
-        context = canvas.getContext("2d");
+        // context = canvas.getContext("2d");
         // context.fillStyle = "#1ff";
         // context.fillRect(0, 0, canvas.width, canvas.height);
     }
