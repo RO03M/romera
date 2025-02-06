@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { Window } from "../desktop/window/window";
 import { Kernel } from "@romos/kernel";
-import type { Process } from "@romos/kernel/dist/process/process";
+import type { Process } from "@romos/kernel";
 import { programTable } from "../../../../programs/program-table";
 
 export function WindowManager() {
@@ -9,12 +9,15 @@ export function WindowManager() {
 
 	useEffect(() => {
 		Kernel.instance().scheduler.watch("all", ["ran", "killed"], () => {
+			console.log("teste");
 			const componentProcesses = Kernel.instance().scheduler.processes.filter(
 				(process) => process.command === "component"
 			);
 			setProcesses(componentProcesses);
 		});
 	}, []);
+
+	console.log(Kernel.instance().scheduler.processes, processes);
 
 	return (
 		<>

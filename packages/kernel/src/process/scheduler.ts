@@ -54,9 +54,9 @@ export class Scheduler {
     public *tick() {
 		while (true) {
 			for (const processItem of this.sleeping) {
-				if (this.running.size >= this.concurrency) {
-					break;
-				}
+				// if (this.running.size >= this.concurrency) {
+				// 	break;
+				// }
 
 				const [pid, process] = processItem;
 

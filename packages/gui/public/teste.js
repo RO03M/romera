@@ -39,4 +39,8 @@ self.onmessage = function (e) {
     animate();
 
     console.log("after")
+
+    return new Promise(() => {
+
+    });
 };

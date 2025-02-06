@@ -35,5 +35,7 @@ async function main() {
 
     animate();
 
-    await sleep(10000);
+    return new Promise(() => {
+
+    });
 }
