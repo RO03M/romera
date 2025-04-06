@@ -1,0 +1,23 @@
+{
+  "name": "@romos/script-tools",
+  "version": "1.0.0",
+  "description": "Internal package for the creation of the \"bin\"s of the OS",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "author": "Romera",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "vitest": "^3.1.1"
+  },
+  "dependencies": {
+    "typescript": "^5.8.3"
+  }
+}
