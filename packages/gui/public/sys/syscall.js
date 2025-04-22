@@ -18,6 +18,8 @@ self.onmessage = ({ data }) => {
     }
 };
 
+// Tem uma forma bem melhor de fazer isso
+// Ao invés de fazer um loop é só guardar a referência do resolve em um map e boas
 async function syscall(method, ...args) {
     const id = (Math.random() + 1).toString(36).substring(7);
     self.postMessage({

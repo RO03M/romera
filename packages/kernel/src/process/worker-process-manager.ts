@@ -35,55 +35,55 @@ export class WorkerProcessManager {
 
 			const { args, method, responseId, type } = data;
 
-			const foo = Kernel.instance().syscall(method, processRef.cwd, processRef.tty);
+			// const foo = Kernel.instance().syscall(method, processRef.cwd, processRef.tty);
 
-            if (foo === null) {
-                this.worker?.postMessage({
-                    type: "SYSCALL_RESPONSE",
-                    id: responseId,
-                    response: "SYSCALL_METHOD_NOT_READY"
-                });
-                return;
-            }
+            // if (foo === null) {
+            //     this.worker?.postMessage({
+            //         type: "SYSCALL_RESPONSE",
+            //         id: responseId,
+            //         response: "SYSCALL_METHOD_NOT_READY"
+            //     });
+            //     return;
+            // }
 
-            const response = safe(() => foo?.bind(null, ...args)());
+            // const response = safe(() => foo?.bind(null, ...args)());
             
-            if (response.error) {
-                this.worker?.postMessage({
-                    type: "SYSCALL_RESPONSE",
-                    id: responseId,
-                    response: response.error.message,
-                    status: 0
-                });
-                return;
-            }
+            // if (response.error) {
+            //     this.worker?.postMessage({
+            //         type: "SYSCALL_RESPONSE",
+            //         id: responseId,
+            //         response: response.error.message,
+            //         status: 0
+            //     });
+            //     return;
+            // }
 
-            if (response.data instanceof Promise) {
-                response.data.then((res) => {
-                    const treatedResponse =
-                        res === undefined
-                            ? ""
-                            : JSON.parse(JSON.stringify(res));
-                    this.worker?.postMessage({
-                        type: "SYSCALL_RESPONSE",
-                        id: responseId,
-                        response: treatedResponse,
-                        status: 1
-                    });
-                });
-            } else {
-                const treatedResponse =
-                    response.data === undefined
-                        ? ""
-                        : JSON.parse(JSON.stringify(response.data));
+            // if (response.data instanceof Promise) {
+            //     response.data.then((res) => {
+            //         const treatedResponse =
+            //             res === undefined
+            //                 ? ""
+            //                 : JSON.parse(JSON.stringify(res));
+            //         this.worker?.postMessage({
+            //             type: "SYSCALL_RESPONSE",
+            //             id: responseId,
+            //             response: treatedResponse,
+            //             status: 1
+            //         });
+            //     });
+            // } else {
+            //     const treatedResponse =
+            //         response.data === undefined
+            //             ? ""
+            //             : JSON.parse(JSON.stringify(response.data));
 
-                this.worker?.postMessage({
-                    type: "SYSCALL_RESPONSE",
-                    id: responseId,
-                    response: treatedResponse,
-                    status: 1
-                });
-            }
+            //     this.worker?.postMessage({
+            //         type: "SYSCALL_RESPONSE",
+            //         id: responseId,
+            //         response: treatedResponse,
+            //         status: 1
+            //     });
+            // }
 		};
 	}
 

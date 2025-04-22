@@ -1,0 +1,17 @@
+{
+  "name": "@romos/bin",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ts-node main.ts",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "@romos/fs": "*",
+    "@romos/kernel": "*"
+  }
+}
