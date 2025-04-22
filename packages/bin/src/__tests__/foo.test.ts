@@ -1,6 +1,6 @@
-import "fake-indexeddb/auto";
-import { describe, it } from "vitest";
-import { ls } from "../ls";
+import { describe, it, test } from "vitest";
+import { ls } from "../programs/ls";
+import { cat } from "../programs/cat";
 
 describe("foo", () => {
     it("Should be able to call the syscall from the kernel", async () => {
@@ -8,14 +8,13 @@ describe("foo", () => {
         await syscall("mkdir", "/teste2");
         await syscall("mkdir", "/teste3");
         await syscall("mkdir", "/teste4");
-        const foo = await syscall("readdir", "/");
+        
+        ls();
+    });
+
+    test("cat", async () => {
+        await syscall("writeFile", "/file.teste", "Teste de cat");
         ls()
-        syscall("echo", "teste", -1)
-        console.log(foo);
-        // mkdir("/teste")
-        // mkdir("/teste2")
-        // mkdir("/teste2/teste")
-        // console.log(readdir("/"));
-        // console.log(readdir("/teste2"));
+        cat("/file.teste")
     });
 });

@@ -1,4 +1,4 @@
-import "./syscall"
+import "../syscall"
 
 export function isArrayOfStrings(value: unknown): value is string[] {
 	if (!Array.isArray(value)) {

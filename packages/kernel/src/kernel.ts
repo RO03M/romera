@@ -47,6 +47,9 @@ export class Kernel {
 		this.syscallMap.set("createProcess", (command: string, args: string[] = [], ppid?: number, cwd?: string, tty?: number) => {	
 			this.scheduler.exec(command, args, { cwd, tty: tty ?? -1, ppid })
 		});
+		this.syscallMap.set("fork", (command: string, args: string[] = [], ppid?: number, cwd?: string, tty?: number) => {	
+			this.scheduler.exec(command, args, { cwd, tty: tty ?? -1, ppid })
+		});
 		this.syscallMap.set("exec", (command: string, args: string[], tty: number) =>
 			this.scheduler.exec(command, args, { tty })
 		);

@@ -1,6 +1,9 @@
+import "fake-indexeddb/auto";
+import { Filesystem, MemoryBackend } from "@romos/fs";
 import { Kernel } from "@romos/kernel";
 
 const kernel = Kernel.instance();
+kernel.filesystem = new Filesystem("mock", { backend: new MemoryBackend() });
 kernel.ttyManager.terminals.set(-1, {
     echo: console.log,
     workingDirectory: "/"
