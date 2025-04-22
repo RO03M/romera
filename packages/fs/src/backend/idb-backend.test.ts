@@ -1,10 +1,10 @@
 import "fake-indexeddb/auto";
 import { expect, it } from "vitest";
-import { FSBackend } from "./backend";
+import { IDBBackend } from "./idb-backend";
 import type { FSMap } from "../filesystem";
 import { Stat } from "../stat";
 
-const backend = new FSBackend();
+const backend = new IDBBackend();
 
 it("Should be able to save and load a superblock", async () => {
 	const data: FSMap = new Map([

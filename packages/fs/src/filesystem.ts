@@ -1,7 +1,7 @@
 import { EEXIST, ENOENT } from "./errors";
 import { btc } from "@romos/utils";
 import { safe } from "@romos/utils";
-import { FSBackend } from "./backend/backend";
+import { IDBBackend } from "./backend/idb-backend";
 import { Dirent } from "./dirent";
 import { FilesystemWatcher } from "./filesystem-watcher";
 import { Stat } from "./stat";
@@ -19,14 +19,19 @@ import {
 	splitParentPathAndNodeName,
 	splitPath
 } from "./utils/path";
+import { Backend } from "./backend/backend";
 
 const STAT_KEY = 0;
 
 export type FSMap = Map<string | 0, Stat | FSMap>;
 
+interface FilesystemOptions {
+	backend?: Backend;
+}
+
 export class Filesystem {
 	public watcher: FilesystemWatcher = new FilesystemWatcher();
-	private backend: FSBackend;
+	private backend: Backend;
 	private iused = 0;
 	public fsName: string;
 	// public inodeTable: Map<Stat["inode"], Uint8Array> = new Map();
@@ -34,9 +39,11 @@ export class Filesystem {
 		["/", new Map([[STAT_KEY, new Stat("dir", 0, 0)]])]
 	]);
 
-	constructor(fsName: string) {
+	constructor(fsName: string, options?: FilesystemOptions) {
+		const { backend = new IDBBackend() } = options ?? {};
+
 		this.fsName = fsName;
-		this.backend = new FSBackend();
+		this.backend = backend;
 	}
 
 	public async init() {
