@@ -1,5 +1,6 @@
 import { type WatchCallback, Watcher } from "@romos/utils";
 import { Process, type ProcessOptions } from "./process";
+import { Kernel } from "../kernel";
 
 type ProcessEvent = "created" | "ran" | "slept" | "killed";
 
@@ -62,7 +63,8 @@ export class Scheduler {
 
 				this.running.set(pid, process);
 				this.sleeping.delete(pid);
-				process.start();
+				// process.start();
+				Kernel.instance().threadManager.spawn(process);
 				this.watcher.emit("all", "ran");
 				this.watcher.emit(pid, "ran");
 			}

@@ -3,18 +3,33 @@ import { Kernel } from "../kernel";
 import { RScriptTranslator } from "./rscript-translator";
 import { isSyscallStream } from "./types";
 import type { Process } from "./process";
+import type { ThreadManager } from "../thread-manager";
 
-export class WorkerProcessManager {
-	private worker: Worker;
-	public readonly url: string;
+export class WorkerProcessManager implements ThreadManager {
+	private worker!: Worker;
+	private url!: string;
 
-	constructor(processRef: Process, content: string) {
-		const rscriptTranslator = new RScriptTranslator(content, processRef.pid, processRef.args);
+	async spawn(process: Process) {
+		const content = await Kernel.instance().filesystem.readFile(
+			process.resolvedPath,
+			{ decode: true }
+		);
+		if (content === null) {
+			process.terminate();
+
+			return;
+		}
+
+		const rscriptTranslator = new RScriptTranslator(
+			content,
+			process.pid,
+			process.args
+		);
 		rscriptTranslator.cookScript();
 		this.url = rscriptTranslator.generateBlob();
 
 		this.worker = new Worker(this.url, {
-			name: `process-${processRef.pid}`
+			name: `process-${process.pid}`,
 		});
 
 		this.worker.onerror = (error) => {
@@ -25,7 +40,7 @@ export class WorkerProcessManager {
 		this.worker.onmessage = ({ data }) => {
 			if (data.kill) {
 				this.terminate();
-                processRef.terminate();
+				process.terminate();
 				return;
 			}
 
@@ -35,64 +50,64 @@ export class WorkerProcessManager {
 
 			const { args, method, responseId, type } = data;
 
-			// const foo = Kernel.instance().syscall(method, processRef.cwd, processRef.tty);
+			// const foo = Kernel.instance().syscall(method, process.cwd, process.tty);
 
-            // if (foo === null) {
-            //     this.worker?.postMessage({
-            //         type: "SYSCALL_RESPONSE",
-            //         id: responseId,
-            //         response: "SYSCALL_METHOD_NOT_READY"
-            //     });
-            //     return;
-            // }
+			// if (foo === null) {
+			//     this.worker?.postMessage({
+			//         type: "SYSCALL_RESPONSE",
+			//         id: responseId,
+			//         response: "SYSCALL_METHOD_NOT_READY"
+			//     });
+			//     return;
+			// }
 
-            // const response = safe(() => foo?.bind(null, ...args)());
-            
-            // if (response.error) {
-            //     this.worker?.postMessage({
-            //         type: "SYSCALL_RESPONSE",
-            //         id: responseId,
-            //         response: response.error.message,
-            //         status: 0
-            //     });
-            //     return;
-            // }
+			// const response = safe(() => foo?.bind(null, ...args)());
 
-            // if (response.data instanceof Promise) {
-            //     response.data.then((res) => {
-            //         const treatedResponse =
-            //             res === undefined
-            //                 ? ""
-            //                 : JSON.parse(JSON.stringify(res));
-            //         this.worker?.postMessage({
-            //             type: "SYSCALL_RESPONSE",
-            //             id: responseId,
-            //             response: treatedResponse,
-            //             status: 1
-            //         });
-            //     });
-            // } else {
-            //     const treatedResponse =
-            //         response.data === undefined
-            //             ? ""
-            //             : JSON.parse(JSON.stringify(response.data));
+			// if (response.error) {
+			//     this.worker?.postMessage({
+			//         type: "SYSCALL_RESPONSE",
+			//         id: responseId,
+			//         response: response.error.message,
+			//         status: 0
+			//     });
+			//     return;
+			// }
 
-            //     this.worker?.postMessage({
-            //         type: "SYSCALL_RESPONSE",
-            //         id: responseId,
-            //         response: treatedResponse,
-            //         status: 1
-            //     });
-            // }
+			// if (response.data instanceof Promise) {
+			//     response.data.then((res) => {
+			//         const treatedResponse =
+			//             res === undefined
+			//                 ? ""
+			//                 : JSON.parse(JSON.stringify(res));
+			//         this.worker?.postMessage({
+			//             type: "SYSCALL_RESPONSE",
+			//             id: responseId,
+			//             response: treatedResponse,
+			//             status: 1
+			//         });
+			//     });
+			// } else {
+			//     const treatedResponse =
+			//         response.data === undefined
+			//             ? ""
+			//             : JSON.parse(JSON.stringify(response.data));
+
+			//     this.worker?.postMessage({
+			//         type: "SYSCALL_RESPONSE",
+			//         id: responseId,
+			//         response: treatedResponse,
+			//         status: 1
+			//     });
+			// }
 		};
 	}
 
-    public postMessage(message: unknown, options?: StructuredSerializeOptions) {
-        this.worker.postMessage(message, options);
-    }
+	public postMessage(message: unknown, options?: StructuredSerializeOptions) {
+		this.worker.postMessage(message, options);
+	}
 
 	public terminate() {
-        this.worker.terminate();
+		this.worker.terminate();
 		if (this.url !== undefined && URL) {
 			URL.revokeObjectURL(this.url);
 		}

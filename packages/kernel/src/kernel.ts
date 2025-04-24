@@ -1,15 +1,17 @@
-import { Filesystem, format, normalize, type ReadFileOptions } from "@romos/fs";
-import { TTYManager } from "./tty-manager";
+import { Filesystem, type ReadFileOptions, format, normalize } from "@romos/fs";
 import { Scheduler } from "./process/scheduler";
+import { TTYManager } from "./tty-manager";
+import type { ThreadManager } from "./thread-manager";
+import { WorkerProcessManager } from "./process/worker-process-manager";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 type SyscallHandler = (...args: any[]) => unknown;
-
 
 export class Kernel {
 	public filesystem: Filesystem;
 	public scheduler: Scheduler;
 	public ttyManager: TTYManager;
+	public threadManager: ThreadManager;
 
 	private static _instance: Kernel;
 	private syscallMap = new Map<string, SyscallHandler>();
@@ -17,6 +19,7 @@ export class Kernel {
 	constructor() {
 		this.setupSyscalls();
 		this.filesystem = new Filesystem("rome-os-fs");
+		this.threadManager = new WorkerProcessManager();
 		// this.filesystem.init();
 
 		this.scheduler = new Scheduler({
@@ -39,26 +42,66 @@ export class Kernel {
 	}
 
 	private setupSyscalls() {
-		this.syscallMap.set("stat", (filepath: string) => this.filesystem.stat(filepath));
-		this.syscallMap.set("lstat", (filepath: string) => this.filesystem.lstat(filepath));
-		this.syscallMap.set("readdir", (filepath: string) => this.filesystem.readdir(filepath));
-		this.syscallMap.set("readFile", (filepath: string, options?: ReadFileOptions) => this.filesystem.readFile(filepath, options));
+		this.syscallMap.set("stat", (filepath: string) =>
+			this.filesystem.stat(filepath)
+		);
+		this.syscallMap.set("lstat", (filepath: string) =>
+			this.filesystem.lstat(filepath)
+		);
+		this.syscallMap.set("readdir", (filepath: string) =>
+			this.filesystem.readdir(filepath)
+		);
+		this.syscallMap.set(
+			"readFile",
+			(filepath: string, options?: ReadFileOptions) =>
+				this.filesystem.readFile(filepath, options)
+		);
 		this.syscallMap.set("normalize", (filepath: string) => normalize(filepath));
-		this.syscallMap.set("createProcess", (command: string, args: string[] = [], ppid?: number, cwd?: string, tty?: number) => {	
-			this.scheduler.exec(command, args, { cwd, tty: tty ?? -1, ppid })
-		});
-		this.syscallMap.set("fork", (command: string, args: string[] = [], ppid?: number, cwd?: string, tty?: number) => {	
-			this.scheduler.exec(command, args, { cwd, tty: tty ?? -1, ppid })
-		});
-		this.syscallMap.set("exec", (command: string, args: string[], tty: number) =>
-			this.scheduler.exec(command, args, { tty })
+		this.syscallMap.set(
+			"createProcess",
+			(
+				command: string,
+				args: string[] = [],
+				ppid?: number,
+				cwd?: string,
+				tty?: number
+			) => {
+				this.scheduler.exec(command, args, { cwd, tty: tty ?? -1, ppid });
+			}
+		);
+		this.syscallMap.set(
+			"fork",
+			(
+				command: string,
+				args: string[] = [],
+				ppid?: number,
+				cwd?: string,
+				tty?: number
+			) => {
+				return this.scheduler.exec(command, args, { cwd, tty: tty ?? -1, ppid });
+			}
+		);
+		this.syscallMap.set(
+			"exec",
+			(command: string, args: string[], tty: number) =>
+				this.scheduler.exec(command, args, { tty })
 		);
 		this.syscallMap.set("echo", (message: string, tty: number) =>
 			this.ttyManager.terminals.get(tty)?.echo(message)
 		);
-		this.syscallMap.set("mkdir", (filepath: string) => this.filesystem.mkdir(filepath));
-		this.syscallMap.set("writeFile", (filepath: string, content: string | Uint8Array) => this.filesystem.writeFile(filepath, content));
-		this.syscallMap.set("pwd", (tty: number) => this.ttyManager.terminals.get(tty)?.workingDirectory);
+		this.syscallMap.set("mkdir", (filepath: string) =>
+			this.filesystem.mkdir(filepath)
+		);
+		this.syscallMap.set(
+			"writeFile",
+			(filepath: string, content: string | Uint8Array) =>
+				this.filesystem.writeFile(filepath, content)
+		);
+		this.syscallMap.set(
+			"pwd",
+			(tty: number) => this.ttyManager.terminals.get(tty)?.workingDirectory
+		);
+		this.syscallMap.set("pathFormat", (root: string, base: string) => format({ root, base }));
 	}
 
 	// TODO algumas funções aqui são desnecessárias e não fazem sentido estarem no "syscalls"

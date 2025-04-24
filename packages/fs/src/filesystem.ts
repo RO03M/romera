@@ -19,7 +19,7 @@ import {
 	splitParentPathAndNodeName,
 	splitPath
 } from "./utils/path";
-import { Backend } from "./backend/backend";
+import type { Backend } from "./backend/backend";
 
 const STAT_KEY = 0;
 
