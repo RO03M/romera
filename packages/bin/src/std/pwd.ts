@@ -1,3 +1,3 @@
 export async function pwd() {
-    return await syscall("pwd", proc.tty);
+    return await syscall("pwd", proc.pid);
 }

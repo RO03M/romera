@@ -19,7 +19,7 @@ import { extname } from "@romos/fs";
 import { Kernel } from "@romos/kernel";
 
 export const filesystem = Kernel.instance().filesystem;
-
+Kernel.instance().filesystem.init();
 /**
  * @deprecated
  */

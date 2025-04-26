@@ -13,7 +13,7 @@ async function main() {
 		return typeof value[0] === "string";
 	}
 
-	const pwd = await syscall("pwd", -1);
+	const pwd = await syscall("pwd", proc.pid);
 
 	const stats = await syscall("readdir", pwd);
 
@@ -22,7 +22,7 @@ async function main() {
 		exit();
 	}
 
-	await syscall("echo", stats.join("\t"), -1);
+	await syscall("echo", stats.join("\t"), proc.tty);
 }
 
 export const ls = main;

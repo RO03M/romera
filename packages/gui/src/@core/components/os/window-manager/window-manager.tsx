@@ -9,15 +9,16 @@ export function WindowManager() {
 
 	useEffect(() => {
 		Kernel.instance().scheduler.watch("all", ["ran", "killed"], () => {
-			console.log("teste");
-			const componentProcesses = Kernel.instance().scheduler.processes.filter(
-				(process) => process.command === "component"
-			);
+			const componentProcesses: Process[] = [];
+			for (const [_key, process] of Kernel.instance().scheduler.processes) {
+				if (process.command === "component") {
+					componentProcesses.push(process);
+				}
+			}
+
 			setProcesses(componentProcesses);
 		});
 	}, []);
-
-	console.log(Kernel.instance().scheduler.processes, processes);
 
 	return (
 		<>

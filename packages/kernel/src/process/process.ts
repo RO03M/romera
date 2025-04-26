@@ -57,6 +57,10 @@ export class Process {
 		this.workerProcessManager?.postMessage(buffer, options);
 	}
 
+	public pipe(process: Process) {
+
+	}
+
 	private resolveCommandPath() {
 		const shouldSearchBin = !/^(\/|\.\/|\.\.\/)/.test(this.command);
 		if (shouldSearchBin) {

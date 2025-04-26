@@ -14,22 +14,20 @@ export class WorkerProcessManager implements ThreadManager {
 			process.resolvedPath,
 			{ decode: true }
 		);
+
+		console.log(await Kernel.instance().filesystem.getJSON());
 		if (content === null) {
 			process.terminate();
 
 			return;
 		}
 
-		const rscriptTranslator = new RScriptTranslator(
-			content,
-			process.pid,
-			process.args
-		);
+		const rscriptTranslator = new RScriptTranslator(content, process);
 		rscriptTranslator.cookScript();
 		this.url = rscriptTranslator.generateBlob();
 
 		this.worker = new Worker(this.url, {
-			name: `process-${process.pid}`,
+			name: `process-${process.pid}`
 		});
 
 		this.worker.onerror = (error) => {
@@ -43,13 +41,30 @@ export class WorkerProcessManager implements ThreadManager {
 				process.terminate();
 				return;
 			}
+			console.log(data);
 
 			if (!isSyscallStream(data)) {
 				return;
 			}
 
-			const { args, method, responseId, type } = data;
-
+			const { args, method, syscallId, type } = data;
+			console.log(method);
+			const response = Kernel.instance().syscall(method, ...args);
+			response
+				.then((value) => {
+					console.log(value, method);
+					this.postMessage({
+						type: "SYSCALL_RESPONSE",
+						id: syscallId,
+						response: value,
+						code: 1
+					});
+				})
+				.catch((error) => {
+					Kernel.instance().syscall("echo", error);
+					process.terminate();
+					this.terminate();
+				});
 			// const foo = Kernel.instance().syscall(method, process.cwd, process.tty);
 
 			// if (foo === null) {

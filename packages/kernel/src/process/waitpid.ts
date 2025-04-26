@@ -1,8 +1,7 @@
 import { Kernel } from "../kernel";
 
 export async function waitpid(pid: number) {
-    // Forma horrível para fazer isso, mas são quase meia noite ent fdas-e
-    const process = Kernel.instance().scheduler.processes.find((process) => process.pid === pid);
+    const process = Kernel.instance().scheduler.processes.get(pid);
 
     if (!process) {
         return;

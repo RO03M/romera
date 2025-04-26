@@ -1,13 +1,14 @@
+import type { Process } from "./process";
+
 export class RScriptTranslator {
-    public args: string[];
 	public rawScript = "";
 	public cookedScript = "";
-    public pid: number;
 
-	constructor(rawScript: string, pid: number, args: string[] = []) {
+	private readonly process: Process;
+
+	constructor(rawScript: string, process: Process) {
 		this.rawScript = rawScript;
-        this.pid = pid;
-        this.args = args;
+		this.process = process;
 	}
 
 	public generateBlob() {
@@ -19,12 +20,17 @@ export class RScriptTranslator {
 	public cookScript() {
 		this.cookedScript = `
 ((async () => {
-    const PID = ${this.pid};
+    const PID = ${this.process.pid};
+	const proc = {
+		pid: ${this.process.pid},
+		ppid: ${this.process.ppid},
+		tty: ${this.process.tty}
+	};
     importScripts("${location.origin}/sys/std.js", "${location.origin}/sys/processes.js");
 
     ${this.rawScript}
 
-    const stdout = await main(${this.args.map((arg) => `'${arg}'`)}); // declared in the rawScript
+    const stdout = await main(${this.process.args.map((arg) => `'${arg}'`)}); // declared in the rawScript
 
     // forced exit
     exit(0, stdout);

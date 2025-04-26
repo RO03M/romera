@@ -45,7 +45,13 @@ export class Scheduler {
 		this.watcher.emit(pid, "killed");
 		this.watcher.events.delete(pid); // Should I do this?
 
-		const children = this.processes.filter((process) => process.ppid === pid);
+		const children: Process[] = [];
+
+		for (const [_, process] of this.processes) {
+			if (process.ppid === pid) {
+				children.push(process);
+			}
+		}
 
 		for (const child of children) {
 			this.kill(child.pid);
@@ -55,16 +61,13 @@ export class Scheduler {
     public *tick() {
 		while (true) {
 			for (const processItem of this.sleeping) {
-				// if (this.running.size >= this.concurrency) {
-				// 	break;
-				// }
-
 				const [pid, process] = processItem;
 
 				this.running.set(pid, process);
 				this.sleeping.delete(pid);
-				// process.start();
-				Kernel.instance().threadManager.spawn(process);
+				if (process.command !== "component") {
+					Kernel.instance().threadManager.spawn(process);
+				}
 				this.watcher.emit("all", "ran");
 				this.watcher.emit(pid, "ran");
 			}
@@ -95,7 +98,7 @@ export class Scheduler {
 	}
 
 	public get processes() {
-		return [...this.running.values(), ...this.sleeping.values()];
+		return new Map([...this.running, ...this.sleeping]);
 	}
 
 	private generatePid() {

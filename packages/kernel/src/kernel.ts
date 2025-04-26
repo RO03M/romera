@@ -99,7 +99,7 @@ export class Kernel {
 		);
 		this.syscallMap.set(
 			"pwd",
-			(tty: number) => this.ttyManager.terminals.get(tty)?.workingDirectory
+			(pid: number) => this.scheduler.processes.get(pid)?.cwd
 		);
 		this.syscallMap.set("pathFormat", (root: string, base: string) => format({ root, base }));
 	}
