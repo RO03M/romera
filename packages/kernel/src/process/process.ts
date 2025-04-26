@@ -1,6 +1,6 @@
 import { Filesystem, format } from "@romos/fs";
 import { Kernel } from "../kernel";
-import type { WorkerProcessManager } from "./worker-process-manager";
+import type { BrowserWorkerManager } from "../worker/browser/worker-process-manager";
 import { Watcher } from "@romos/utils";
 
 type TerminateCallback = (process: Process) => void;
@@ -24,7 +24,7 @@ export class Process {
 	public readonly args: string[];
 	public readonly resolvedPath: string;
 
-	private workerProcessManager?: WorkerProcessManager;
+	private workerProcessManager?: BrowserWorkerManager;
 	private onTerminate?: TerminateCallback;
 	private watcher = new Watcher<string, number>();
 

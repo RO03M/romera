@@ -1,5 +1,5 @@
 import { type WatchCallback, Watcher } from "@romos/utils";
-import { Process, type ProcessOptions } from "./process";
+import { Process, type ProcessOptions } from "../process/process";
 import { Kernel } from "../kernel";
 
 type ProcessEvent = "created" | "ran" | "slept" | "killed";

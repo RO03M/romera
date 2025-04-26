@@ -1,8 +1,8 @@
 import { Filesystem, type ReadFileOptions, format, normalize } from "@romos/fs";
-import { Scheduler } from "./process/scheduler";
+import { Scheduler } from "./scheduler/scheduler";
 import { TTYManager } from "./tty-manager";
-import type { ThreadManager } from "./thread-manager";
-import { WorkerProcessManager } from "./process/worker-process-manager";
+import type { WorkerBackend } from "./worker/backend";
+import { BrowserWorkerManager } from "./worker/browser/worker-process-manager";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 type SyscallHandler = (...args: any[]) => unknown;
@@ -11,7 +11,7 @@ export class Kernel {
 	public filesystem: Filesystem;
 	public scheduler: Scheduler;
 	public ttyManager: TTYManager;
-	public threadManager: ThreadManager;
+	public threadManager: WorkerBackend;
 
 	private static _instance: Kernel;
 	private syscallMap = new Map<string, SyscallHandler>();
@@ -19,7 +19,7 @@ export class Kernel {
 	constructor() {
 		this.setupSyscalls();
 		this.filesystem = new Filesystem("rome-os-fs");
-		this.threadManager = new WorkerProcessManager();
+		this.threadManager = new BrowserWorkerManager();
 		// this.filesystem.init();
 
 		this.scheduler = new Scheduler({
