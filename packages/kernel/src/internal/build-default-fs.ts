@@ -11,7 +11,6 @@ function buildFs() {
     Kernel.instance().filesystem.mkdir("/home/romera/desktop/Projetos");
     Kernel.instance().filesystem.mkdir("/usr");
     Kernel.instance().filesystem.mkdir("/usr/applications");
-    console.log(cat.toString());
     Kernel.instance().filesystem.writeFile("/bin/ls", ls.toString());
     Kernel.instance().filesystem.writeFile("/bin/cat", cat.toString());
     Kernel.instance().filesystem.writeFile("/bin/mkdir", mkdir.toString());
