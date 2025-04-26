@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
+    "build-fs": "tsc && node dist/internal/build-fs.js",
     "compile": "tsc && ts-node index.ts",
     "dev": "tsc --watch",
     "postinstall": "yarn build"

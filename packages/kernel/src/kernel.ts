@@ -2,7 +2,7 @@ import { Filesystem, type ReadFileOptions, format, normalize } from "@romos/fs";
 import { Scheduler } from "./scheduler/scheduler";
 import { TTYManager } from "./tty-manager";
 import type { WorkerBackend } from "./worker/backend";
-import { BrowserWorkerManager } from "./worker/browser/worker-process-manager";
+import { BrowserWorkerManager } from "./worker/browser/browser-worker-manager";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 type SyscallHandler = (...args: any[]) => unknown;

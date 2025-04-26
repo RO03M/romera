@@ -1,6 +1,6 @@
 import { Filesystem, format } from "@romos/fs";
 import { Kernel } from "../kernel";
-import type { BrowserWorkerManager } from "../worker/browser/worker-process-manager";
+import type { BrowserWorkerManager } from "../worker/browser/browser-worker-manager";
 import { Watcher } from "@romos/utils";
 
 type TerminateCallback = (process: Process) => void;

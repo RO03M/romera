@@ -14,15 +14,12 @@ export class BrowserWorkerManager implements WorkerBackend {
 			{ decode: true }
 		);
 
-		console.log(await Kernel.instance().filesystem.getJSON());
 		if (content === null) {
 			process.terminate();
 
 			return;
 		}
 
-		// const rscriptTranslator = new Injector(content, process);
-		// rscriptTranslator.cookScript();
 		this.url = injectScript(content, process);
 
 		this.worker = new Worker(this.url, {
@@ -45,12 +42,11 @@ export class BrowserWorkerManager implements WorkerBackend {
 				return;
 			}
 
-			const { args, method, syscallId, type } = data;
+			const { args, method, syscallId } = data;
 
 			const response = Kernel.instance().syscall(method, ...args);
 			response
 				.then((value) => {
-					console.log(value, method);
 					this.postMessage({
 						type: "SYSCALL_RESPONSE",
 						id: syscallId,
