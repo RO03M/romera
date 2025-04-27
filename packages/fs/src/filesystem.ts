@@ -333,6 +333,7 @@ export class Filesystem {
 		entry.set(STAT_KEY, stat);
 		dir.set(basename, entry);
 		this.watcher.emit(dirname, "change");
+		this.watcher.emit(path, "created");
 		this.backend.saveSuperblock(this.root);
 	}
 

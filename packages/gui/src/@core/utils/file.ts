@@ -1,5 +1,5 @@
-import { filesystem } from "../../app";
 import { extname } from "@romos/fs";
+import { Kernel } from "@romos/kernel";
 
 export async function fileToBuffer(file: File) {
 	const buffer = await file
@@ -37,7 +37,7 @@ function mimeTypeFromFile(filepath: string) {
 }
 
 export async function blobFromFile(filepath: string) {
-    const buffer = await filesystem.readFile(filepath);
+    const buffer = await Kernel.instance().filesystem.readFile(filepath);
     
 	if (buffer === null || typeof buffer === "string") {
 		return null;

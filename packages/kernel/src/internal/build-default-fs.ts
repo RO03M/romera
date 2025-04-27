@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { Kernel } from "../kernel";
 import { Filesystem, MemoryBackend } from "@romos/fs";
 import { cat, ls, sleep, mkdir, watch } from "../bin/programs";
@@ -7,26 +7,27 @@ import { prog_pwd } from "../bin/programs/pwd";
 import { addDoom } from "./desktop/doom";
 
 async function buildFs() {
-    Kernel.instance().filesystem.mkdir("/bin");
-    Kernel.instance().filesystem.mkdir("/home");
-    Kernel.instance().filesystem.mkdir("/home/romera");
-    Kernel.instance().filesystem.mkdir("/home/romera/desktop");
-    Kernel.instance().filesystem.mkdir("/usr");
-    Kernel.instance().filesystem.mkdir("/usr/applications");
-    Kernel.instance().filesystem.mkdir("/usr/games");
-    Kernel.instance().filesystem.writeFile("/bin/ls", ls.toString());
-    Kernel.instance().filesystem.writeFile("/bin/cat", cat.toString());
-    Kernel.instance().filesystem.writeFile("/bin/mkdir", mkdir.toString());
-    Kernel.instance().filesystem.writeFile("/bin/sleep", sleep.toString());
-    Kernel.instance().filesystem.writeFile("/bin/watch", watch.toString());
-    Kernel.instance().filesystem.writeFile("/bin/touch", touch.toString());
-    Kernel.instance().filesystem.writeFile("/bin/pwd", prog_pwd.toString());
+    const filesystem = Kernel.instance().filesystem;
+    filesystem.mkdir("/bin");
+    filesystem.mkdir("/home");
+    filesystem.mkdir("/home/romera");
+    filesystem.mkdir("/home/romera/desktop");
+    filesystem.mkdir("/usr");
+    filesystem.mkdir("/usr/applications");
+    filesystem.mkdir("/usr/games");
+    filesystem.writeFile("/bin/ls", ls.toString());
+    filesystem.writeFile("/bin/cat", cat.toString());
+    filesystem.writeFile("/bin/mkdir", mkdir.toString());
+    filesystem.writeFile("/bin/sleep", sleep.toString());
+    filesystem.writeFile("/bin/watch", watch.toString());
+    filesystem.writeFile("/bin/touch", touch.toString());
+    filesystem.writeFile("/bin/pwd", prog_pwd.toString());
 
-    Kernel.instance().filesystem.writeFile("/usr/applications/Sobre mim", "[Desktop Entry];\nx=0;\ny=0;\ndefaultExecName=monaco");
-    Kernel.instance().filesystem.writeFile("/usr/applications/Projetos", "[Desktop Entry];\nx=0;\ny=1;");
+    filesystem.writeFile("/usr/applications/Sobre mim", "[Desktop Entry];\nx=0;\ny=0;\ndefaultExecName=monaco");
+    filesystem.writeFile("/usr/applications/Projetos", "[Desktop Entry];\nx=0;\ny=1;");
 
-    Kernel.instance().filesystem.mkdir("/home/romera/desktop/Projetos");
-    Kernel.instance().filesystem.writeFile("/home/romera/desktop/Sobre mim", `Olá, me chamo Romera!
+    filesystem.mkdir("/home/romera/desktop/Projetos");
+    filesystem.writeFile("/home/romera/desktop/Sobre mim", `Olá, me chamo Romera!
 
 Sou um desenvolvedor de software que começou a estudar sobre computação em 2016
 
@@ -37,6 +38,13 @@ Desde o ínicio da minha carreira sempre consegui entender e aprender rapidament
 No quesito de tecnologia eu já passei por várias, mas as que eu mais possuo experiência são Typescript/React/NextJs, PHP/Laravel, Rust, Java/Spring Boot e diversas outras mais ligadas ao cenário da web. Mas estou disposto a aprender qualquer ferramenta necessária para o meu desenvolvimento e o da minha equipe.`);
 
     await addDoom();
+
+    const ubuntu22 = readFileSync(`${__dirname}/wallpapers/ubuntu-22.jpg`);
+
+    filesystem.mkdir("/usr/system");
+    filesystem.mkdir("/usr/system/wallpapers");
+    await filesystem.writeFile("/usr/system/wallpapers/ubuntu-22.jpg", ubuntu22);
+    filesystem.symlink("/usr/system/wallpapers/ubuntu-22.jpg", "/usr/system/wallpaper");
 }
 
 Kernel.instance().filesystem = new Filesystem("mock", { backend: new MemoryBackend() });

@@ -17,6 +17,7 @@ import "./app.css";
 import { theme } from "./theme";
 import { extname } from "@romos/fs";
 import { Kernel } from "@romos/kernel";
+import { useWallpaper } from "./@core/hooks/use-wallpaper";
 
 export const filesystem = Kernel.instance().filesystem;
 
@@ -33,6 +34,8 @@ setInterval(() => {
 
 export function App() {
 	const contextRef = useRef<ContextMenuRef | null>(null);
+
+	const wallpaper = useWallpaper();
 
 	const onFileDrop = useCallback(async (event: DragEvent) => {
 		const { x, y } = positionToGridPosition([event.clientX, event.clientY]);
@@ -81,12 +84,13 @@ export function App() {
 		}
 	}, []);
 
-	// return <Teste />
-
 	return (
 		<ThemeProvider theme={theme}>
 			<Main
 				id={"main"}
+				style={{
+					backgroundImage: `url("${wallpaper}")`,
+				}}
 				onDrop={onFileDrop}
 				onDragOver={(event) => event.preventDefault()}
 				onContextMenu={(event) => contextRef.current?.show(event)}
@@ -108,7 +112,8 @@ const Main = styled.main({
 	height: "100vh",
 	maxHeight: "100vh",
 	overflow: "hidden",
-	backgroundSize: "contain",
+	backgroundSize: "cover",
+	backgroundPosition: "center",
 	backgroundImage: `url("https://images.unsplash.com/photo-1473081556163-2a17de81fc97?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxleHBsb3JlLWZlZWR8Mnx8fGVufDB8fHx8fA%3D%3D")`,
 	position: "fixed"
 });

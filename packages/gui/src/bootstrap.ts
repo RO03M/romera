@@ -28,18 +28,21 @@ async function buildFiles(basepath: string, nodes: HydrationData[]) {
 		}
 
 		if (node.type === "file") {
+			
 			if (node.content === undefined) {
 				node.content = "";
 			}
-
 			if (Array.isArray(node.content)) {
+				if (node.name === "/ubuntu-22.jpg") {
+					console.log(new Uint8Array(node.content), path);
+				}
+				
 				await Kernel.instance().filesystem.writeFile(path, new Uint8Array(node.content));
 				continue;
 			}
-
 			await Kernel.instance().filesystem.writeFile(path, node.content);
 		} else if (node.type === "symlink" && node.target !== undefined) {
-			if (Kernel.instance().filesystem.stat(path) === null) {
+			if (Kernel.instance().filesystem.stat(node.target) === null) {
 				await Kernel.instance().filesystem.writeFile(node.target, "");
 			}
 			Kernel.instance().filesystem.symlink(node.target, path);
@@ -51,8 +54,9 @@ export async function bootstrap() {
     const superblock = await Kernel.instance().filesystem.backend.loadSuperblock();
 
     // if (superblock !== undefined) {
-    //     Kernel.instance().filesystem.root = superblock;
-    //     Kernel.instance().filesystem.watcher.emit("/home/romera/desktop", "change");
+		//     Kernel.instance().filesystem.root = superblock;
+		//     Kernel.instance().filesystem.watcher.emit("/home/romera/desktop", "change");
+		// Preciso ajustar o iused no final 
     //     return;
     // }
 

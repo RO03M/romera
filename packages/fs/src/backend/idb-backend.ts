@@ -1,6 +1,6 @@
 import type { FSMap } from "../filesystem";
 import { Stat } from "../stat";
-import { Backend } from "./backend";
+import type { Backend } from "./backend";
 import { IDB } from "./idb";
 
 export class IDBBackend implements Backend {
