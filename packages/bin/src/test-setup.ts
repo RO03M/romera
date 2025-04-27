@@ -1,2 +1,0 @@
-import "./syscall"
-import "./exit"
