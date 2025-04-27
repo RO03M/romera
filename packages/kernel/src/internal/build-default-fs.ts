@@ -2,6 +2,8 @@ import { writeFileSync } from "node:fs";
 import { Kernel } from "../kernel";
 import { Filesystem, MemoryBackend } from "@romos/fs";
 import { cat, ls, sleep, mkdir, watch } from "../bin/programs";
+import { touch } from "../bin/programs/touch";
+import { prog_pwd } from "../bin/programs/pwd";
 
 function buildFs() {
     Kernel.instance().filesystem.mkdir("/bin");
@@ -16,6 +18,8 @@ function buildFs() {
     Kernel.instance().filesystem.writeFile("/bin/mkdir", mkdir.toString());
     Kernel.instance().filesystem.writeFile("/bin/sleep", sleep.toString());
     Kernel.instance().filesystem.writeFile("/bin/watch", watch.toString());
+    Kernel.instance().filesystem.writeFile("/bin/touch", touch.toString());
+    Kernel.instance().filesystem.writeFile("/bin/pwd", prog_pwd.toString());
 
     Kernel.instance().filesystem.writeFile("/usr/applications/Sobre mim", "[Desktop Entry];\nx=0;\ny=0;\ndefaultExecName=monaco");
     Kernel.instance().filesystem.writeFile("/usr/applications/Projetos", "[Desktop Entry];\nx=0;\ny=1;");

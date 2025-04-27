@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "yarn gui:dev",
-    "fs:gd": "yarn workspace @romos/kernel build-fs",
+    "fs": "yarn workspace @romos/kernel build-fs",
     "build:libs": "yarn workspace @romos/utils build && yarn workspace @romos/fs build && yarn workspace @romos/kernel build",
     "build": "yarn workspace @romos/gui build",
     "gui:dev": "vite packages/gui",
