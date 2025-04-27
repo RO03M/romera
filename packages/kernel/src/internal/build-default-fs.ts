@@ -23,19 +23,9 @@ async function buildFs() {
     filesystem.writeFile("/bin/touch", touch.toString());
     filesystem.writeFile("/bin/pwd", prog_pwd.toString());
 
-    filesystem.writeFile("/usr/applications/Sobre mim", "[Desktop Entry];\nx=0;\ny=0;\ndefaultExecName=monaco");
     filesystem.writeFile("/usr/applications/Projetos", "[Desktop Entry];\nx=0;\ny=1;");
 
     filesystem.mkdir("/home/romera/desktop/Projetos");
-    filesystem.writeFile("/home/romera/desktop/Sobre mim", `Olá, me chamo Romera!
-
-Sou um desenvolvedor de software que começou a estudar sobre computação em 2016
-
-Gosto de resolver problemas e de entender a fundo as soluções para os mesmos, além de sempre tentar buscar a melhor solução para o momento.
-
-Desde o ínicio da minha carreira sempre consegui entender e aprender rapidamente, além de me dispor a ajudar a minha equipe.
-
-No quesito de tecnologia eu já passei por várias, mas as que eu mais possuo experiência são Typescript/React/NextJs, PHP/Laravel, Rust, Java/Spring Boot e diversas outras mais ligadas ao cenário da web. Mas estou disposto a aprender qualquer ferramenta necessária para o meu desenvolvimento e o da minha equipe.`);
 
     await addDoom();
 
