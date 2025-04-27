@@ -31,10 +31,9 @@ interface FilesystemOptions {
 
 export class Filesystem {
 	public watcher: FilesystemWatcher = new FilesystemWatcher();
-	private backend: Backend;
+	public readonly backend: Backend;
 	private iused = 0;
 	public fsName: string;
-	// public inodeTable: Map<Stat["inode"], Uint8Array> = new Map();
 	public root: FSMap = new Map([
 		["/", new Map([[STAT_KEY, new Stat("dir", 0, 0)]])]
 	]);
@@ -44,40 +43,6 @@ export class Filesystem {
 
 		this.fsName = fsName;
 		this.backend = backend;
-	}
-
-	public async init() {
-		const superblock = await this.backend.loadSuperblock();
-		if (superblock !== undefined) {
-			this.root = superblock;
-			this.watcher.emit("/home/romera/desktop", "change"); // Perhaps I should use a cascate approach? Too lazy now, fuck it!
-			this.readdir("/usr/applications");
-		} else {
-			const defaultSuperblockJson = await safe(
-				fetch("/filesystem/default.json")
-			);
-
-			if (defaultSuperblockJson.error) {
-				console.error(
-					"Failed to load default filesystem",
-					defaultSuperblockJson.error
-				);
-				return;
-			}
-
-			const defaultSuperblock = await safe(defaultSuperblockJson.data.json());
-			if (defaultSuperblock.error) {
-				console.error(
-					"Failed to parse filesystem json ",
-					defaultSuperblock.error
-				);
-				return;
-			}
-
-			this.hydrate(defaultSuperblock.data);
-		}
-
-		this.iused = this.getMaxINode(this.root);
 	}
 
 	private getMaxINode(fsmap: FSMap) {
@@ -95,8 +60,9 @@ export class Filesystem {
 		return maxInode;
 	}
 
-	public hydrate(data: HydrationData, inheritPath = "/") {
+	public async hydrate(data: HydrationData, inheritPath = "/") {
 		const absolutePath = normalize(`${inheritPath}/${data.name}`);
+		console.log(absolutePath, data);
 		if (data.type === "dir") {
 			if (absolutePath !== "/") {
 				this.mkdir(absolutePath);
@@ -104,7 +70,7 @@ export class Filesystem {
 
 			if (data.nodes) {
 				for (const child of data.nodes) {
-					this.hydrate(child, absolutePath);
+					await this.hydrate(child, absolutePath);
 				}
 			}
 		} else if (data.type === "file") {
@@ -113,11 +79,11 @@ export class Filesystem {
 			}
 
 			if (Array.isArray(data.content)) {
-				this.writeFile(absolutePath, new Uint8Array(data.content));
+				await this.writeFile(absolutePath, new Uint8Array(data.content));
 				return;
 			}
 
-			this.writeFile(absolutePath, data.content);
+			await this.writeFile(absolutePath, data.content);
 		} else if (data.type === "symlink" && data.target !== undefined) {
 			this.symlink(data.target, absolutePath);
 		}
@@ -337,7 +303,7 @@ export class Filesystem {
 			entry.set(STAT_KEY, stat);
 
 			dir.set(basename, entry);
-			// this.inodeTable.set(stat.inode, data);
+
 			await this.backend.writeFile(stat.inode, data);
 			this.backend.saveSuperblock(this.root);
 			this.watcher.emit(dirname, "change");
@@ -366,6 +332,7 @@ export class Filesystem {
 		const stat = new Stat("symlink", this.iused, target.length, target);
 		entry.set(STAT_KEY, stat);
 		dir.set(basename, entry);
+		this.watcher.emit(dirname, "change");
 		this.backend.saveSuperblock(this.root);
 	}
 
