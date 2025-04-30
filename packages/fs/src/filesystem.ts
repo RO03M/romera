@@ -32,9 +32,9 @@ interface FilesystemOptions {
 export class Filesystem {
 	public watcher: FilesystemWatcher = new FilesystemWatcher();
 	public readonly backend: Backend;
-	private iused = 0;
 	public fsName: string;
-	public root: FSMap = new Map([
+	private iused = 0;
+	private root: FSMap = new Map([
 		["/", new Map([[STAT_KEY, new Stat("dir", 0, 0)]])]
 	]);
 
@@ -43,6 +43,11 @@ export class Filesystem {
 
 		this.fsName = fsName;
 		this.backend = backend;
+	}
+
+	public setRoot(fsmap: FSMap) {
+		this.root = fsmap;
+		this.iused = this.getMaxINode(fsmap);
 	}
 
 	private getMaxINode(fsmap: FSMap) {

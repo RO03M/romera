@@ -33,10 +33,6 @@ async function buildFiles(basepath: string, nodes: HydrationData[]) {
 				node.content = "";
 			}
 			if (Array.isArray(node.content)) {
-				if (node.name === "/ubuntu-22.jpg") {
-					console.log(new Uint8Array(node.content), path);
-				}
-				
 				await Kernel.instance().filesystem.writeFile(path, new Uint8Array(node.content));
 				continue;
 			}
@@ -53,12 +49,13 @@ async function buildFiles(basepath: string, nodes: HydrationData[]) {
 export async function bootstrap() {
     const superblock = await Kernel.instance().filesystem.backend.loadSuperblock();
 
-    // if (superblock !== undefined) {
-		//     Kernel.instance().filesystem.root = superblock;
-		//     Kernel.instance().filesystem.watcher.emit("/home/romera/desktop", "change");
-		// Preciso ajustar o iused no final 
-    //     return;
-    // }
+    if (superblock !== undefined) {
+		Kernel.instance().filesystem.setRoot(superblock);
+		Kernel.instance().filesystem.watcher.emit("/home/romera/desktop", "change");
+		Kernel.instance().filesystem.watcher.emit("/usr/system/wallpaper", "change");
+
+        return;
+    }
 
     const defaultSuperblockJson = await safe(
         fetch("/filesystem/default.json").then((response) => response.json())

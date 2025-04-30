@@ -5,12 +5,8 @@ export function useProcesses() {
     const [processes, setProcesses] = useState<Process[]>([]);
 
     useEffect(() => {
-        Kernel.instance().scheduler.watch("all", ["ran", "killed"], () => {
-            console.log("teste");
-            const componentProcesses = Kernel.instance().scheduler.processes.filter(
-                (process) => process.command === "component"
-            );
-            setProcesses(componentProcesses);
+        Kernel.instance().scheduler.watch("all", ["created", "slept", "ran", "killed"], () => {
+            setProcesses([...Kernel.instance().scheduler.processes.values()]);
         });
     }, []);
 

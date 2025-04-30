@@ -1,9 +1,9 @@
 import { Editor } from "@monaco-editor/react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useCallback, useEffect, useState } from "preact/hooks";
-import type { ProcessComponentProps } from "../@core/processes/types";
 import { filesystem } from "../app";
 import { useAsyncMemo } from "../@core/hooks/use-async-memo";
+import type { ProcessComponentProps } from "./types";
 
 type CodeEditorProps = ProcessComponentProps;
 
@@ -12,17 +12,23 @@ export function CodeEditor(props: CodeEditorProps) {
 
 	const [value, setValue] = useState<string | undefined>("");
 
-	const fileContent = useAsyncMemo(async () => {
-		if (workingDirectory === undefined) {
-			return "";
-		}
-		const content = await filesystem.readFile(workingDirectory, { decode: true });
-		if (content === null) {
-			return "";
-		}
+	const fileContent = useAsyncMemo(
+		async () => {
+			if (workingDirectory === undefined) {
+				return "";
+			}
+			const content = await filesystem.readFile(workingDirectory, {
+				decode: true
+			});
+			if (content === null) {
+				return "";
+			}
 
-		return content;
-	}, [workingDirectory], "");
+			return content;
+		},
+		[workingDirectory],
+		""
+	);
 
 	const writeFile = useCallback(() => {
 		if (workingDirectory === undefined) {

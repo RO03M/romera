@@ -1,10 +1,18 @@
 import { Topbar } from "./topbar";
 import { useWindow } from "./use-window";
-import { Suspense, useCallback, useRef, type ComponentType } from "preact/compat";
-import type { ProcessComponentProps, ProcessComponentRef } from "../../../../processes/types";
+import {
+	Suspense,
+	useCallback,
+	useRef,
+	type ComponentType
+} from "preact/compat";
 import { Rnd } from "react-rnd";
 import styled from "styled-components";
 import { Kernel } from "@romos/kernel";
+import type {
+	ProcessComponentProps,
+	ProcessComponentRef
+} from "../../../../../programs/types";
 
 interface WindowProps {
 	pid: number;
@@ -14,15 +22,18 @@ interface WindowProps {
 
 export function Window(props: WindowProps) {
 	const { pid, contentArgs, Content } = props;
-	
+
 	const ref = useRef<Rnd | null>(null);
 	const contentRef = useRef<ProcessComponentRef>(null);
-	
+
 	const windowProps = useWindow(ref);
 
 	const handleClose = useCallback(() => {
 		Kernel.instance().scheduler.kill(pid);
-		if (contentRef.current !== null && contentRef.current?.onClose !== undefined) {
+		if (
+			contentRef.current !== null &&
+			contentRef.current?.onClose !== undefined
+		) {
 			contentRef.current.onClose();
 		}
 	}, [pid]);
@@ -45,7 +56,9 @@ export function Window(props: WindowProps) {
 			}}
 			onDragStart={windowProps.onDragStart}
 			position={windowProps.maximized ? { x: 0, y: 0 } : undefined}
-			size={windowProps.maximized ? { width: "100%", height: "100%" } : undefined}
+			size={
+				windowProps.maximized ? { width: "100%", height: "100%" } : undefined
+			}
 			enableUserSelectHack={false}
 			// onResize={(_, _, _, delta) => {
 			// 	console.log("teste", delta);
@@ -65,10 +78,17 @@ export function Window(props: WindowProps) {
 				}
 			}}
 		>
-			<Topbar title={"debug"} onMaximizeClick={windowProps.toggleMaximization} onClose={handleClose} onPointerDown={() => {}} />
+			<Topbar
+				title={"debug"}
+				onMaximizeClick={windowProps.toggleMaximization}
+				onClose={handleClose}
+				onPointerDown={() => {}}
+			/>
 			<ContentWrapper className={"romos-window-content-container"}>
 				<Suspense fallback={"..."}>
-					{Content !== undefined && <Content ref={contentRef} {...contentArgs} />}
+					{Content !== undefined && (
+						<Content ref={contentRef} {...contentArgs} />
+					)}
 				</Suspense>
 			</ContentWrapper>
 		</Wrapper>

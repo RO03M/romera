@@ -6,10 +6,8 @@ import { Desktop } from "./@core/components/os/desktop";
 import { ApplicationConfig } from "./@core/components/os/desktop/application-item/application-config-file";
 import { DesktopContext } from "./@core/components/os/desktop/desktop-context";
 import { Dock } from "./@core/components/os/dock/dock";
-import { TTYManager } from "./@core/components/os/terminal/tty";
 import { TopPanel } from "./@core/components/os/top-panel/top-panel";
 import { WindowManager } from "./@core/components/os/window-manager/window-manager";
-import { ProcessScheduler } from "./@core/processes/process-scheduler";
 import { getFilesFromDataTransferItems } from "./@core/utils/datatransfer-to-files";
 import { positionToGridPosition } from "./@core/utils/grid";
 import { safe } from "./@core/utils/safe";
@@ -20,17 +18,6 @@ import { Kernel } from "@romos/kernel";
 import { useWallpaper } from "./@core/hooks/use-wallpaper";
 
 export const filesystem = Kernel.instance().filesystem;
-
-/**
- * @deprecated
- */
-export const processScheduler = new ProcessScheduler();
-
-export const terminalManager = new TTYManager();
-
-setInterval(() => {
-	processScheduler.tick().next();
-}, 0);
 
 export function App() {
 	const contextRef = useRef<ContextMenuRef | null>(null);
