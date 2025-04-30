@@ -1,6 +1,6 @@
 import { useAsyncMemo } from "../@core/hooks/use-async-memo";
-import type { ProcessComponentProps } from "../@core/processes/types";
 import { blobFromFile } from "../@core/utils/file";
+import type { ProcessComponentProps } from "./types";
 
 export function VideoViewer(props: ProcessComponentProps) {
 	const { workingDirectory } = props;

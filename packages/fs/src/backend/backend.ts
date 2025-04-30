@@ -1,51 +1,8 @@
-import type { FSMap } from "../filesystem";
-import { Stat } from "../stat";
-import { IDB } from "./idb";
+import { FSMap } from "../filesystem";
 
-export class FSBackend {
-	private idb: IDB;
-
-	constructor() {
-		this.idb = new IDB();
-	}
-
-	public async writeFile(inode: number, data: Uint8Array) {
-		return await this.idb.writeFile(inode, data);
-	}
-
-	public async readFile(inode: number) {
-		const file = await this.idb.readFile(inode);
-
-		return file?.data;
-	}
-
-	/**
-	   @description when saved to the indexeddb, the classes are transformed into an object, so I have to fucking transform those fuckers
-	*/
-	private formatSuperblock(data: FSMap) {
-		const blockmap: FSMap = new Map();
-		for (const [key, value] of data.entries()) {
-			if (key === 0) {
-				blockmap.set(key, Stat.fromObject(value as Stat));
-			} else {
-				blockmap.set(key, this.formatSuperblock(value as FSMap));
-			}
-		}
-
-		return blockmap;
-	}
-
-	public async saveSuperblock(data: FSMap) {
-		await this.idb.saveSuperblock(data);
-	}
-
-	public async loadSuperblock() {
-		const superblock = await this.idb.getSuperblock();
-
-		if (superblock !== undefined) {
-			return this.formatSuperblock(superblock.data);
-		}
-
-		return superblock;
-	}
+export interface Backend {
+    writeFile(inode: number, data: Uint8Array): Promise<number>;
+    readFile(inode: number): Promise<Uint8Array | undefined>;
+    saveSuperblock(data: FSMap): Promise<void>;
+    loadSuperblock(): Promise<FSMap | undefined>;
 }

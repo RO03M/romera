@@ -8,12 +8,20 @@
     <script src="./js-dos/js-dos.js"></script>
     <link rel="stylesheet" href="./js-dos/js-dos.css">
     <script>
-       emulators.pathPrefix = "./js-dos/";
+      emulators.pathPrefix = "./js-dos/";
+
+      function reset() {
+        indexedDB.deleteDatabase("romos-fs");
+        location.reload()
+      }
+
+      console.log("To reset the database run `reset()`");
     </script>
     <title>RomeOS</title>
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx">
+    </script>
   </body>
 </html>

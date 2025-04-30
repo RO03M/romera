@@ -1,3 +1,5 @@
+export { IDBBackend } from "./backend/idb-backend";
+export { MemoryBackend } from "./backend/memory-backend";
 export { Dirent } from "./dirent";
 export { Filesystem } from "./filesystem";
 export { IDB } from "./backend/idb";

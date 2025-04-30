@@ -10,7 +10,7 @@ interface SyscallStream {
 	type: "SYSCALL";
 	method: string;
 	args: unknown[];
-	responseId: string;
+	syscallId: string;
 }
 
 export function isSyscallStream(data: unknown): data is SyscallStream {
@@ -23,7 +23,7 @@ export function isSyscallStream(data: unknown): data is SyscallStream {
 		"type" in data &&
 		"method" in data &&
 		"args" in data &&
-		"responseId" in data;
+		"syscallId" in data;
 
 	if (!hasParameters) {
 		return false;

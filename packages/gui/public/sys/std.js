@@ -11,7 +11,7 @@ async function echo(message) {
 }
 
 async function pwd() {
-    return await syscall("pwd");
+    return await syscall("pwd", proc.pid);
 }
 
 async function pathFormat(root, base) {

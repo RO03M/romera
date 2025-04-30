@@ -3,43 +3,48 @@ import { Window } from "../desktop/window/window";
 import { Kernel } from "@romos/kernel";
 import type { Process } from "@romos/kernel";
 import { programTable } from "../../../../programs/program-table";
+import { extname } from "@romos/fs";
 
 export function WindowManager() {
 	const [processes, setProcesses] = useState<Process[]>([]);
 
 	useEffect(() => {
 		Kernel.instance().scheduler.watch("all", ["ran", "killed"], () => {
-			console.log("teste");
-			const componentProcesses = Kernel.instance().scheduler.processes.filter(
-				(process) => process.command === "component"
-			);
+			const componentProcesses: Process[] = [];
+			for (const [_key, process] of Kernel.instance().scheduler.processes) {
+				if (process.command === "component") {
+					componentProcesses.push(process);
+				}
+			}
+
 			setProcesses(componentProcesses);
 		});
 	}, []);
 
-	console.log(Kernel.instance().scheduler.processes, processes);
-
 	return (
 		<>
 			{processes.map((process) => {
+				const linkStat = Kernel.instance().filesystem.lstat(process.cwd);
+				
+				const extension = extname(linkStat?.target ?? "")?.split(".")?.pop();
+
 				const [programName, title, workingDirectory, ...args] = process.args;
-				if (!programName || !programTable[programName]) {
-					return null;
-				}
 
-				const Program = programTable[programName]
+				const Program = programTable[extension ?? programName];
 
-				return (<Window
-					key={process.pid}
-					pid={process.pid}
-					Content={Program}
-					contentArgs={{
-						pid: process.pid,
-						title,
-						workingDirectory,
-						args: args
-					}}
-				/>)
+				return (
+					<Window
+						key={process.pid}
+						pid={process.pid}
+						Content={Program}
+						contentArgs={{
+							pid: process.pid,
+							title,
+							workingDirectory,
+							args: args
+						}}
+					/>
+				);
 			}
 
 			)}

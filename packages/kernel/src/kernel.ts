@@ -1,17 +1,26 @@
-import { Filesystem, format, normalize, type ReadFileOptions } from "@romos/fs";
+import { Filesystem, type ReadFileOptions, format, normalize } from "@romos/fs";
+import { Scheduler } from "./scheduler/scheduler";
 import { TTYManager } from "./tty-manager";
-import { Scheduler } from "./process/scheduler";
+import type { WorkerBackend } from "./worker/backend";
+import { BrowserWorkerManager } from "./worker/browser/browser-worker-manager";
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+type SyscallHandler = (...args: any[]) => unknown;
 
 export class Kernel {
 	public filesystem: Filesystem;
 	public scheduler: Scheduler;
 	public ttyManager: TTYManager;
+	public threadManager: WorkerBackend;
 
 	private static _instance: Kernel;
+	private syscallMap = new Map<string, SyscallHandler>();
 
 	constructor() {
+		this.setupSyscalls();
 		this.filesystem = new Filesystem("rome-os-fs");
-		this.filesystem.init();
+		this.threadManager = new BrowserWorkerManager();
+		// this.filesystem.init();
 
 		this.scheduler = new Scheduler({
 			concurrency: 4 // TODO add dynamic concurrency limit
@@ -32,41 +41,78 @@ export class Kernel {
 		return Kernel._instance;
 	}
 
+	private setupSyscalls() {
+		this.syscallMap.set("stat", (filepath: string) =>
+			this.filesystem.stat(filepath)
+		);
+		this.syscallMap.set("lstat", (filepath: string) =>
+			this.filesystem.lstat(filepath)
+		);
+		this.syscallMap.set("readdir", (filepath: string) =>
+			this.filesystem.readdir(filepath)
+		);
+		this.syscallMap.set(
+			"readFile",
+			(filepath: string, options?: ReadFileOptions) =>
+				this.filesystem.readFile(filepath, options)
+		);
+		this.syscallMap.set("normalize", (filepath: string) => normalize(filepath));
+		this.syscallMap.set(
+			"createProcess",
+			(
+				command: string,
+				args: string[] = [],
+				ppid?: number,
+				cwd?: string,
+				tty?: number
+			) => {
+				this.scheduler.exec(command, args, { cwd, tty: tty ?? -1, ppid });
+			}
+		);
+		this.syscallMap.set(
+			"fork",
+			(
+				command: string,
+				args: string[] = [],
+				ppid?: number,
+				cwd?: string,
+				tty?: number
+			) => {
+				return this.scheduler.exec(command, args, { cwd, tty: tty ?? -1, ppid });
+			}
+		);
+		this.syscallMap.set(
+			"exec",
+			(command: string, args: string[], tty: number) =>
+				this.scheduler.exec(command, args, { tty })
+		);
+		this.syscallMap.set("echo", (message: string, tty: number) =>
+			this.ttyManager.terminals.get(tty)?.echo(message)
+		);
+		this.syscallMap.set("mkdir", (filepath: string) =>
+			this.filesystem.mkdir(filepath)
+		);
+		this.syscallMap.set(
+			"writeFile",
+			(filepath: string, content: string | Uint8Array) =>
+				this.filesystem.writeFile(filepath, content)
+		);
+		this.syscallMap.set(
+			"pwd",
+			(pid: number) => this.scheduler.processes.get(pid)?.cwd
+		);
+		this.syscallMap.set("pathFormat", (root: string, base: string) => format({ root, base }));
+	}
+
 	// TODO algumas funções aqui são desnecessárias e não fazem sentido estarem no "syscalls"
 	// Por exemplo a função pathFormat, esse caralho poderia estar em um arquivo importado pelo o worker ou algo assim
-	public syscall(method: string, cwd: string, tty: number) {
-		// biome-ignore lint/complexity/noBannedTypes: <explanation>
-		const methods: Record<string, Function> = {
-			stat: (filepath: string) => this.filesystem.stat(filepath),
-			lstat: (filepath: string) => this.filesystem.lstat(filepath),
-			readdir: (filepath: string) => this.filesystem.readdir(filepath),
-			readFile: async (filepath: string, options?: ReadFileOptions) =>
-				await this.filesystem.readFile(filepath, options),
-			normalize: (filepath: string) => normalize(filepath),
-			createProcess: (command: string, args: string[] = [], ppid?: number) =>
-				this.scheduler.exec(command, args, {
-					cwd,
-					tty,
-					ppid
-				}),
-			// create_proc_default_rgui: createWindowProcessFromProgramTable,
-			exec: (command: string, args: string[], tty: number) =>
-				this.scheduler.exec(command, args, {
-					tty
-				}),
-			pwd: () => cwd,
-			echo: (message: string) =>
-				this.ttyManager.terminals.get(tty)?.echo(message),
-			free: () => {},
-			lock: () => {},
-			mkdir: (filepath: string) => this.filesystem.mkdir(filepath),
-			writeFile: (filepath: string, content: string | Uint8Array) =>
-				this.filesystem.writeFile(filepath, content),
-			pathFormat: (root: string, base: string) => format({ root, base })
-		};
-
-		if (method in methods) {
-			return methods?.[method] ?? null;
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	public async syscall(method: string, ...args: any[]) {
+		const handler = this.syscallMap.get(method);
+		if (!handler) {
+			throw new Error(`Syscall ${method} not found`);
 		}
+		const result = handler(...args);
+		return result instanceof Promise ? await result : result;
 	}
 }
