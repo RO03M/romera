@@ -13,6 +13,7 @@ import { filesystem } from "../../app";
 import { addFilesFromDragToDir } from "./drag-to-dir";
 import { ExplorerList } from "./explorer-list/list";
 import { useEntries } from "./use-entries";
+import { Kernel } from "@romos/kernel";
 
 export function Explorer(props: ProcessComponentProps) {
 	const { workingDirectory } = props;
@@ -24,12 +25,17 @@ export function Explorer(props: ProcessComponentProps) {
 
 	const goToNode = useCallback(
 		(entry: Dirent) => {
+			const entryPath = normalize(path + entry.name);
+
+			if (entry.type === "file") {
+				Kernel.instance().scheduler.exec("component", ["monaco", "monaco", entryPath], { tty: -1, cwd: entryPath });
+			}
+
 			if (entry.type !== "dir") {
 				return;
 			}
 
-			const newPath = normalize(path + entry.name);
-			setPath(newPath);
+			setPath(entryPath);
 		},
 		[path]
 	);
