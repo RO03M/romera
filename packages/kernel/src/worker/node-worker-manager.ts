@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import { writeFileSync } from "node:fs";
-import { buildSyscall, syscall } from "./syscall";
+import { buildSyscall } from "./syscall";
 import { buildStd } from "../bin/std/build-std";
 import { Kernel, type Process, type ThreadManager } from "..";
 

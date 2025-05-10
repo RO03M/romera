@@ -13,7 +13,7 @@
 const queue = new Map<string, (value: unknown) => void>();
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export async function syscall(method: string, ...args: any[])  {
+async function syscall(method: string, ...args: any[])  {
     const syscallId = (Math.random() + 1).toString(36).substring(7);
     self.postMessage({
         type: "SYSCALL",
@@ -69,6 +69,6 @@ export function buildSyscall(node: "browser" | "node") {
 
         ${syscallReceiver(node === "node")}
 
-        ${syscall.toString()}
+        ${syscall.toString().replace("syscall$1", "syscall")}
     `;
 }
