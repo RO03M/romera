@@ -33,6 +33,10 @@ const proc = {
     tty: ${process.tty}
 };
 
+self.on("message", (data) => {
+	console.log("data", data);
+})
+
 ${buildStd()}
 
 function exit(code = 0, message = "") {
@@ -53,6 +57,14 @@ exit(0, stdout);
 		// console.log(workerDataUrl);
 
 		const worker = new Worker(tmpFilePath);
+
+		process.stdin.on("data", (data) => {
+			console.log("stdin", data);
+			worker.postMessage({
+				type: "stdin",
+				value: data
+			});
+		});
 
 		worker.on("error", (error) => {
 			console.log("error", error);

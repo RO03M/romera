@@ -16,6 +16,7 @@
     "gui:preview": "vite preview packages/gui",
     "kernel:build": "yarn workspace @romos/kernel build",
     "kernel:dev": "yarn workspace @romos/kernel dev",
+    "kernel:test": "yarn workspace @romos/kernel test",
     "test": "vitest",
     "deploy": "vercel deploy",
     "preview": "yarn workspace @romos/gui preview"

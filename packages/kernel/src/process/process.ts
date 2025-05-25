@@ -2,6 +2,7 @@ import { Filesystem, format } from "@romos/fs";
 import { Kernel } from "../kernel";
 import type { BrowserWorkerManager } from "../worker/browser/browser-worker-manager";
 import { Watcher } from "@romos/utils";
+import { Stream } from "../stream/stream";
 
 type TerminateCallback = (process: Process) => void;
 
@@ -23,6 +24,8 @@ export class Process {
 	public readonly cwd: string;
 	public readonly args: string[];
 	public readonly resolvedPath: string;
+	public stdout = new Stream();
+	public stdin = new Stream();
 
 	private workerProcessManager?: BrowserWorkerManager;
 	private onTerminate?: TerminateCallback;
@@ -53,9 +56,13 @@ export class Process {
 		this.watcher.unwatch(this.pid, event, callback);
 	}
 
-	public stdin(buffer: unknown, options?: StructuredSerializeOptions) {
-		this.workerProcessManager?.postMessage(buffer, options);
-	}
+	// public stdin(buffer: unknown, options?: StructuredSerializeOptions) {
+	// 	this.workerProcessManager?.postMessage(buffer, options);
+	// }
+
+	// public stdout() {
+		
+	// }
 
 	public pipe(process: Process) {
 

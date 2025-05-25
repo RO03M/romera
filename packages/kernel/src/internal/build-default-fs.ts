@@ -1,12 +1,11 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { Kernel } from "../kernel";
-import { Filesystem, MemoryBackend } from "@romos/fs";
 import { cat, ls, sleep, mkdir, watch } from "../bin/programs";
 import { touch } from "../bin/programs/touch";
 import { prog_pwd } from "../bin/programs/pwd";
 import { addDoom } from "./desktop/doom";
 
-async function buildFs() {
+export async function buildFs() {
     const filesystem = Kernel.instance().filesystem;
     filesystem.mkdir("/bin");
     filesystem.mkdir("/home");
@@ -30,17 +29,11 @@ async function buildFs() {
     await addDoom();
 
     const ubuntu22 = readFileSync(`${__dirname}/wallpapers/ubuntu-22.jpg`);
+    const windows98 = readFileSync(`${__dirname}/wallpapers/windows-98.jpg`);
 
     filesystem.mkdir("/usr/system");
     filesystem.mkdir("/usr/system/wallpapers");
     await filesystem.writeFile("/usr/system/wallpapers/ubuntu-22.jpg", ubuntu22);
-    filesystem.symlink("/usr/system/wallpapers/ubuntu-22.jpg", "/usr/system/wallpaper");
+    await filesystem.writeFile("/usr/system/wallpapers/windows-98.jpg", windows98);
+    filesystem.symlink("/usr/system/wallpapers/windows-98.jpg", "/usr/system/wallpaper");
 }
-
-Kernel.instance().filesystem = new Filesystem("mock", { backend: new MemoryBackend() });
-
-await buildFs();
-Kernel.instance().filesystem.getJSON().then((json) => {
-    writeFileSync("../gui/public/filesystem/default.json", JSON.stringify(json));
-    process.exit();
-});

@@ -7,10 +7,11 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "build-fs": "vite-node src/internal/build-default-fs.ts",
+    "build-fs": "vite-node src/internal/run-build-default-fs.ts",
     "compile": "tsc && ts-node index.ts",
     "dev": "tsc --watch",
-    "postinstall": "yarn build"
+    "postinstall": "yarn build",
+    "test": "vitest"
   },
   "dependencies": {
     "@romos/fs": "1.0.0",

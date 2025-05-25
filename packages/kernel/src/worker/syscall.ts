@@ -63,10 +63,6 @@ export function buildSyscall(node: "browser" | "node") {
     return `
         const queue = new Map();
 
-        function exit(code = 0, message = "") {
-            self.postMessage({ code, message, kill: true });
-        }
-
         ${syscallReceiver(node === "node")}
 
         ${syscall.toString().replace("syscall$1", "syscall")}

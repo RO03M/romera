@@ -12,7 +12,7 @@ async function main() {
 	}
 
 	const pwd = await syscall("pwd", proc.pid);
-
+	await syscall("sleep", 2000);
 	const stats = await syscall("readdir", pwd);
 
 	if (!isArrayOfStrings(stats)) {
