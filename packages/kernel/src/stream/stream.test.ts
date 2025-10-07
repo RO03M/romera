@@ -25,7 +25,7 @@ describe("Stream", async () => {
 
         let index = 0;
         const interval = setInterval(() => {
-            if (index == data.length) {
+            if (index === data.length) {
                 clearInterval(interval);
                 return;
             }
@@ -41,6 +41,7 @@ describe("Stream", async () => {
         stream.on("end", endListener);
 
         const result = await stream.read();
+        console.log(result)
         expect(dataListener).toHaveBeenCalledTimes(4);
         expect(endListener).toHaveBeenCalledOnce();
     });
