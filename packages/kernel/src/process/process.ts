@@ -40,6 +40,13 @@ export class Process {
 		this.args = options.args ?? [];
 		this.resolvedPath = this.resolveCommandPath();
 		this.onTerminate = options.onTerminate;
+
+		this.stdin.on("data", (data) => {
+			this.workerProcessManager?.postMessage({
+				type: "stdin",
+				value: data
+			});
+		})
 	}
 
 	public terminate() {

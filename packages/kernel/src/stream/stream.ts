@@ -1,63 +1,66 @@
-import { ReadStream } from "node:fs";
+import type { ReadStream } from "node:fs";
 
-export type StreamListener = (...args: any[]) => void
-export type StreamChunk = string | null;
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type StreamListener = (...args: any[]) => void;
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type StreamChunk = any;
 
 export class Stream {
-    private events = new Map<string, StreamListener[]>();
-    private data: StreamChunk[] = [];
+	private events = new Map<string, StreamListener[]>();
+	private data: StreamChunk[] = [];
 
-    public on(event: string, listener: StreamListener): Stream {
-        const listeners = this.events.get(event) ?? [];
-        listeners.push(listener);
+	public on(event: string, listener: StreamListener): Stream {
+		const listeners = this.events.get(event) ?? [];
+		listeners.push(listener);
 
-        this.events.set(event, listeners);
+		this.events.set(event, listeners);
 
-        return this;
-    }
+		return this;
+	}
 
-    public emit(event: string, ...args: any[]): Stream {
-        const listeners = this.events.get(event) ?? [];
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	public emit(event: string, ...args: any[]): Stream {
+		const listeners = this.events.get(event) ?? [];
 
-        for (const listener of listeners) {
-            listener(...args);
-        }
+		for (const listener of listeners) {
+			listener(...args);
+		}
 
-        return this;
-    }
+		return this;
+	}
 
-    public async push(chunk: StreamChunk) {
-        if (chunk !== null) {
-            this.data.push(chunk + "\n");
-            this.emit("data", chunk, this.data);
-            return;
-        }
+	public async push(chunk: StreamChunk) {
+		if (chunk !== null) {
+			this.data.push(`${chunk}\n`);
+			this.emit("data", chunk, this.data);
+			return;
+		}
 
-        this.data.push(chunk);
-        this.emit("end");
-    }
+		this.data.push(chunk);
+		this.emit("end");
+	}
 
-    public async read() {
-        const promise = new Promise<StreamChunk[]>((resolve) => {
-            this.on("end", () => resolve(this.data));
-        });
+	public async read() {
+		const promise = new Promise<StreamChunk[]>((resolve) => {
+			this.on("end", () => resolve(this.data));
+		});
 
-        return promise;
-    }
-    public pipe(stream: Stream | ReadStream) {
-        this.on("data", (chunk: string) => {
-            stream.emit("pipe", chunk);
-        });
-    }
+		return promise;
+	}
+	public pipe(stream: Stream | ReadStream) {
+		this.on("data", (chunk: string) => {
+			stream.emit("pipe", chunk);
+		});
+	}
 
-    public write(chunk: StreamChunk) {
-        if (chunk !== null) {
-            this.data.push(chunk + "\n");
-            this.emit("data", chunk, this.data);
-            return;
-        }
+	public write(chunk: StreamChunk) {
+		if (chunk !== null) {
+			this.data.push(`${chunk}\n`);
+			this.emit("data", chunk, this.data);
+			return;
+		}
 
-        this.data.push(chunk);
-        this.emit("end");
-    }
+		this.data.push(chunk);
+		this.emit("end");
+	}
 }

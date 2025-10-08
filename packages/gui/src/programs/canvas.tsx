@@ -67,12 +67,12 @@ export const Canvas = forwardRef<ProcessComponentRef, CanvasProps>(
 				return;
 			}
 
-			process.stdin(
+			process.stdin.push([
 				{ canvas: offscreen },
 				{
 					transfer: [offscreen]
 				}
-			);
+			]);
 		}, [args]);
 
 		return (

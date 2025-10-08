@@ -16,6 +16,10 @@ export function injectScript(content: string, process: Process) {
 			${buildStd()}
 			${buildSyscall("browser")}
 	
+			function exit(code = 0, message = "") {
+				self.postMessage({ code, message, kill: true });
+			}
+
 			${content}
 	
 			const stdout = await main(...args);
