@@ -36,7 +36,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 
 	const syncPosition = useCallback(async () => {
 		const config = await ApplicationConfig.fromFSApplication(name);
-		console.log("config", config);
+
 		setX(+config.x + 1);
 		setY(+config.y + 1);
 	}, [name]);
@@ -68,14 +68,9 @@ export function ApplicationItem(props: ApplicationItemProps) {
 
 	useEffect(() => {
 		filesystem.watch(`/usr/applications/${name}`, () => {
-			console.log("teste");
 			syncPosition();
 		});
 	}, [name, syncPosition]);
-
-	// useEffect(() => {
-	// 	syncPosition();
-	// }, [syncPosition]);
 
 	useDoubleTap(ref, openProgram);
 

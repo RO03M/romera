@@ -14,3 +14,4 @@
   - /usr/share/icons/mimetypes
 - Adicionar wallpapers
 - Zap com IRC
+- Cache no filesystem

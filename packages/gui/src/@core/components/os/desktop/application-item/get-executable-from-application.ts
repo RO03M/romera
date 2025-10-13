@@ -3,7 +3,7 @@ import {
 	isMagicProgram,
 	type programTable
 } from "../../../../../programs/program-table";
-import { normalize } from "@romos/fs";
+import { extname, normalize } from "@romos/fs";
 import { getConfigFromApplication } from "./application-config-file";
 
 export async function getExecutableFromApplication(
@@ -20,6 +20,11 @@ export async function getExecutableFromApplication(
 		return "explorer";
 	}
 
+	switch (extname(name)) {
+		case ".pdf":
+			return "pdfviewer";
+	}
+	
 	if (stat?.isFile()) {
 		return "monaco";
 	}

@@ -3,7 +3,7 @@ import { App } from "./app";
 import "./index.css";
 import { bootstrap } from "./bootstrap";
 
-bootstrap();
+await bootstrap();
 
 const app = document.getElementById("app");
 if (app !== null) {

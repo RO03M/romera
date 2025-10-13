@@ -52,7 +52,7 @@ export async function bootstrap() {
     if (superblock !== undefined) {
 		Kernel.instance().filesystem.setRoot(superblock);
 		Kernel.instance().filesystem.watcher.emit("/home/romera/desktop", "change");
-		Kernel.instance().filesystem.watcher.emit("/usr/system/wallpaper", "change");
+		Kernel.instance().filesystem.watcher.emit("/usr/system/wallpaper", "change"); // me odeio
 
         return;
     }
