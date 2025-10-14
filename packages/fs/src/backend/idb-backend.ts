@@ -5,6 +5,7 @@ import { IDB } from "./idb";
 
 export class IDBBackend implements Backend {
 	private idb: IDB;
+	private cache = new Map<number, Uint8Array>();
 
 	constructor() {
 		this.idb = new IDB();
@@ -15,7 +16,17 @@ export class IDBBackend implements Backend {
 	}
 
 	public async readFile(inode: number) {
+		const cache = this.cache.get(inode);
+
+		if (cache) {
+			return cache;
+		}
+
 		const file = await this.idb.readFile(inode);
+
+		if (file?.data !== undefined && file.data.byteLength < 10 * 1024 * 1024) { // 10MB
+			this.cache.set(inode, file.data);
+		}
 
 		return file?.data;
 	}
