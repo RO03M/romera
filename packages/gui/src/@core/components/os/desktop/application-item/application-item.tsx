@@ -48,7 +48,6 @@ export function ApplicationItem(props: ApplicationItemProps) {
 			return;
 		}
 
-		Kernel.instance().filesystem.readFile
 		Kernel.instance().scheduler.exec(
 			"component",
 			[programName, programName, normalize(`/home/romera/desktop/${name}`)],
@@ -80,7 +79,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 		setFocused(false);
 		contextRef.current?.close();
 	});
-	console.log(filename(name), x, y);
+	// console.log(filename(name), x, y);
 	return (
 		<Wrapper
 			ref={ref}
