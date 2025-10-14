@@ -1,4 +1,4 @@
-import { normalize } from "@romos/fs";
+import { filename, normalize } from "@romos/fs";
 import styled from "styled-components";
 import type { Stat } from "@romos/fs";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
@@ -17,13 +17,15 @@ interface ApplicationItemProps {
 	name: string;
 	icon: string;
 	type: Stat["type"];
+	initialX: number;
+	initialY: number
 }
 
 export function ApplicationItem(props: ApplicationItemProps) {
 	const { name, icon } = props;
 
-	const [x, setX] = useState(1);
-	const [y, setY] = useState(0);
+	const [x, setX] = useState(props.initialX);
+	const [y, setY] = useState(props.initialY);
 	const [focused, setFocused] = useState(false);
 
 	const contextRef = useRef<ContextMenuRef | null>(null);
@@ -78,7 +80,7 @@ export function ApplicationItem(props: ApplicationItemProps) {
 		setFocused(false);
 		contextRef.current?.close();
 	});
-
+	console.log(filename(name), x, y);
 	return (
 		<Wrapper
 			ref={ref}
@@ -95,6 +97,9 @@ export function ApplicationItem(props: ApplicationItemProps) {
 						name
 					})
 				);
+			}}
+			onDragEnd={() => {
+
 			}}
 			onContextMenu={(event) => {
 				event.stopPropagation();

@@ -6,7 +6,7 @@ import { prog_pwd } from "../bin/programs/pwd";
 import { addDoom } from "./desktop/doom";
 import type { Filesystem } from "@romos/fs";
 
-export async function buildImages(filesystem: Filesystem) {
+async function buildImages(filesystem: Filesystem) {
 	const ubuntu22 = readFileSync(`${__dirname}/images/ubuntu-22.jpg`);
 	const windows98 = readFileSync(`${__dirname}/images/windows-98.jpg`);
 	const firefoxIcon = readFileSync(`${__dirname}/images/firefox.png`);
@@ -42,6 +42,38 @@ export async function buildImages(filesystem: Filesystem) {
 	);
 }
 
+interface DotDesktop {
+	apps: {
+		[key: string]: {
+			icon?: string
+		};
+	};
+	grid: {
+		[key: string]: string;
+	};
+}
+
+async function buildDesktop() {
+	const filesystem = Kernel.instance().filesystem;
+
+	const dotDesktop: DotDesktop = {
+		apps: {
+			"Projetos": {},
+			"Doom": {
+				icon: "/usr/icons/unknown-file.png"
+			},
+			"curriculo.pdf": {}
+		},
+		grid: {
+			"0,0": "Projetos",
+			"0,1": "Doom",
+			"0,2": "Doom",
+		}
+	}
+
+	await filesystem.writeFile("/home/romera/.desktop", JSON.stringify(dotDesktop));
+}
+
 export async function buildFs() {
 	const filesystem = Kernel.instance().filesystem;
 	filesystem.mkdir("/bin");
@@ -73,12 +105,5 @@ export async function buildFs() {
 
 	await buildImages(filesystem);
 
-    // const ubuntu22 = readFileSync(`${__dirname}/images/ubuntu-22.jpg`);
-    // const windows98 = readFileSync(`${__dirname}/images/windows-98.jpg`);
-
-    // filesystem.mkdir("/usr/system");
-    // filesystem.mkdir("/usr/system/wallpapers");
-    // await filesystem.writeFile("/usr/system/wallpapers/ubuntu-22.jpg", ubuntu22);
-    // await filesystem.writeFile("/usr/system/wallpapers/windows-98.jpg", windows98);
-    // filesystem.symlink("/usr/system/wallpapers/windows-98.jpg", "/usr/system/wallpaper");
+	await buildDesktop();
 }

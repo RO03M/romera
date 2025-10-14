@@ -14,6 +14,8 @@ export function Desktop() {
 					type={file.type}
 					name={file.name}
 					icon={file.icon}
+					initialX={file.x}
+					initialY={file.y}
 				/>
 			))}
 		</DesktopArea>
