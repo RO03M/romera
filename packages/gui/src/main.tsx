@@ -3,9 +3,10 @@ import { App } from "./app";
 import "./index.css";
 import { bootstrap } from "./bootstrap";
 
-await bootstrap();
+bootstrap().finally(() => {
+    const app = document.getElementById("app");
+    if (app !== null) {
+        render(<App />, app);
+    }
+});
 
-const app = document.getElementById("app");
-if (app !== null) {
-    render(<App />, app);
-}
