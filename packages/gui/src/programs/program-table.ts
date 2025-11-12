@@ -18,7 +18,7 @@ export const programTable: Record<
 	explorer: Explorer,
 	monaco: CodeEditor,
 	imageviewer: ImageViewer,
-	videoViewer: VideoViewer,
+	videoviewer: VideoViewer,
 	pdfviewer: PdfViewer,
 	jsdos: DosPlayer,
 	canvas: Canvas,

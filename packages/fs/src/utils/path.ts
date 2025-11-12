@@ -65,9 +65,15 @@ export function dirname(filepath: string) {
 	return normalize(filepath.split("/").slice(0, -1).join("/"));
 }
 
-export function basename(filepath: string) {
-	return normalize(filepath.split("/").slice(-1).join("/"));
+export function basename(filepath: string): string {
+	if (!filepath) {
+		return "";
+	}
+	const normalized = normalize(filepath);
+
+	return normalized.split("/").slice(-1).join("");
 }
+
 
 export function extname(filepath: string) {
 	const [extension] = filepath.match(/\.[^.]+$/) ?? [];
@@ -76,14 +82,14 @@ export function extname(filepath: string) {
 }
 
 export function filename(filepath: string) {
-	const base = basename(filepath);
+	const base = normalize(basename(filepath));
 
 	return normalize(base.replace(/\.[^.]+$/, "")).replace(/^\//, "");
 }
 
 export function splitParentPathAndNodeName(path: string) {
 	const dir = dirname(path);
-	const base = basename(path);
+	const base = normalize(basename(path));
 
 	return [dir, base];
 }

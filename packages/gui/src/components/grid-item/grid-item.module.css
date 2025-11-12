@@ -1,0 +1,17 @@
+.grid-item {
+    cursor: initial !important;
+    width: 100px;
+    height: 100px;
+    user-select: none;
+    background-size: 60px;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.focused {
+    background-color: rgba(var(--blue-500), 0.3);
+	border: 1px dotted var(--blue-500);
+}

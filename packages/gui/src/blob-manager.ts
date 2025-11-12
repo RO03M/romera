@@ -1,5 +1,6 @@
 import { Kernel } from "@romos/kernel";
 import { DEFAULT_MIME, MIMEMAP } from "./mimemap";
+import { extname } from "@romos/fs";
 
 export class BlobManager {
     private blobCache = new Map<string, string>();
@@ -29,7 +30,7 @@ export class BlobManager {
             return null;
         }
         
-        const blobUrl = URL.createObjectURL(new Blob([buffer as BlobPart], { type: MIMEMAP.get(filepath) ?? DEFAULT_MIME }));
+        const blobUrl = URL.createObjectURL(new Blob([buffer as BlobPart], { type: MIMEMAP.get(extname(filepath) ?? "") ?? DEFAULT_MIME }));
 
         this.blobCache.set(filepath, blobUrl);
 

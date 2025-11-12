@@ -16,6 +16,7 @@ import { theme } from "./theme";
 import { extname } from "@romos/fs";
 import { Kernel } from "@romos/kernel";
 import { useWallpaper } from "./@core/hooks/use-wallpaper";
+import { Grid } from "./components/grid/grid";
 
 export const filesystem = Kernel.instance().filesystem;
 
@@ -78,13 +79,13 @@ export function App() {
 				style={{
 					backgroundImage: `url("${wallpaper}")`,
 				}}
-				onDrop={onFileDrop}
+				// onDrop={(event) => event.prop}
 				onDragOver={(event) => event.preventDefault()}
 				onContextMenu={(event) => contextRef.current?.show(event)}
 				onClick={() => contextRef.current?.close()}
 			>
 				<TopPanel />
-				<Desktop />
+				<Grid />
 				<Dock />
 				<DesktopContext ref={contextRef} />
 				<WindowManager />

@@ -13,6 +13,7 @@ async function buildImages(filesystem: Filesystem) {
 	const folder = readFileSync(`${__dirname}/images/folder.png`);
 	const unknownFile = readFileSync(`${__dirname}/images/unknown-file.png`);
 	const pdf = readFileSync(`${__dirname}/images/pdf.png`);
+	const doom = readFileSync(`${__dirname}/images/doom.png`);
 
 	filesystem.mkdir("/usr/wallpapers");
 	filesystem.mkdir("/usr/icons");
@@ -23,6 +24,7 @@ async function buildImages(filesystem: Filesystem) {
 	await filesystem.writeFile("/usr/icons/folder.png", folder);
 	await filesystem.writeFile("/usr/icons/unknown-file.png", unknownFile);
 	await filesystem.writeFile("/usr/icons/pdf.png", pdf);
+	await filesystem.writeFile("/usr/icons/doom.png", doom);
 
 	await filesystem.writeFile(
 		"/usr/system",
@@ -34,6 +36,36 @@ async function buildImages(filesystem: Filesystem) {
 					file: "/usr/icons/unknown-file.png",
 					".html": "/usr/icons/firefox.png",
 					".pdf": "/usr/icons/pdf.png"
+				},
+				programs: {
+					folder: "explorer",
+					file: "monaco",
+					".jsdos": "jsdos",
+					".pdf": "pdfviewer",
+					".apng": "imageviewer",
+					".avif": "imageviewer",
+					".bmp": "imageviewer",
+					".gif": "imageviewer",
+					".ico": "imageviewer",
+					".cur": "imageviewer",
+					".jpg": "imageviewer",
+					".jpeg": "imageviewer",
+					".jfif": "imageviewer",
+					".pjpeg": "imageviewer",
+					".pjp": "imageviewer",
+					".png": "imageviewer",
+					".svg": "imageviewer",
+					".tif": "imageviewer",
+					".tiff": "imageviewer",
+					".webp": "imageviewer",
+					".mp4": "videoviewer",
+					".m4v": "videoviewer",
+					".mkv": "videoviewer",
+					".mov": "videoviewer",
+					".avi": "videoviewer",
+					".webm": "videoviewer",
+					".ogv": "videoviewer",
+					".cmd": "terminal"
 				}
 			},
 			null,
@@ -60,14 +92,14 @@ async function buildDesktop() {
 		apps: {
 			"Projetos": {},
 			"Doom": {
-				icon: "/usr/icons/unknown-file.png"
+				icon: "/usr/icons/doom.png"
 			},
-			"curriculo.pdf": {}
+			"currículo.pdf": {}
 		},
 		grid: {
 			"0,0": "Projetos",
 			"0,1": "Doom",
-			"0,2": "Doom",
+			"0,2": "currículo.pdf",
 		}
 	}
 
