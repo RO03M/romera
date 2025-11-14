@@ -1,3 +1,4 @@
+import { code } from "../programs";
 import { echo } from "./echo";
 import { readFile, writeFile, stat } from "./fs/fs";
 import { format } from "./fs/path-format";

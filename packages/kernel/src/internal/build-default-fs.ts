@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { Kernel } from "../kernel";
-import { cat, ls, sleep, mkdir, watch } from "../bin/programs";
+import { cat, ls, sleep, mkdir, watch, code } from "../bin/programs";
 import { touch } from "../bin/programs/touch";
 import { prog_pwd } from "../bin/programs/pwd";
 import { addDoom } from "./desktop/doom";
@@ -40,6 +40,7 @@ async function buildImages(filesystem: Filesystem) {
 				programs: {
 					folder: "explorer",
 					file: "monaco",
+					".html": "browser",
 					".jsdos": "jsdos",
 					".pdf": "pdfviewer",
 					".apng": "imageviewer",
@@ -122,6 +123,7 @@ export async function buildFs() {
 	filesystem.writeFile("/bin/watch", watch.toString());
 	filesystem.writeFile("/bin/touch", touch.toString());
 	filesystem.writeFile("/bin/pwd", prog_pwd.toString());
+	filesystem.writeFile("/bin/code", code.toString());
 
 	filesystem.writeFile(
 		"/usr/applications/Projetos",
@@ -132,7 +134,20 @@ export async function buildFs() {
 
 	const resume = readFileSync(`${__dirname}/desktop/resume-pt.pdf`);
 	await filesystem.writeFile("/home/romera/desktop/currículo.pdf", resume);
-	
+
+	const testHtml = readFileSync(`${__dirname}/test.html`);
+	const testCss = readFileSync(`${__dirname}/test.css`);
+	await filesystem.writeFile("/home/romera/desktop/test.html", testHtml);
+	await filesystem.writeFile("/home/romera/desktop/test.css", testCss);
+
+	const solarh = readFileSync(`${__dirname}/solarsystem/solar.html`);
+	const solarj = readFileSync(`${__dirname}/solarsystem/solar.js`);
+	const solarcss = readFileSync(`${__dirname}/solarsystem/solar.css`);
+
+	await filesystem.writeFile("/home/romera/desktop/solar.html", solarh);
+	await filesystem.writeFile("/home/romera/desktop/solar.js", solarj);
+	await filesystem.writeFile("/home/romera/desktop/solar.css", solarcss);
+
 	await addDoom();
 
 	await buildImages(filesystem);
