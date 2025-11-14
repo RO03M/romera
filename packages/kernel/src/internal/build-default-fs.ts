@@ -135,18 +135,18 @@ export async function buildFs() {
 	const resume = readFileSync(`${__dirname}/desktop/resume-pt.pdf`);
 	await filesystem.writeFile("/home/romera/desktop/currículo.pdf", resume);
 
-	const testHtml = readFileSync(`${__dirname}/test.html`);
-	const testCss = readFileSync(`${__dirname}/test.css`);
-	await filesystem.writeFile("/home/romera/desktop/test.html", testHtml);
-	await filesystem.writeFile("/home/romera/desktop/test.css", testCss);
+	// const testHtml = readFileSync(`${__dirname}/test.html`);
+	// const testCss = readFileSync(`${__dirname}/test.css`);
+	// await filesystem.writeFile("/home/romera/desktop/test.html", testHtml);
+	// await filesystem.writeFile("/home/romera/desktop/test.css", testCss);
 
-	const solarh = readFileSync(`${__dirname}/solarsystem/solar.html`);
-	const solarj = readFileSync(`${__dirname}/solarsystem/solar.js`);
-	const solarcss = readFileSync(`${__dirname}/solarsystem/solar.css`);
+	// const solarh = readFileSync(`${__dirname}/solarsystem/solar.html`);
+	// const solarj = readFileSync(`${__dirname}/solarsystem/solar.js`);
+	// const solarcss = readFileSync(`${__dirname}/solarsystem/solar.css`);
 
-	await filesystem.writeFile("/home/romera/desktop/solar.html", solarh);
-	await filesystem.writeFile("/home/romera/desktop/solar.js", solarj);
-	await filesystem.writeFile("/home/romera/desktop/solar.css", solarcss);
+	// await filesystem.writeFile("/home/romera/desktop/solar.html", solarh);
+	// await filesystem.writeFile("/home/romera/desktop/solar.js", solarj);
+	// await filesystem.writeFile("/home/romera/desktop/solar.css", solarcss);
 
 	const minecraft = readFileSync(`${__dirname}/minecraft.html`);
 	await filesystem.writeFile("/home/romera/desktop/minecraft.html", minecraft);
