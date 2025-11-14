@@ -62,7 +62,7 @@ export function BrowserProgram(props: ProcessComponentProps) {
 
     return (
         <iframe
-            sandbox={"allow-scripts allow-same-origin"}
+            sandbox={"allow-scripts allow-same-origin allow-pointer-lock"}
             src={content}
             style={{
                 width: "100%",

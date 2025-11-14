@@ -148,6 +148,9 @@ export async function buildFs() {
 	await filesystem.writeFile("/home/romera/desktop/solar.js", solarj);
 	await filesystem.writeFile("/home/romera/desktop/solar.css", solarcss);
 
+	const minecraft = readFileSync(`${__dirname}/minecraft.html`);
+	await filesystem.writeFile("/home/romera/desktop/minecraft.html", minecraft);
+
 	await addDoom();
 
 	await buildImages(filesystem);
