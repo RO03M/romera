@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import type { ProcessComponentProps } from "./types";
 import { Kernel } from "@romos/kernel";
 import { BlobManager } from "../blob-manager";
-import { ENOENT } from "@romos/fs";
 import { MIMEMAP } from "../mimemap";
+import { forwardRef } from "preact/compat";
 
 async function parseOsImports(content: string) {
     const osImportRegex = /os_import\(['"]([^'"]+)['"]\)/g;
@@ -14,7 +14,7 @@ async function parseOsImports(content: string) {
 
     for await (const [_, path] of paths) {
         const blob = await BlobManager.instance().get(path);
-        console.log(path, blob);
+
         // if (blob === null) {
         //     throw new ENOENT(path);
         // }
@@ -22,52 +22,55 @@ async function parseOsImports(content: string) {
         pathBlobMap.set(path, blob ?? "");
     }
 
-    const replaced = content.replace(osImportRegex, (full, path) => {
+    const replaced = content.replace(osImportRegex, (_, path) => {
         return pathBlobMap.get(path) ?? "";
     });
 
     return replaced;
 }
 
-export function BrowserProgram(props: ProcessComponentProps) {
-    const [content, setContent] = useState("");
-    useEffect(() => {
-        
-        async function loadFile() {
-            if (!props.workingDirectory) {
-                return;
+export const BrowserProgram = forwardRef<HTMLIFrameElement, ProcessComponentProps>(
+    function BrowserProgram(props, ref) {
+        const [content, setContent] = useState("");
+        useEffect(() => {
+
+            async function loadFile() {
+                if (!props.workingDirectory) {
+                    return;
+                }
+
+                const file = await Kernel.instance().filesystem.readFile(props.workingDirectory, { decode: true });
+                const fileWithImports = await parseOsImports(file!);
+                const blob = new Blob([fileWithImports], {
+                    type: MIMEMAP.get(".html")
+                });
+                const blobUrl = URL.createObjectURL(blob);
+
+                // const blobUrl = await BlobManager.instance().get(props.workingDirectory);
+
+                if (!blobUrl) {
+                    return;
+                }
+
+                setContent(blobUrl);
             }
 
-            const file = await Kernel.instance().filesystem.readFile(props.workingDirectory, { decode: true });
-            const fileWithImports = await parseOsImports(file!);
-            const blob = new Blob([fileWithImports], {
-                type: MIMEMAP.get(".html")
-            });
-            const blobUrl = URL.createObjectURL(blob);
-            console.log(fileWithImports);
-            // const blobUrl = await BlobManager.instance().get(props.workingDirectory);
+            loadFile();
 
-            if (!blobUrl) {
-                return;
-            }
+        }, [props.workingDirectory]);
 
-            setContent(blobUrl);
-        }
-
-        loadFile();
-
-    }, [props.workingDirectory]);
-
-    console.log(content);
-
-    return (
-        <iframe
-            sandbox={"allow-scripts allow-same-origin allow-pointer-lock"}
-            src={content}
-            style={{
-                width: "100%",
-                height: "100%"
-            }}
-        />
-    );
-}
+        return (
+            <iframe
+                ref={ref}
+                onClick={(event) => console.log(event.currentTarget)}
+                tabIndex={1}
+                sandbox={"allow-scripts allow-same-origin allow-pointer-lock"}
+                src={content}
+                style={{
+                    width: "100%",
+                    height: "100%"
+                }}
+            />
+        );
+    }
+);

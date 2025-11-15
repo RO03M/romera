@@ -30,7 +30,7 @@ export const Topbar = (props: TopbarProp) => {
 					<Icon icon={icons.square} />
 				</TopbarButton>
 				<TopbarButton
-					style={{ borderStartEndRadius: 10 }}
+					style={{ borderStartEndRadius: 5 }}
 					className={"close-button"}
 					closeButton
 					onClick={onClose}
@@ -47,13 +47,13 @@ const DragHandler = styled.nav({
 });
 
 const Wrapper = styled.div(
-	(props) => ({
+	() => ({
 		height: 30,
 		display: "flex",
 		justifyContent: "flex-end",
 		alignItems: "center",
-		borderRadius: "10px 10px 0 0",
-		backgroundColor: props.theme.colors.grey[700],
+		borderRadius: "5px 5px 0 0",
+		backgroundColor: "#1f2020",
 		touchAction: "none",
 		"& > *": {
 			height: "100%"
@@ -73,6 +73,6 @@ const TopbarButton = styled.div<{ closeButton?: boolean }>((props) => ({
 	"&:hover": {
 		backgroundColor: props.closeButton
 			? props.theme.colors.red[500]
-			: props.theme.colors.grey[900]
+			: props.theme.colors.grey[700]
 	}
 }));

@@ -21,8 +21,6 @@ export function WindowManager() {
 		});
 	}, []);
 
-	console.log(processes);
-
 	return (
 		<>
 			{processes.map((process) => {
@@ -33,7 +31,7 @@ export function WindowManager() {
 				const [programName, title, workingDirectory, ...args] = process.args;
 
 				const Program = programTable[extension ?? programName];
-				console.log(programName, title, Program);
+
 				return (
 					<Window
 						key={process.pid}
