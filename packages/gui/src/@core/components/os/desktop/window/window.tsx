@@ -18,6 +18,7 @@ import type {
 import { WindowHierarchy } from "./window-hierarchy";
 import { OrderChangeEvent } from "./order-change-event";
 import styles from "./window.module.css";
+import { VisibilityChangeEvent } from "./visibility-change-event";
 
 interface WindowProps {
 	pid: number;
@@ -28,7 +29,9 @@ interface WindowProps {
 export function Window(props: WindowProps) {
 	const { pid, contentArgs, Content } = props;
 
-	const [zindex, setZIndex] = useState(-1);
+	const [zindex, setZIndex] = useState(0);
+	const [visible, setVisible] = useState(true);
+
 
 	const ref = useRef<Rnd | null>(null);
 	const contentRef = useRef<ProcessComponentRef>(null);
@@ -63,7 +66,28 @@ export function Window(props: WindowProps) {
 		return () => {
 			document.removeEventListener(OrderChangeEvent.key as any, onOrderChange);
 		};
-	}, []);
+	}, [pid]);
+
+	useEffect(() => {
+		function onVisibilityChange(event: VisibilityChangeEvent) {
+			if (event.detail.pid !== pid) {
+				return;
+			}
+
+			if (event.detail.toggle) {
+				setVisible((curr) => !curr);
+				return;
+			}
+
+			setVisible(event.detail.visible);
+		}
+
+		document.addEventListener(VisibilityChangeEvent.key as any, onVisibilityChange);
+
+		return () => {
+			document.removeEventListener(VisibilityChangeEvent.key as any, onVisibilityChange);
+		};
+	}, [pid]);
 
 	if (contentArgs === undefined) {
 		return null;
@@ -75,7 +99,8 @@ export function Window(props: WindowProps) {
 			className={styles.window}
 			ref={ref}
 			style={{
-				zIndex: zindex
+				zIndex: zindex,
+				visibility: visible ? "inherit" : "hidden"
 			}}
 			dragHandleClassName={"topbar"}
 			default={{
@@ -90,7 +115,11 @@ export function Window(props: WindowProps) {
 			size={
 				windowProps.maximized ? { width: "100%", height: "100%" } : undefined
 			}
-			onPointerDownCapture={() => WindowHierarchy.instance().promote(pid)}
+			onClick={() => console.log("teste")}
+			onPointerDownCapture={() => {
+				WindowHierarchy.instance().promote(pid);
+				console.log("tete")
+			}}
 			enableUserSelectHack={false}
 			resizeHandleStyles={{
 				bottom: {
@@ -108,12 +137,16 @@ export function Window(props: WindowProps) {
 			}}
 		>
 			<Topbar
+				pid={props.pid}
 				title={"debug"}
 				onMaximizeClick={windowProps.toggleMaximization}
 				onClose={handleClose}
 				onPointerDown={() => {}}
 			/>
-			<ContentWrapper className={"romos-window-content-container"}>
+			<ContentWrapper
+				className={"romos-window-content-container"}
+				onClick={() => console.log("hellow")}
+			>
 				<Suspense fallback={"..."}>
 					{Content !== undefined && (
 						<Content ref={contentRef} {...contentArgs} />

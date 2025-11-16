@@ -62,7 +62,6 @@ export const BrowserProgram = forwardRef<HTMLIFrameElement, ProcessComponentProp
         return (
             <iframe
                 ref={ref}
-                onClick={(event) => console.log(event.currentTarget)}
                 tabIndex={1}
                 sandbox={"allow-scripts allow-same-origin allow-pointer-lock"}
                 src={content}

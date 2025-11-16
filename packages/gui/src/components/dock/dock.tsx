@@ -19,8 +19,6 @@ export function Dock() {
         });
     }, []);
 
-    console.log(processes);
-
     return (
         <div className={styles.container}>
             <div className={styles.bar}>

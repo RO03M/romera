@@ -3,6 +3,7 @@ import type { HTMLAttributes } from "preact/compat";
 import styled from "styled-components";
 import { icons } from "../../../icons";
 import { Row } from "../../../ui/row";
+import { VisibilityChangeEvent } from "./visibility-change-event";
 
 interface TopbarProp {
 	onMaximizeClick?: () => void;
@@ -10,6 +11,7 @@ interface TopbarProp {
 	onPointerDown: (event: PointerEvent) => void;
 	containerProps?: HTMLAttributes<HTMLDivElement>;
 	title: string;
+	pid: number
 }
 
 export const Topbar = (props: TopbarProp) => {
@@ -23,7 +25,10 @@ export const Topbar = (props: TopbarProp) => {
 		>
 			<DragHandler className={"topbar"} />
 			<Row>
-				<TopbarButton className={"minimize-button"}>
+				<TopbarButton
+					className={"minimize-button"}
+					onClick={() => document.dispatchEvent(new VisibilityChangeEvent(props.pid, false, false))}
+				>
 					<Icon icon={icons.horizontalLine} />
 				</TopbarButton>
 				<TopbarButton className={"maximize-button"} onClick={onMaximizeClick}>
