@@ -11,7 +11,19 @@ export class IDBBackend implements Backend {
 		this.idb = new IDB();
 	}
 
+	private cacheIt(inode: number, data: Uint8Array) {
+		if (data.byteLength < 10 * 1024 * 1024) { // 10MB
+			this.cache.set(inode, data);
+		}
+	}
+
 	public async writeFile(inode: number, data: Uint8Array) {
+		if (this.cache.has(inode)) {
+			this.cache.delete(inode);
+		}
+
+		this.cacheIt(inode, data);
+		
 		return await this.idb.writeFile(inode, data);
 	}
 
@@ -24,8 +36,8 @@ export class IDBBackend implements Backend {
 
 		const file = await this.idb.readFile(inode);
 
-		if (file?.data !== undefined && file.data.byteLength < 10 * 1024 * 1024) { // 10MB
-			this.cache.set(inode, file.data);
+		if (file?.data !== undefined) {
+			this.cacheIt(inode, file.data);
 		}
 
 		return file?.data;

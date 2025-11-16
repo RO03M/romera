@@ -7,7 +7,7 @@ export interface ProcessComponentProps {
 	args: string[];
 }
 
-export interface ProcessComponentRef {
+export interface ProcessComponentRef extends HTMLElement {
 	onResize?: (width: number, height: number) => void;
 	onClose?: () => void;
 }

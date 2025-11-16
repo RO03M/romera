@@ -45,9 +45,7 @@ export function WindowManager() {
 						}}
 					/>
 				);
-			}
-
-			)}
+			})}
 		</>
 	);
 }

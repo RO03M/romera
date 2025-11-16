@@ -30,6 +30,8 @@ export function CodeEditor(props: CodeEditorProps) {
 		""
 	);
 
+	console.log(workingDirectory);
+
 	const writeFile = useCallback(() => {
 		if (workingDirectory === undefined) {
 			return;

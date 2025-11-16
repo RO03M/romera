@@ -9,6 +9,7 @@ import type { ReactNode } from "preact/compat";
 import { Canvas } from "./canvas";
 import { ProcessManager } from "./process-manager";
 import type { ProcessComponentProps } from "./types";
+import { BrowserProgram } from "./browser";
 
 export const programTable: Record<
 	string,
@@ -18,11 +19,12 @@ export const programTable: Record<
 	explorer: Explorer,
 	monaco: CodeEditor,
 	imageviewer: ImageViewer,
-	videoViewer: VideoViewer,
+	videoviewer: VideoViewer,
 	pdfviewer: PdfViewer,
 	jsdos: DosPlayer,
 	canvas: Canvas,
-	psman: ProcessManager
+	psman: ProcessManager,
+	browser: BrowserProgram
 };
 
 export function isMagicProgram(
