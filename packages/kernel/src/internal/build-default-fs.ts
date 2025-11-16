@@ -14,6 +14,7 @@ async function buildImages(filesystem: Filesystem) {
 	const unknownFile = readFileSync(`${__dirname}/images/unknown-file.png`);
 	const pdf = readFileSync(`${__dirname}/images/pdf.png`);
 	const doom = readFileSync(`${__dirname}/images/doom.png`);
+	const minecraft = readFileSync(`${__dirname}/images/minecraft.png`);
 
 	filesystem.mkdir("/usr/wallpapers");
 	filesystem.mkdir("/usr/icons");
@@ -25,6 +26,7 @@ async function buildImages(filesystem: Filesystem) {
 	await filesystem.writeFile("/usr/icons/unknown-file.png", unknownFile);
 	await filesystem.writeFile("/usr/icons/pdf.png", pdf);
 	await filesystem.writeFile("/usr/icons/doom.png", doom);
+	await filesystem.writeFile("/usr/icons/minecraft.png", minecraft);
 
 	await filesystem.writeFile(
 		"/usr/system",
@@ -95,12 +97,16 @@ async function buildDesktop() {
 			"Doom": {
 				icon: "/usr/icons/doom.png"
 			},
+			"Minecraft": {
+				icon: "/usr/icons/minecraft.png"
+			},
 			"currículo.pdf": {}
 		},
 		grid: {
 			"0,0": "Projetos",
 			"0,1": "Doom",
-			"0,2": "currículo.pdf",
+			"0,2": "Minecraft",
+			"0,3": "currículo.pdf"
 		}
 	}
 
@@ -148,11 +154,12 @@ export async function buildFs() {
 	// await filesystem.writeFile("/home/romera/desktop/solar.js", solarj);
 	// await filesystem.writeFile("/home/romera/desktop/solar.css", solarcss);
 
-	const minecraft = readFileSync(`${__dirname}/minecraft.html`);
-	await filesystem.writeFile("/home/romera/desktop/minecraft.html", minecraft);
-
 	await addDoom();
 
+	const minecraft = readFileSync(`${__dirname}/minecraft.html`);
+	await filesystem.writeFile("/usr/games/minecraft.html", minecraft);
+	filesystem.symlink("/usr/games/minecraft.html", "/home/romera/desktop/Minecraft");
+	
 	await buildImages(filesystem);
 
 	await buildDesktop();

@@ -115,10 +115,8 @@ export function Window(props: WindowProps) {
 			size={
 				windowProps.maximized ? { width: "100%", height: "100%" } : undefined
 			}
-			onClick={() => console.log("teste")}
 			onPointerDownCapture={() => {
 				WindowHierarchy.instance().promote(pid);
-				console.log("tete")
 			}}
 			enableUserSelectHack={false}
 			resizeHandleStyles={{
@@ -145,7 +143,6 @@ export function Window(props: WindowProps) {
 			/>
 			<ContentWrapper
 				className={"romos-window-content-container"}
-				onClick={() => console.log("hellow")}
 			>
 				<Suspense fallback={"..."}>
 					{Content !== undefined && (

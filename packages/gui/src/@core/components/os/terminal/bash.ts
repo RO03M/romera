@@ -284,7 +284,6 @@ export class Bash extends Terminal {
 			absolutePath = normalize(`${this.workingDirectory}/${path}`);
 		}
 
-		console.log(absolutePath);
 		const stat = filesystem.stat(absolutePath);
 
 		if (stat) {
