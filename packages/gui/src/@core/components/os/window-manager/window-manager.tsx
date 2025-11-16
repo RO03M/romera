@@ -30,7 +30,7 @@ export function WindowManager() {
 
 				const [programName, title, workingDirectory, ...args] = process.args;
 
-				const Program = programTable[extension ?? programName];
+				const Program = programTable[programName ?? extension];
 
 				return (
 					<Window
