@@ -1,4 +1,4 @@
-import { filename, normalize } from "@romos/fs";
+import { normalize } from "@romos/fs";
 import styled from "styled-components";
 import type { Stat } from "@romos/fs";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
