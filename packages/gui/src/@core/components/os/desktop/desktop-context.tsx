@@ -3,6 +3,7 @@ import { filesystem } from "../../../../app";
 import { safe } from "../../../utils/safe";
 import { ContextMenu, type ContextMenuRef } from "../context-menu/context-menu";
 import { Kernel } from "@romos/kernel";
+import { DEFAULT_MIME } from "../../../../mimemap";
 
 export const DesktopContext = forwardRef<ContextMenuRef>(
 	function DesktopContext(_, ref) {
@@ -47,19 +48,19 @@ export const DesktopContext = forwardRef<ContextMenuRef>(
 			Kernel.instance().scheduler.exec("component", ["psman"]);
 		}, []);
 
-		const downloadFilesystem = useCallback(() => {
-			const fsAsJSON = filesystem.getJSON();
-			if (fsAsJSON === undefined) {
+		const downloadFilesystem = useCallback(async () => {
+			const fsbin = await filesystem.export();
+			if (fsbin === undefined) {
 				throw new Error("Failed to create json from current filesystem");
 			}
 
-			const file = new Blob([JSON.stringify(fsAsJSON)], {
-				type: "text/plain"
+			const file = new Blob([fsbin], {
+				type: DEFAULT_MIME
 			});
 
 			const a = document.createElement("a");
 			a.href = URL.createObjectURL(file);
-			a.download = "filesystem-romOS.json";
+			a.download = "filesystem-romOS";
 			a.click();
 		}, []);
 

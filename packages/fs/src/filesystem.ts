@@ -20,6 +20,8 @@ import {
 	splitPath
 } from "./utils/path";
 import type { Backend } from "./backend/backend";
+import { mapToObject } from "./utils/map-to-object";
+import { objectToFsMap } from "./utils/object-to-fsmap";
 
 const STAT_KEY = 0;
 
@@ -65,6 +67,116 @@ export class Filesystem {
 		return maxInode;
 	}
 
+	/**
+	 * [4 bytes json root length][json root buffer][4 bytes for iused]
+	 * 
+	 * [4 bytes inode][4 bytes buffer length][buffer]
+	 * 
+	 * [4 bytes inode][4 bytes buffer length][buffer]
+	 * 
+	 * ...
+	 */
+	public async export() {
+		const stack: [string | 0, FSMap | Stat][] = [];
+		const parts: Uint8Array[] = [];
+
+		for (const fsmap of this.root) {
+			stack.push(fsmap);
+		}
+
+		while (stack.length !== 0) {
+			const [currentPath, currentDir] = stack.pop()!;
+
+			if (currentDir instanceof Stat) {
+				const stat = currentDir;
+				const buffer = await this.backend.readFile(stat.inode);
+
+				if (buffer === undefined) {
+					continue;
+				}
+
+				const inode = new Uint32Array([stat.inode]);
+				const bufferLength = new Uint32Array([buffer.length]);
+
+				parts.push(new Uint8Array(inode.buffer));
+				parts.push(new Uint8Array(bufferLength.buffer));
+				parts.push(buffer);
+
+				continue;
+			}
+
+			for (const [entry, value] of currentDir) {
+				const path = currentPath === "/" ? entry : `${currentPath}${entry}`;
+				stack.push([path, value]);
+			}
+		}
+
+		const rootJson = JSON.stringify(mapToObject(this.root));
+		const jsonBytes = new TextEncoder().encode(rootJson);
+		const jsonLength = new Uint8Array(new Uint32Array([jsonBytes.length]).buffer);
+
+		let totalLength = 0;
+		for (const part of parts) {
+			totalLength += part.length;
+		}
+
+		totalLength += jsonLength.length + jsonBytes.length + 4;
+		const raw = new Uint8Array(totalLength);
+
+		let offset = 0;
+		raw.set(jsonLength, offset);
+		offset += jsonLength.length;
+		raw.set(jsonBytes, offset);
+		offset += jsonBytes.length;
+
+		const iusedBytes = new Uint8Array(new Uint32Array([this.iused]).buffer);
+		raw.set(iusedBytes, offset);
+		offset += iusedBytes.length;
+
+		for (const part of parts) {
+			raw.set(part, offset);
+			offset += part.length;
+		}
+
+		return raw;
+	}
+
+	public async import(data: Uint8Array) {
+		let offset = 0;
+
+		const rootLength = new DataView(data.buffer, offset, 4).getUint32(0, true);
+		offset += 4;
+		const root = new Uint8Array(data.buffer.slice(offset, offset + rootLength));
+		offset += rootLength;
+
+		const iused = new DataView(data.buffer, offset, 4).getUint32(0, true);
+		offset += 4;
+		this.iused = iused;
+
+		const fsmapJson = JSON.parse(new TextDecoder().decode(root));
+		const fsmap = objectToFsMap(fsmapJson);
+
+		this.root = fsmap;
+		const inodes: number[] = [];
+
+		const writePromises: Promise<number>[] = [];
+
+		while (offset < data.length) {
+			const inode = new DataView(data.buffer, offset, 4).getUint32(0, true);
+			inodes.push(inode);
+
+			offset += 4;
+			const length = new DataView(data.buffer, offset, 4).getUint32(0, true);
+			offset += 4;
+			const file = new Uint8Array(data.buffer.slice(offset, offset + length));
+			offset += length;
+
+			writePromises.push(this.backend.writeFile(inode, file));
+		}
+
+		await Promise.allSettled(writePromises);
+	}
+
 	public async hydrate(data: HydrationData, inheritPath = "/") {
 		const absolutePath = normalize(`${inheritPath}/${data.name}`);
 		console.log(absolutePath, data);
@@ -92,53 +204,6 @@ export class Filesystem {
 		} else if (data.type === "symlink" && data.target !== undefined) {
 			this.symlink(data.target, absolutePath);
 		}
-	}
-
-	public async getJSON() {
-		const rootJSON = await this.buildJSONTree(this.root);
-		if (rootJSON === undefined) {
-			return;
-		}
-		return rootJSON[0];
-	}
-
-	private async buildJSONTree(data: FSMap | Stat, inheritPath = "") {
-		if (data instanceof Stat) {
-			return;
-		}
-
-		const response: HydrationData[] = [];
-
-		for (const [key, value] of data) {
-			if (value instanceof Stat) {
-				continue;
-			}
-
-			const stat = value.get(STAT_KEY);
-			if (stat instanceof Stat) {
-				const currentPath = normalize(`${inheritPath}/${key}`);
-				const entry: HydrationData = {
-					name: key.toString(),
-					type: stat.type,
-					nodes: await this.buildJSONTree(value, currentPath)
-				};
-				if (stat.target) {
-					entry.target = stat.target;
-				}
-
-				if (stat.isFile()) {
-					// const content = this.inodeTable.get(stat.inode);
-					const content = await this.backend.readFile(stat.inode);
-					if (content !== undefined) {
-						entry.content = Array.from(content);
-					}
-				}
-
-				response.push(entry);
-			}
-		}
-
-		return response;
 	}
 
 	private lookup(filepath: string, followSymbolicLink = true) {
@@ -239,7 +304,7 @@ export class Filesystem {
 		try {
 			this.lookup(filepath);
 			throw EEXIST;
-		} catch {}
+		} catch { }
 
 		if (this.stat(filepath) !== null) {
 			throw EEXIST;
