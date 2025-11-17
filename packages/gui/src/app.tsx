@@ -26,7 +26,6 @@ export function App() {
 				style={{
 					backgroundImage: `url("${wallpaper}")`,
 				}}
-				// onDrop={(event) => event.prop}
 				onDragOver={(event) => event.preventDefault()}
 				onContextMenu={(event) => contextRef.current?.show(event)}
 				onClick={() => contextRef.current?.close()}

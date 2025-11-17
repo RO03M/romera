@@ -24,25 +24,23 @@ export function Grid() {
 				const dotDesktop = await DotDesktop.load();
 
 				if (typeof filedrag === "string" && filedrag !== "") {
-					// console.log(filedrag, x, y, dotDesktop.getAt(x, y), dotDesktop.get(), dotDesktop);
 					if (dotDesktop.hasPos(x, y)) {
 						return;
 					}
 					dotDesktop.move(filedrag, x, y);
 
-					// console.time("save");
 					await dotDesktop.save();
-					// console.timeEnd("save");
 				}
 
 				if (filedrag === "") {
 					const dotDesktop = await DotDesktop.load();
 					const data = await getFilesFromDataTransferItems(event.dataTransfer.items);
+					console.log(data);
 					for (const entries of data) {
 						const [x, y] = dotDesktop.getEmptyCell(10, 10);
 
 						dotDesktop.add(entries.name, x, y, {});
-						Kernel.instance().filesystem.hydrate(entries, "/home/romera/desktop");
+						await Kernel.instance().filesystem.hydrate(entries, "/home/romera/desktop");
 					}
 
 					await dotDesktop.save();

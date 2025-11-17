@@ -4,6 +4,7 @@ import { safe } from "../../../utils/safe";
 import { ContextMenu, type ContextMenuRef } from "../context-menu/context-menu";
 import { Kernel } from "@romos/kernel";
 import { DEFAULT_MIME } from "../../../../mimemap";
+import { createDesktopDir, createDesktopFile } from "../../../../os/desktop-utils";
 
 export const DesktopContext = forwardRef<ContextMenuRef>(
 	function DesktopContext(_, ref) {
@@ -11,14 +12,8 @@ export const DesktopContext = forwardRef<ContextMenuRef>(
 			console.log(event);
 		}, []);
 
-		const newDirectory = useCallback((index = 0) => {
-			const response = safe(() =>
-				filesystem.mkdir(`/home/romera/desktop/new directory(${index})`)
-			);
-
-			if (response.error !== null) {
-				newDirectory(index + 1);
-			}
+		const newDirectory = useCallback(() => {
+			createDesktopDir("dir");
 		}, []);
 
 		const newFile = useCallback(async (index = 0) => {
@@ -31,9 +26,7 @@ export const DesktopContext = forwardRef<ContextMenuRef>(
 				return;
 			}
 
-			await safe(
-				filesystem.writeFile(`/home/romera/desktop/new file(${index})`, "")
-			);
+			await safe(createDesktopFile(`new file(${index})`, ""));
 		}, []);
 
 		const openTerminal = useCallback(() => {

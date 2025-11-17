@@ -179,14 +179,17 @@ export class Filesystem {
 
 	public async hydrate(data: HydrationData, inheritPath = "/") {
 		const absolutePath = normalize(`${inheritPath}/${data.name}`);
-		console.log(absolutePath, data);
+		console.log(absolutePath, data, data.nodes);
 		if (data.type === "dir") {
 			if (absolutePath !== "/") {
 				this.mkdir(absolutePath);
 			}
 
+			console.log(data.nodes);
+
 			if (data.nodes) {
 				for (const child of data.nodes) {
+					console.log(child);
 					await this.hydrate(child, absolutePath);
 				}
 			}
@@ -200,6 +203,7 @@ export class Filesystem {
 				return;
 			}
 
+			console.log(absolutePath, data.content);
 			await this.writeFile(absolutePath, data.content);
 		} else if (data.type === "symlink" && data.target !== undefined) {
 			this.symlink(data.target, absolutePath);

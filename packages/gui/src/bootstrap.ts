@@ -52,9 +52,8 @@ export async function bootstrap() {
 	writer.write(defaultSuperblock.data);
 	writer.close();
 	const uncompressed = await new Response(ds.readable).arrayBuffer();
-	
-	await Kernel.instance().filesystem.import(new Uint8Array(uncompressed));
 
+	await Kernel.instance().filesystem.import(new Uint8Array(uncompressed));
 	await setupDotDesktop();
     Kernel.instance().filesystem.watcher.emit("/home/romera/desktop", "change");
 }
