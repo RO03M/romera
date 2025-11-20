@@ -2,7 +2,7 @@ export * from "./desktop";
 
 export const system = {
 	topPanel: {
-		height: 30
+		height: 35
 	},
 	dockbar: {
 		height: 40
