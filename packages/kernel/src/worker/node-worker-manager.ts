@@ -3,11 +3,9 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import { writeFileSync } from "node:fs";
-import { buildSyscall } from "./syscall";
-import { buildStd } from "../bin/std/build-std";
 import { Kernel, type Process, type ThreadManager } from "..";
-import { Stream } from "../stream/stream";
 import { compile, CompileTarget } from "./browser/injector";
+import { linkWorkerToProcess, workerMessageHandler } from "./worker-handlers";
 
 export class NodeWorkerManager implements ThreadManager {
 	async spawn(process: Process): Promise<void> {
@@ -23,69 +21,27 @@ export class NodeWorkerManager implements ThreadManager {
 
 		const tmpFilePath = join(tmpdir(), `worker-${randomUUID()}.js`);
 
-		const workerCode = `
+		const workerCode = 
+`
 import { parentPort } from "node:worker_threads";
 const self = parentPort;
 
 ${compile(process, content, CompileTarget.NodeJS)}
-        `;
+`;
 
 		writeFileSync(tmpFilePath, workerCode);
 
 		const worker = new Worker(tmpFilePath);
 
-		process.stdin.on("pipe", (data) => {
-			worker.postMessage({
-				type: "stdin",
-				value: data
-			});
-		});
-
-		process.stdout.on("pipe", (data) => {
-			worker.postMessage({
-				type: "stdout",
-				value: data
-			});
-		});
+		linkWorkerToProcess(worker, process);
 
 		worker.on("error", (error) => {
 			console.log("error", error);
+			process.kill();
 		});
 
 		worker.on("message", (data) => {
-			if ("kill" in data) {
-				worker.terminate();
-				process.terminate();
-				return;
-			}
-
-			if ("opcode" in data && data.opcode === "stdout") {
-				process.stdout.write(data.content);
-				return;
-			}
-
-			if ("opcode" in data && data.opcode === "stdin") {
-				return;
-			}
-
-			const { args, method, syscallId, type } = data;
-
-			const response = Kernel.instance().syscall(method, ...args);
-
-			response
-				.then((value) => {
-					worker.postMessage({
-						type: "SYSCALL_RESPONSE",
-						id: syscallId,
-						response: value,
-						code: 1
-					});
-				})
-				.catch((error) => {
-					Kernel.instance().syscall("echo", error);
-					process.terminate();
-					worker.terminate();
-				});
+			workerMessageHandler(process, data);
 		});
 	}
 }
