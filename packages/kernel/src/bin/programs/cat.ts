@@ -22,7 +22,7 @@ async function main(filename: string) {
         const stdin = await os.stdin.read();
         console.log("after stdin read", stdin);
         // await echo(stdin.join(""));
-        os.stdout.write(stdin.join(""));
+        print(stdin.join(""));
 
         return;
     }
@@ -34,9 +34,16 @@ async function main(filename: string) {
         await echo(`cat: ${filename}: No such file or directory`);
         exit();
     }
-    const content = await syscall("readFile", filepath, { decode: true });
+    const content = await readFile(filepath as string, { decode: true });
 
-    await echo(content);
+    if (typeof content !== "string") {
+        print(`Invalid content from filepath: ${filepath}`);
+
+        return;
+    }
+
+    print(content);
+    // await echo(content);
 }
 
 export const cat = main;

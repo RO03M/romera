@@ -49,18 +49,7 @@ function messageHandler() {
 function nodeSyscall() {
     return `
         self.on("message", (data) => {
-            if (data.type === "SYSCALL_RESPONSE" && data.id !== undefined) {
-                const resolve = queue.get(data.id);
-                if (!resolve || typeof resolve !== "function") {
-                    return;
-                }
-                
-                resolve(data.response);
-            } else if (data.type === "stdin") {
-                os.stdin.write(data.value)
-            } else if (data.type === "stdout") {
-                os.stdout.write(data.value);
-            }
+            ${messageHandler()}
         });
     `;
 }
@@ -68,18 +57,7 @@ function nodeSyscall() {
 function browserSyscall() {
     return `
         self.onmessage = (({ data }) => {
-            if (data.type === "SYSCALL_RESPONSE" && data.id !== undefined) {
-                const resolve = queue.get(data.id);
-                if (!resolve || typeof resolve !== "function") {
-                    return;
-                }
-                
-                resolve(data.response);
-            } else if (data.type === "stdin") {
-                os.stdin.write(data.value)
-            } else if (data.type === "stdout") {
-                os.stdout.write(data.value);
-            }
+            ${messageHandler()}
         });
     `;
 }

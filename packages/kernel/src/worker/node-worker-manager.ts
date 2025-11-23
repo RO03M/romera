@@ -7,6 +7,7 @@ import { buildSyscall } from "./syscall";
 import { buildStd } from "../bin/std/build-std";
 import { Kernel, type Process, type ThreadManager } from "..";
 import { Stream } from "../stream/stream";
+import { compile, CompileTarget } from "./browser/injector";
 
 export class NodeWorkerManager implements ThreadManager {
 	async spawn(process: Process): Promise<void> {
@@ -26,48 +27,7 @@ export class NodeWorkerManager implements ThreadManager {
 import { parentPort } from "node:worker_threads";
 const self = parentPort;
 
-const args = [${process.args.map((arg) => `"${arg}"`)}];
-
-const proc = {
-    pid: ${process.pid},
-    ppid: ${process.ppid},
-    tty: ${process.tty}
-};
-
-${Stream.toString()}
-
-const os = {
-	stdin: new Stream(),
-	stdout: new Stream()
-};
-
-os.stdin.on("data", (data) => {
-	self.postMessage({
-		opcode: "stdin",
-		content: data
-	});
-});
-
-os.stdout.on("data", (data) => {
-	self.postMessage({
-		opcode: "stdout",
-		content: data
-	});
-});
-
-${buildStd()}
-
-function exit(code = 0, message = "") {
-    self.postMessage({ code, message, kill: true });
-}
-
-${buildSyscall("node")}
-
-${content}
-
-const stdout = await main(...args);
-
-exit(0, stdout);
+${compile(process, content, CompileTarget.NodeJS)}
         `;
 
 		writeFileSync(tmpFilePath, workerCode);

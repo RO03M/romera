@@ -1,5 +1,3 @@
-async function main(message: string) {
+export function print(message: string) {
     os.stdout.write(message);
 }
-
-export const print = main;
