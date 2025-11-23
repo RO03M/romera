@@ -335,14 +335,19 @@ export class Bash extends Terminal {
 		}
 
 		const stat = filesystem.stat(absolutePath);
-
-		if (stat) {
-			this.workingDirectory = absolutePath;
+		
+		if (!stat) {
+			this.echo(`bash: cd: ${path} no such directory`);
 
 			return;
 		}
+		
+		if (stat.type === "file") {
+			this.echo(`bash: cd: ${path}: Not a directory`);
+			return;
+		}
 
-		this.echo(`bash: cd: ${path} no such directory`);
+		this.workingDirectory = absolutePath;
 	}
 
 	public prompt() {
