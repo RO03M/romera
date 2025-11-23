@@ -5,6 +5,7 @@ export function useProcesses() {
     const [processes, setProcesses] = useState<Process[]>([]);
 
     useEffect(() => {
+        setProcesses([...Kernel.instance().scheduler.processes.values()]);
         Kernel.instance().scheduler.watch("all", ["created", "slept", "ran", "killed"], () => {
             setProcesses([...Kernel.instance().scheduler.processes.values()]);
         });

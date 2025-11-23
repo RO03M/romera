@@ -10,7 +10,8 @@ import {
 } from "./utils/get-row-col-from-text";
 import { clamp } from "../../../utils/math";
 import { HistoryController } from "./history-controller";
-import { Kernel } from "@romos/kernel";
+import { Kernel, Process } from "@romos/kernel";
+import { ShellParser } from "./utils/shell-parser";
 
 enum TerminalSequences {
 	NULL = "\0",
@@ -244,7 +245,10 @@ export class Bash extends Terminal {
 
 		this.goToBufferLastLine();
 
-		switch (program) {
+		const sh = new ShellParser();
+		sh.parse(this.userInput);
+
+		switch (sh.firstProgram()) {
 			case "cd":
 				this.cd(args[0]);
 				this.prompt();
@@ -254,14 +258,60 @@ export class Bash extends Terminal {
 				this.prompt();
 				break;
 			default: {
-				const process = Kernel.instance().scheduler.exec(program, args, {
-					cwd: this.workingDirectory,
-					tty: this.id
-				});
+				if (sh.output?.type === "command") {
+					const process = Kernel.instance().scheduler.exec(program, args, {
+						cwd: this.workingDirectory,
+						tty: this.id
+					});
+	
+					process.stdout.on("data", (data) => {
+						if (data === null) {
+							return;
+						}
+	
+						this.echo(data);
+					});
+	
+					Kernel.instance().scheduler.waitpid(process.pid).then(() => {
+						this.prompt();
+					});
+				} else if (sh.output?.type === "pipeline") {
+					const processes: Process[] = [];
+					let currentProcess: Process | undefined;
+					let prevProcess: Process | undefined;
+					for (const command of sh.output.commands) {
+						currentProcess = Kernel.instance().scheduler.exec(command.program, command.args, {
+							cwd: this.workingDirectory,
+							tty: this.id
+						});
 
-				Kernel.instance().scheduler.waitpid(process.pid).then(() => {
-					this.prompt();
-				});
+						processes.push(currentProcess);
+
+						if (prevProcess) {
+							prevProcess.stdout.pipe(currentProcess.stdin);
+						}
+
+						prevProcess = currentProcess;
+					}
+
+					// In this point the currentProcess is the last one created
+					if (currentProcess) {
+						currentProcess.stdout.on("data", (data) => {
+							if (data === null) {
+								return;
+							}
+
+							this.echo(data);
+						});
+
+						Kernel.instance().scheduler.waitpid(currentProcess.pid).then(() => {
+							this.prompt();
+						});
+					} else {
+						this.prompt();
+					}
+				}
+
 				break;
 			}
 		}

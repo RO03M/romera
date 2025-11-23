@@ -13,7 +13,7 @@
 const queue = new Map<string, (value: unknown) => void>();
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-async function syscall(method: string, ...args: any[])  {
+async function syscall(method: string, ...args: any[]) {
     const syscallId = (Math.random() + 1).toString(36).substring(7);
     self.postMessage({
         type: "SYSCALL",
@@ -29,33 +29,36 @@ async function syscall(method: string, ...args: any[])  {
     return promise;
 }
 
-function syscallReceiver(node: boolean) {
-    if (node) {
-        return `
-            self.on("message", (data) => {
-                if (data.type === "SYSCALL_RESPONSE" && data.id !== undefined) {
-                    const resolve = queue.get(data.id);
-                    if (!resolve || typeof resolve !== "function") {
-                        return;
-                    }
-                    
-                    resolve(data.response);
-                }
-            })
-        `;
-    }
+function messageHandler() {
+    return `
+        if (data.type === "SYSCALL_RESPONSE" && data.id !== undefined) {
+            const resolve = queue.get(data.id);
+            if (!resolve || typeof resolve !== "function") {
+                return;
+            }
+            
+            resolve(data.response);
+        } else if (data.type === "stdin") {
+            os.stdin.write(data.value)
+        } else if (data.type === "stdout") {
+            os.stdout.write(data.value);
+        }
+    `;
+}
 
+function nodeSyscall() {
+    return `
+        self.on("message", (data) => {
+            ${messageHandler()}
+        });
+    `;
+}
+
+function browserSyscall() {
     return `
         self.onmessage = (({ data }) => {
-            if (data.type === "SYSCALL_RESPONSE" && data.id !== undefined) {
-                const resolve = queue.get(data.id);
-                if (!resolve || typeof resolve !== "function") {
-                    return;
-                }
-                
-                resolve(data.response);
-            }
-        })
+            ${messageHandler()}
+        });
     `;
 }
 
@@ -63,7 +66,7 @@ export function buildSyscall(node: "browser" | "node") {
     return `
         const queue = new Map();
 
-        ${syscallReceiver(node === "node")}
+        ${node === "node" ? nodeSyscall() : browserSyscall()}
 
         ${syscall.toString().replace("syscall$1", "syscall")}
     `;

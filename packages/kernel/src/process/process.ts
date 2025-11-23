@@ -1,6 +1,4 @@
-import { Filesystem, format } from "@romos/fs";
-import { Kernel } from "../kernel";
-import type { BrowserWorkerManager } from "../worker/browser/browser-worker-manager";
+import { format } from "@romos/fs";
 import { Watcher } from "@romos/utils";
 import { Stream } from "../stream/stream";
 
@@ -16,6 +14,11 @@ export interface ProcessOptions {
 	onTerminate?: TerminateCallback;
 }
 
+export interface ProcessWorker {
+	terminate(): void;
+	postMessage(value: any, transferList?: readonly Transferable[] | undefined): void
+}
+
 export class Process {
 	public readonly pid: number;
 	public readonly ppid: number | null;
@@ -26,8 +29,8 @@ export class Process {
 	public readonly resolvedPath: string;
 	public stdout = new Stream();
 	public stdin = new Stream();
+	public worker: ProcessWorker | undefined;
 
-	private workerProcessManager?: BrowserWorkerManager;
 	private onTerminate?: TerminateCallback;
 	private watcher = new Watcher<string, number>();
 
@@ -40,18 +43,12 @@ export class Process {
 		this.args = options.args ?? [];
 		this.resolvedPath = this.resolveCommandPath();
 		this.onTerminate = options.onTerminate;
-
-		this.stdin.on("data", (data) => {
-			this.workerProcessManager?.postMessage({
-				type: "stdin",
-				value: data
-			});
-		})
 	}
+
 
 	public terminate() {
 		this.onTerminate?.(this);
-		this.workerProcessManager?.terminate();
+		// this.workerProcessManager?.terminate();
 		this.watcher.emit(this.pid, "killed");
 	}
 
@@ -63,18 +60,14 @@ export class Process {
 		this.watcher.unwatch(this.pid, event, callback);
 	}
 
-	// public stdin(buffer: unknown, options?: StructuredSerializeOptions) {
-	// 	this.workerProcessManager?.postMessage(buffer, options);
-	// }
-
-	// public stdout() {
-		
-	// }
-
-	public pipe(process: Process) {
-
+	public kill() {
+		this.worker?.terminate();
+		this.onTerminate?.(this);
+		this.watcher.emit(this.pid, "killed");
 	}
 
+	// FIXME: Não deveria ser responsabilidade do processo de buscar o caminho do comando
+	// Acho que seria do bash, já que podemos ter aliases
 	private resolveCommandPath() {
 		const shouldSearchBin = !/^(\/|\.\/|\.\.\/)/.test(this.command);
 		if (shouldSearchBin) {

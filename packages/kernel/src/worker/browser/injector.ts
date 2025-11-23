@@ -1,30 +1,64 @@
 import { buildStd } from "../../bin/std/build-std";
 import type { Process } from "../../process/process";
+import { Stream } from "../../stream/stream";
 import { buildSyscall } from "../syscall";
+
+export enum CompileTarget {
+	NodeJS,
+	Browser
+}
+
+export function compile(process: Process, main: string, target: CompileTarget) {
+	const code = `
+${Stream.toString()}
+${buildStd()}
+${buildSyscall(target === CompileTarget.NodeJS ? "node" : "browser")}
+
+const os = {
+	stdin: new Stream(),
+	stdout: new Stream()
+};
+
+os.stdin.on("data", (data) => {
+	self.postMessage({
+		opcode: "stdin",
+		content: data
+	});
+});
+
+os.stdout.on("data", (data) => {
+	self.postMessage({
+		opcode: "stdout",
+		content: data
+	});
+});
+
+function exit(code = 0, message = "") {
+    self.postMessage({ code, message, kill: true });
+}
+
+const args = [${process.args.map((arg) => `"${arg}"`)}];
+
+const proc = {
+    pid: ${process.pid},
+    ppid: ${process.ppid},
+    tty: ${process.tty}
+};
+
+${main.trim()}
+
+const stdout = await main(...args);
+
+exit(0, stdout);
+`;
+
+	return code.trim();
+}
 
 export function injectScript(content: string, process: Process) {
 	const workerCode = `
 		(async () => {
-			const args = [${process.args.map((arg) => `"${arg}"`)}];
-	
-			const proc = {
-				pid: ${process.pid},
-				ppid: ${process.ppid},
-				tty: ${process.tty}
-			};
-	
-			${buildStd()}
-			${buildSyscall("browser")}
-	
-			function exit(code = 0, message = "") {
-				self.postMessage({ code, message, kill: true });
-			}
-
-			${content}
-	
-			const stdout = await main(...args);
-	
-			exit(0, stdout);
+			${compile(process, content, CompileTarget.Browser)}
 		})();
 	`;
 
@@ -32,42 +66,3 @@ export function injectScript(content: string, process: Process) {
 		new Blob([workerCode], { type: "application/javascript" })
 	)
 }
-
-// export class Injector {
-// 	public rawScript = "";
-// 	public cookedScript = "";
-
-// 	private readonly process: Process;
-
-// 	constructor(rawScript: string, process: Process) {
-// 		this.rawScript = rawScript;
-// 		this.process = process;
-// 	}
-
-// 	public generateBlob() {
-// 		return URL.createObjectURL(
-// 			new Blob([this.cookedScript], { type: "application/javascript" })
-// 		);
-// 	}
-
-// 	public cookScript() {
-// 		this.cookedScript = `
-// ((async () => {
-//     const PID = ${this.process.pid};
-// 	const proc = {
-// 		pid: ${this.process.pid},
-// 		ppid: ${this.process.ppid},
-// 		tty: ${this.process.tty}
-// 	};
-//     importScripts("${location.origin}/sys/std.js", "${location.origin}/sys/processes.js");
-
-//     ${this.rawScript}
-
-//     const stdout = await main(${this.process.args.map((arg) => `'${arg}'`)}); // declared in the rawScript
-
-//     // forced exit
-//     exit(0, stdout);
-// }))()
-//         `;
-// 	}
-// }

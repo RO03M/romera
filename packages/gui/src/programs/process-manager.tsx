@@ -3,7 +3,7 @@ import classes from "./process-manager.module.css";
 
 export function ProcessManager() {
     const processes = useProcesses();
-        
+
     return (
         <div className={classes.teste}>
             <table>

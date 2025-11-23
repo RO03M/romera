@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
+    "test": "vitest",
     "postinstall": "yarn build"
   },
   "dependencies": {

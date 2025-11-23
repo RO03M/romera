@@ -3,9 +3,9 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import { writeFileSync } from "node:fs";
-import { buildSyscall } from "./syscall";
-import { buildStd } from "../bin/std/build-std";
 import { Kernel, type Process, type ThreadManager } from "..";
+import { compile, CompileTarget } from "./browser/injector";
+import { linkWorkerToProcess, workerMessageHandler } from "./worker-handlers";
 
 export class NodeWorkerManager implements ThreadManager {
 	async spawn(process: Process): Promise<void> {
@@ -21,79 +21,27 @@ export class NodeWorkerManager implements ThreadManager {
 
 		const tmpFilePath = join(tmpdir(), `worker-${randomUUID()}.js`);
 
-		const workerCode = `
+		const workerCode = 
+`
 import { parentPort } from "node:worker_threads";
 const self = parentPort;
 
-const args = [${process.args.map((arg) => `"${arg}"`)}];
-
-const proc = {
-    pid: ${process.pid},
-    ppid: ${process.ppid},
-    tty: ${process.tty}
-};
-
-self.on("message", (data) => {
-	console.log("data", data);
-})
-
-${buildStd()}
-
-function exit(code = 0, message = "") {
-    self.postMessage({ code, message, kill: true });
-}
-
-${buildSyscall("node")}
-
-${content}
-
-const stdout = await main(...args);
-
-exit(0, stdout);
-        `;
+${compile(process, content, CompileTarget.NodeJS)}
+`;
 
 		writeFileSync(tmpFilePath, workerCode);
-		// const workerDataUrl =  `data:text/javascript;base64,${Buffer.from(workerCode).toString('base64')}`;
-		// console.log(workerDataUrl);
 
 		const worker = new Worker(tmpFilePath);
 
-		process.stdin.on("data", (data) => {
-			console.log("stdin", data);
-			worker.postMessage({
-				type: "stdin",
-				value: data
-			});
-		});
+		linkWorkerToProcess(worker, process);
 
 		worker.on("error", (error) => {
 			console.log("error", error);
+			process.kill();
 		});
+
 		worker.on("message", (data) => {
-			if ("kill" in data) {
-				worker.terminate();
-				process.terminate();
-				return;
-			}
-
-			const { args, method, syscallId, type } = data;
-
-			const response = Kernel.instance().syscall(method, ...args);
-
-			response
-				.then((value) => {
-					worker.postMessage({
-						type: "SYSCALL_RESPONSE",
-						id: syscallId,
-						response: value,
-						code: 1
-					});
-				})
-				.catch((error) => {
-					Kernel.instance().syscall("echo", error);
-					process.terminate();
-					worker.terminate();
-				});
+			workerMessageHandler(process, data);
 		});
 	}
 }
