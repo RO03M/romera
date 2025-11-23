@@ -285,15 +285,6 @@ export class Bash extends Terminal {
 							tty: this.id
 						});
 
-						// Por algum motivo isso daqui vem somente depois do prompt lá do waitpit (eu acho)
-						currentProcess.stdout.on("data", (data) => {
-							if (data === null) {
-								return;
-							}
-		
-							this.echo(data);
-						});
-
 						processes.push(currentProcess);
 
 						if (prevProcess) {
@@ -303,9 +294,16 @@ export class Bash extends Terminal {
 						prevProcess = currentProcess;
 					}
 
-					console.log(currentProcess);
-
+					// In this point the currentProcess is the last one created
 					if (currentProcess) {
+						currentProcess.stdout.on("data", (data) => {
+							if (data === null) {
+								return;
+							}
+
+							this.echo(data);
+						});
+
 						Kernel.instance().scheduler.waitpid(currentProcess.pid).then(() => {
 							this.prompt();
 						});
