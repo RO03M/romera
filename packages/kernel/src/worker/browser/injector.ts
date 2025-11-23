@@ -1,5 +1,6 @@
 import { buildStd } from "../../bin/std/build-std";
 import type { Process } from "../../process/process";
+import { Stream } from "../../stream/stream";
 import { buildSyscall } from "../syscall";
 
 export function injectScript(content: string, process: Process) {
@@ -16,6 +17,27 @@ export function injectScript(content: string, process: Process) {
 			${buildStd()}
 			${buildSyscall("browser")}
 	
+			${Stream.toString()}
+			
+			const os = {
+				stdin: new Stream(),
+				stdout: new Stream()
+			};
+			
+			os.stdin.on("data", (data) => {
+				self.postMessage({
+					opcode: "stdin",
+					content: data
+				});
+			});
+			
+			os.stdout.on("data", (data) => {
+				self.postMessage({
+					opcode: "stdout",
+					content: data
+				});
+			});
+
 			function exit(code = 0, message = "") {
 				self.postMessage({ code, message, kill: true });
 			}

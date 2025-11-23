@@ -20,7 +20,10 @@ async function main() {
 		exit();
 	}
 
-	await syscall("echo", stats.join("\t"), proc.tty);
+	os.stdout.write(stats.join("\t"));
+	os.stdout.write(null);
+
+	// await syscall("echo", stats.join("\t"), proc.tty);
 }
 
 export const ls = main;

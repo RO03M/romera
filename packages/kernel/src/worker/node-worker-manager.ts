@@ -6,6 +6,7 @@ import { writeFileSync } from "node:fs";
 import { buildSyscall } from "./syscall";
 import { buildStd } from "../bin/std/build-std";
 import { Kernel, type Process, type ThreadManager } from "..";
+import { Stream } from "../stream/stream";
 
 export class NodeWorkerManager implements ThreadManager {
 	async spawn(process: Process): Promise<void> {
@@ -33,9 +34,26 @@ const proc = {
     tty: ${process.tty}
 };
 
-self.on("message", (data) => {
-	console.log("data", data);
-})
+${Stream.toString()}
+
+const os = {
+	stdin: new Stream(),
+	stdout: new Stream()
+};
+
+os.stdin.on("data", (data) => {
+	self.postMessage({
+		opcode: "stdin",
+		content: data
+	});
+});
+
+os.stdout.on("data", (data) => {
+	self.postMessage({
+		opcode: "stdout",
+		content: data
+	});
+});
 
 ${buildStd()}
 
@@ -53,15 +71,19 @@ exit(0, stdout);
         `;
 
 		writeFileSync(tmpFilePath, workerCode);
-		// const workerDataUrl =  `data:text/javascript;base64,${Buffer.from(workerCode).toString('base64')}`;
-		// console.log(workerDataUrl);
 
 		const worker = new Worker(tmpFilePath);
 
-		process.stdin.on("data", (data) => {
-			console.log("stdin", data);
+		process.stdin.on("pipe", (data) => {
 			worker.postMessage({
 				type: "stdin",
+				value: data
+			});
+		});
+
+		process.stdout.on("pipe", (data) => {
+			worker.postMessage({
+				type: "stdout",
 				value: data
 			});
 		});
@@ -69,10 +91,20 @@ exit(0, stdout);
 		worker.on("error", (error) => {
 			console.log("error", error);
 		});
+
 		worker.on("message", (data) => {
 			if ("kill" in data) {
 				worker.terminate();
 				process.terminate();
+				return;
+			}
+
+			if ("opcode" in data && data.opcode === "stdout") {
+				process.stdout.write(data.content);
+				return;
+			}
+
+			if ("opcode" in data && data.opcode === "stdin") {
 				return;
 			}
 

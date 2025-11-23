@@ -65,11 +65,16 @@ export class Scheduler {
 
 				this.running.set(pid, process);
 				this.sleeping.delete(pid);
-				if (process.command !== "component") {
-					Kernel.instance().threadManager.spawn(process);
+				if (process.command === "component") {
+					this.watcher.emit("all", "ran");
+					this.watcher.emit(pid, "ran");
+					continue;
 				}
-				this.watcher.emit("all", "ran");
-				this.watcher.emit(pid, "ran");
+
+				Kernel.instance().threadManager.spawn(process).then(() => {
+					this.watcher.emit("all", "ran");
+					this.watcher.emit(pid, "ran");
+				});
 			}
 
 			yield {

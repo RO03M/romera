@@ -5,8 +5,8 @@ import type { Process } from "../../process/process";
 import type { WorkerBackend } from "../backend";
 
 export class BrowserWorkerManager implements WorkerBackend {
-	private worker!: Worker;
-	private url!: string;
+	// private worker!: Worker;
+	// private url!: string;
 
 	async spawn(process: Process) {
 		const content = await Kernel.instance().filesystem.readFile(
@@ -20,21 +20,44 @@ export class BrowserWorkerManager implements WorkerBackend {
 			return;
 		}
 
-		this.url = injectScript(content, process);
+		const url = injectScript(content, process);
 
-		this.worker = new Worker(this.url, {
+		const worker = new Worker(url, {
 			name: `process-${process.pid}`
 		});
 
-		this.worker.onerror = (error) => {
+		process.stdin.on("pipe", (data) => {
+			worker.postMessage({
+				type: "stdin",
+				value: data
+			});
+		});
+
+		process.stdout.on("pipe", (data) => {
+			worker.postMessage({
+				type: "stdout",
+				value: data
+			});
+		});
+
+		worker.onerror = (error) => {
 			console.error("[WORKER-PROCESS-MANAGER]: ", error);
-			this.terminate();
+			// this.terminate();
 		};
 
-		this.worker.onmessage = ({ data }) => {
+		worker.onmessage = ({ data }) => {
 			if (data.kill) {
-				this.terminate();
+				// this.terminate();
 				process.terminate();
+				return;
+			}
+
+			if ("opcode" in data && data.opcode === "stdout") {
+				process.stdout.write(data.content);
+				return;
+			}
+
+			if ("opcode" in data && data.opcode === "stdin") {
 				return;
 			}
 
@@ -47,7 +70,7 @@ export class BrowserWorkerManager implements WorkerBackend {
 			const response = Kernel.instance().syscall(method, ...args);
 			response
 				.then((value) => {
-					this.postMessage({
+					worker.postMessage({
 						type: "SYSCALL_RESPONSE",
 						id: syscallId,
 						response: value,
@@ -57,19 +80,19 @@ export class BrowserWorkerManager implements WorkerBackend {
 				.catch((error) => {
 					Kernel.instance().syscall("echo", error);
 					process.terminate();
-					this.terminate();
+					// this.terminate();
 				});
 		};
 	}
 
-	public postMessage(message: unknown, options?: StructuredSerializeOptions) {
-		this.worker.postMessage(message, options);
-	}
+	// public postMessage(message: unknown, options?: StructuredSerializeOptions) {
+	// 	this.worker.postMessage(message, options);
+	// }
 
-	public terminate() {
-		this.worker.terminate();
-		if (this.url !== undefined && URL) {
-			URL.revokeObjectURL(this.url);
-		}
-	}
+	// public terminate() {
+	// 	this.worker.terminate();
+	// 	if (this.url !== undefined && URL) {
+	// 		URL.revokeObjectURL(this.url);
+	// 	}
+	// }
 }

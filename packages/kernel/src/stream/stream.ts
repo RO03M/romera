@@ -47,9 +47,15 @@ export class Stream {
 
 		return promise;
 	}
-	public pipe(stream: Stream | ReadStream) {
+
+	public end() {
+		this.emit("end");
+	}
+
+	public pipe(stream: Stream) {
 		this.on("data", (chunk: string) => {
 			stream.emit("pipe", chunk);
+			stream.write(chunk);
 		});
 	}
 
@@ -60,7 +66,7 @@ export class Stream {
 			return;
 		}
 
-		this.data.push(chunk);
 		this.emit("end");
+		this.emit("data", chunk);
 	}
 }
