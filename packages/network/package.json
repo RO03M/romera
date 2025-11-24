@@ -1,0 +1,21 @@
+{
+  "name": "@romos/network",
+  "version": "1.0.0",
+  "main": "dist/src/index.js",
+  "typings": "dist/src/index.d.ts",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "compile": "tsc && ts-node index.ts",
+    "dev": "tsc --watch",
+    "postinstall": "yarn build",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "peerjs": "^1.5.5"
+  },
+  "devDependencies": {
+    "wrtc": "^0.4.7"
+  }
+}
