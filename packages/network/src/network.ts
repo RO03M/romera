@@ -1,8 +1,9 @@
-import Peer from "peerjs";
+import Peer, { DataConnection } from "peerjs";
 
 export class Network {
     public readonly ip: string;
     private peer: Peer;
+    private connections = new Map<string, DataConnection>();
 
     constructor() {
         this.ip = this.generateIp()
@@ -19,21 +20,47 @@ export class Network {
             });
         });
     }
+    
+    public get connected() {
+        return this.peer.disconnected;
+    }
 
-    public setup() {
+    public bind() {
         return new Promise((resolve) => {
             this.peer.on("open", resolve);
         });
     }
 
+    public async sendTo(ip: string, data: unknown) {
+        if (!this.connections.has(ip)) {
+            await this.connect(ip);
+        }
+        
+        const connection = this.connections.get(ip);
+        
+        if (!connection) {
+            throw new Error("failed to get connection");
+        }
+        
+        await connection.send(data);
+    }
+    
+    private addConnection(ip: string, connection: DataConnection) {
+        this.connections.set(ip, connection);
+    }
+    
+    private destroyConnection(ip: string) {
+        this.connections.delete(ip);
+    }
+    
     public connect(target: string) {
         const connection = this.peer.connect(target);
-        console.log(target, connection.open);
-        
-        return new Promise((resolve) => {
+        this.addConnection(target, connection);
+
+        return new Promise<DataConnection>((resolve) => {
             connection.on("open", () => {
                 console.log("connected from: ", this.ip, " to ", target);
-                resolve("");
+                resolve(connection);
             });
         });
     }

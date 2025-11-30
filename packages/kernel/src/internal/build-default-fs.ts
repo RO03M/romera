@@ -5,6 +5,7 @@ import { touch } from "../bin/programs/touch";
 import { prog_pwd } from "../bin/programs/pwd";
 import { addDoom } from "./desktop/doom";
 import type { Filesystem } from "@romos/fs";
+import { ping } from "../bin/programs/ping";
 
 async function buildImages(filesystem: Filesystem) {
 	const ubuntu22 = readFileSync(`${__dirname}/images/ubuntu-22.jpg`);
@@ -122,14 +123,15 @@ export async function buildFs() {
 	filesystem.mkdir("/usr");
 	filesystem.mkdir("/usr/applications");
 	filesystem.mkdir("/usr/games");
-	filesystem.writeFile("/bin/ls", ls.toString());
-	filesystem.writeFile("/bin/cat", cat.toString());
-	filesystem.writeFile("/bin/mkdir", mkdir.toString());
-	filesystem.writeFile("/bin/sleep", sleep.toString());
-	filesystem.writeFile("/bin/watch", watch.toString());
-	filesystem.writeFile("/bin/touch", touch.toString());
-	filesystem.writeFile("/bin/pwd", prog_pwd.toString());
-	filesystem.writeFile("/bin/code", code.toString());
+	await filesystem.writeFile("/bin/ls", ls.toString());
+	await filesystem.writeFile("/bin/cat", cat.toString());
+	await filesystem.writeFile("/bin/mkdir", mkdir.toString());
+	await filesystem.writeFile("/bin/sleep", sleep.toString());
+	await filesystem.writeFile("/bin/watch", watch.toString());
+	await filesystem.writeFile("/bin/touch", touch.toString());
+	await filesystem.writeFile("/bin/pwd", prog_pwd.toString());
+	await filesystem.writeFile("/bin/code", code.toString());
+	await filesystem.writeFile("/bin/ping", ping.toString());
 
 	filesystem.writeFile(
 		"/usr/applications/Projetos",

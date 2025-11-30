@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@romos/fs": "1.0.0",
+    "@romos/network": "1.0.0",
     "typescript": "^5.7.2"
   },
   "devDependencies": {

@@ -3,6 +3,7 @@ import { Scheduler } from "./scheduler/scheduler";
 import { TTYManager } from "./tty-manager";
 import type { WorkerBackend } from "./worker/backend";
 import { BrowserWorkerManager } from "./worker/browser/browser-worker-manager";
+import { Network } from "@romos/network";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 type SyscallHandler = (...args: any[]) => unknown;
@@ -12,6 +13,7 @@ export class Kernel {
 	public scheduler: Scheduler;
 	public ttyManager: TTYManager;
 	public threadManager: WorkerBackend;
+	public readonly network: Network
 
 	private static _instance: Kernel;
 	private syscallMap = new Map<string, SyscallHandler>();
@@ -20,6 +22,8 @@ export class Kernel {
 		this.setupSyscalls();
 		this.filesystem = new Filesystem("rome-os-fs");
 		this.threadManager = new BrowserWorkerManager();
+    this.network = new Network();
+
 		// this.filesystem.init();
 
 		this.scheduler = new Scheduler({
@@ -102,6 +106,20 @@ export class Kernel {
 			(pid: number) => this.scheduler.processes.get(pid)?.cwd
 		);
 		this.syscallMap.set("pathFormat", (root: string, base: string) => format({ root, base }));
+		
+		this.syscallNetwork();
+	}
+	
+	private syscallNetwork() {
+    	this.syscallMap.set("sys_connect", async (targetIp: string) => {
+            await this.network.connect(targetIp);
+    	});
+     
+        this.syscallMap.set("sys_sendto", async (ip: string, data: unknown) => {
+            await this.network.sendTo(ip, data)
+        });
+        // this.syscallMap.set("sys_recv")
+        // this.syscallMap.set("sys_recvfrom")
 	}
 
 	// TODO algumas funções aqui são desnecessárias e não fazem sentido estarem no "syscalls"

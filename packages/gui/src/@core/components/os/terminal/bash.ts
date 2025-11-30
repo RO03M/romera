@@ -248,6 +248,8 @@ export class Bash extends Terminal {
 		const sh = new ShellParser();
 		sh.parse(this.userInput);
 
+		console.log(sh);
+		
 		switch (sh.firstProgram()) {
 			case "cd":
 				this.cd(args[0]);
@@ -263,6 +265,8 @@ export class Bash extends Terminal {
 						cwd: this.workingDirectory,
 						tty: this.id
 					});
+					
+					console.log(process);
 	
 					process.stdout.on("data", (data) => {
 						if (data === null) {

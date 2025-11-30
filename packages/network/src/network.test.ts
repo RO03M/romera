@@ -11,7 +11,7 @@ describe("Network test", () => {
         const n1 = new Network();
         const n2 = new Network();
 
-        const foo = await n1.setup();
+        const foo = await n1.bind();
         console.log(foo);
 
         await n1.connect(n2.ip);

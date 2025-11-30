@@ -1,8 +1,10 @@
 import { Filesystem, ReadFileOptions } from "@romos/fs";
 import { Stream } from "./src/stream/stream";
 
+type SyscallMethod = "sys_sendto" | "sys_connect" | (string & {});
+
 declare global {
-    function syscall<T = unknown>(method: string, ...args: any): T | Promise<T>;
+    function syscall<T = unknown>(method: SyscallMethod, ...args: any): T | Promise<T>;
     function exit(code?: number, message?: string): never;
     // function echo(message: number | string | boolean): void;
     function pwd(): Promise<string>;
